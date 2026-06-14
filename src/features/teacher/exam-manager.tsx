@@ -1,0 +1,525 @@
+"use client";
+
+import { useMutation, useQuery } from "convex/react";
+import { toast } from "sonner";
+import { ClipboardCheck, Plus, Trash2 } from "lucide-react";
+import { api } from "convex/_generated/api";
+import { Id } from "convex/_generated/dataModel";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useState } from "react";
+
+type DeleteTarget =
+  | { type: "exam"; examId: Id<"exams"> }
+  | { type: "question"; questionId: Id<"examQuestions"> }
+  | null;
+
+type QuestionDraft = {
+  questionText: string;
+  options: Array<{ id: string; text: string }>;
+  correctOptionId: string;
+  explanation: string;
+};
+
+function createOptionId() {
+  return `opt_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function emptyQuestionDraft(): QuestionDraft {
+  const a = createOptionId();
+  const b = createOptionId();
+  const c = createOptionId();
+  const d = createOptionId();
+  return {
+    questionText: "",
+    options: [
+      { id: a, text: "" },
+      { id: b, text: "" },
+      { id: c, text: "" },
+      { id: d, text: "" },
+    ],
+    correctOptionId: a,
+    explanation: "",
+  };
+}
+
+export function ExamManager({
+  courseId,
+  modules,
+}: {
+  courseId: Id<"courses">;
+  modules: Array<{
+    _id: Id<"modules">;
+    title: string;
+    exams: Array<{
+      _id: Id<"exams">;
+      title: string;
+      passingScore: number;
+      maxAttempts: number;
+      timeLimitMinutes?: number;
+      order: number;
+    }>;
+  }>;
+}) {
+  const exams = useQuery(api.exams.listByCourse, { courseId });
+  const createExam = useMutation(api.exams.create);
+  const updateExam = useMutation(api.exams.update);
+  const removeExam = useMutation(api.exams.remove);
+  const addQuestion = useMutation(api.exams.addQuestion);
+  const updateQuestion = useMutation(api.exams.updateQuestion);
+  const removeQuestion = useMutation(api.exams.removeQuestion);
+
+  const [selectedModuleId, setSelectedModuleId] = useState<Id<"modules"> | "">(
+    ""
+  );
+  const [examTitle, setExamTitle] = useState("");
+  const [passingScore, setPassingScore] = useState("70");
+  const [maxAttempts, setMaxAttempts] = useState("3");
+  const [timeLimit, setTimeLimit] = useState("");
+  const [editingExamId, setEditingExamId] = useState<Id<"exams"> | null>(null);
+  const [questionDraft, setQuestionDraft] =
+    useState<QuestionDraft>(emptyQuestionDraft);
+  const [editingQuestionId, setEditingQuestionId] =
+    useState<Id<"examQuestions"> | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const editingExam = exams?.find((e) => e._id === editingExamId);
+
+  async function handleCreateExam() {
+    if (!selectedModuleId || !examTitle.trim()) {
+      toast.error("Select a module and enter an exam title");
+      return;
+    }
+    try {
+      const examId = await createExam({
+        moduleId: selectedModuleId,
+        title: examTitle.trim(),
+        passingScore: Number(passingScore),
+        maxAttempts: Number(maxAttempts),
+        timeLimitMinutes: timeLimit.trim() ? Number(timeLimit) : undefined,
+      });
+      setExamTitle("");
+      setEditingExamId(examId);
+      toast.success("Exam created — add questions below");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed");
+    }
+  }
+
+  async function handleSaveExamSettings() {
+    if (!editingExamId) return;
+    try {
+      await updateExam({
+        examId: editingExamId,
+        passingScore: Number(passingScore),
+        maxAttempts: Number(maxAttempts),
+        timeLimitMinutes: timeLimit.trim() ? Number(timeLimit) : undefined,
+      });
+      toast.success("Exam settings saved");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed");
+    }
+  }
+
+  async function handleDeleteConfirm() {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
+    try {
+      if (deleteTarget.type === "exam") {
+        await removeExam({ examId: deleteTarget.examId });
+        if (editingExamId === deleteTarget.examId) {
+          setEditingExamId(null);
+          setEditingQuestionId(null);
+          setQuestionDraft(emptyQuestionDraft());
+        }
+        toast.success("Exam deleted");
+      } else {
+        await removeQuestion({ questionId: deleteTarget.questionId });
+        if (editingQuestionId === deleteTarget.questionId) resetQuestionForm();
+        toast.success("Question deleted");
+      }
+      setDeleteTarget(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed");
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
+
+  function startEditQuestion(question: {
+    _id: Id<"examQuestions">;
+    questionText: string;
+    options: Array<{ id: string; text: string }>;
+    correctOptionId: string;
+    explanation?: string;
+  }) {
+    setEditingQuestionId(question._id);
+    setQuestionDraft({
+      questionText: question.questionText,
+      options: question.options,
+      correctOptionId: question.correctOptionId,
+      explanation: question.explanation ?? "",
+    });
+  }
+
+  function resetQuestionForm() {
+    setEditingQuestionId(null);
+    setQuestionDraft(emptyQuestionDraft());
+  }
+
+  async function handleSaveQuestion() {
+    if (!editingExamId) {
+      toast.error("Select an exam first");
+      return;
+    }
+    if (!questionDraft.questionText.trim()) {
+      toast.error("Question text is required");
+      return;
+    }
+    if (questionDraft.options.some((o) => !o.text.trim())) {
+      toast.error("Fill in all answer options");
+      return;
+    }
+
+    try {
+      if (editingQuestionId) {
+        await updateQuestion({
+          questionId: editingQuestionId,
+          questionText: questionDraft.questionText,
+          options: questionDraft.options.map((o) => ({
+            id: o.id,
+            text: o.text.trim(),
+          })),
+          correctOptionId: questionDraft.correctOptionId,
+          explanation: questionDraft.explanation || undefined,
+        });
+        toast.success("Question updated");
+      } else {
+        await addQuestion({
+          examId: editingExamId,
+          questionText: questionDraft.questionText,
+          options: questionDraft.options.map((o) => ({
+            id: o.id,
+            text: o.text.trim(),
+          })),
+          correctOptionId: questionDraft.correctOptionId,
+          explanation: questionDraft.explanation || undefined,
+        });
+        toast.success("Question added");
+      }
+      resetQuestionForm();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed");
+    }
+  }
+
+  async function handleDeleteQuestion(questionId: Id<"examQuestions">) {
+    setDeleteTarget({ type: "question", questionId });
+  }
+
+  function selectExam(exam: NonNullable<typeof exams>[number]) {
+    setEditingExamId(exam._id);
+    setPassingScore(String(exam.passingScore));
+    setMaxAttempts(String(exam.maxAttempts));
+    setTimeLimit(exam.timeLimitMinutes ? String(exam.timeLimitMinutes) : "");
+    resetQuestionForm();
+  }
+
+  if (exams === undefined) {
+    return <p className="text-sm text-slate-500">Loading exams...</p>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-lg border border-border bg-white p-5">
+        <h3 className="font-medium text-slate-900">Create Module Exam</h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Add Coursera-style quizzes at the end of each module. Students get
+          instant feedback and can retry if attempts remain.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <Label>Module</Label>
+            <select
+              className="mt-2 w-full rounded-md border border-border px-3 py-2 text-sm"
+              value={selectedModuleId}
+              onChange={(e) =>
+                setSelectedModuleId(e.target.value as Id<"modules">)
+              }
+            >
+              <option value="">Select module</option>
+              {modules.map((mod) => (
+                <option key={mod._id} value={mod._id}>
+                  {mod.title}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <Label>Exam Title</Label>
+            <Input
+              value={examTitle}
+              onChange={(e) => setExamTitle(e.target.value)}
+              placeholder="Module 1 Practice Quiz"
+              className="mt-2"
+            />
+          </div>
+        </div>
+        <Button className="mt-4 gap-2" onClick={handleCreateExam}>
+          <Plus className="h-4 w-4" />
+          Add Exam
+        </Button>
+      </div>
+
+      <div className="space-y-4">
+        {exams.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-border px-4 py-6 text-sm text-slate-500">
+            No exams yet. Create one to let students test their knowledge.
+          </p>
+        ) : (
+          exams.map((exam) => (
+            <div
+              key={exam._id}
+              className="rounded-lg border border-border bg-white p-5"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <ClipboardCheck className="h-4 w-4 text-brand-600" />
+                    <h4 className="font-medium text-slate-900">{exam.title}</h4>
+                  </div>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {exam.questions.length} questions · Pass{" "}
+                    {exam.passingScore}% ·{" "}
+                    {exam.maxAttempts === 0
+                      ? "Unlimited attempts"
+                      : `${exam.maxAttempts} attempts`}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant={editingExamId === exam._id ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => selectExam(exam)}
+                  >
+                    {editingExamId === exam._id ? "Editing" : "Manage"}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      setDeleteTarget({ type: "exam", examId: exam._id })
+                    }
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {editingExamId === exam._id && (
+                <div className="mt-5 space-y-5 border-t border-border pt-5">
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <div>
+                      <Label>Passing Score (%)</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={100}
+                        value={passingScore}
+                        onChange={(e) => setPassingScore(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label>Max Attempts (0 = unlimited)</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={maxAttempts}
+                        onChange={(e) => setMaxAttempts(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label>Time Limit (minutes, optional)</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={timeLimit}
+                        onChange={(e) => setTimeLimit(e.target.value)}
+                        placeholder="No limit"
+                        className="mt-2"
+                      />
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={handleSaveExamSettings}>
+                    Save Exam Settings
+                  </Button>
+
+                  <div>
+                    <h5 className="text-sm font-semibold text-slate-800">
+                      Questions
+                    </h5>
+                    <ul className="mt-3 space-y-2">
+                      {exam.questions.length === 0 ? (
+                        <li className="text-sm text-slate-500">
+                          No questions yet
+                        </li>
+                      ) : (
+                        exam.questions.map((q, index) => (
+                          <li
+                            key={q._id}
+                            className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-slate-50 px-3 py-2 text-sm"
+                          >
+                            <span>
+                              {index + 1}. {q.questionText}
+                            </span>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => startEditQuestion(q)}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteQuestion(q._id)}
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </li>
+                        ))
+                      )}
+                    </ul>
+                  </div>
+
+                  <div className="rounded-lg border border-border bg-slate-50/80 p-4">
+                    <h5 className="font-medium text-slate-900">
+                      {editingQuestionId ? "Edit Question" : "Add Question"}
+                    </h5>
+                    <div className="mt-4 space-y-4">
+                      <div>
+                        <Label>Question</Label>
+                        <Textarea
+                          value={questionDraft.questionText}
+                          onChange={(e) =>
+                            setQuestionDraft((d) => ({
+                              ...d,
+                              questionText: e.target.value,
+                            }))
+                          }
+                          rows={2}
+                          className="mt-2"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Answer Options</Label>
+                        {questionDraft.options.map((option, index) => (
+                          <div
+                            key={option.id}
+                            className="flex items-center gap-2"
+                          >
+                            <input
+                              type="radio"
+                              name="correctOption"
+                              checked={
+                                questionDraft.correctOptionId === option.id
+                              }
+                              onChange={() =>
+                                setQuestionDraft((d) => ({
+                                  ...d,
+                                  correctOptionId: option.id,
+                                }))
+                              }
+                            />
+                            <Input
+                              value={option.text}
+                              onChange={(e) =>
+                                setQuestionDraft((d) => ({
+                                  ...d,
+                                  options: d.options.map((o, i) =>
+                                    i === index
+                                      ? { ...o, text: e.target.value }
+                                      : o
+                                  ),
+                                }))
+                              }
+                              placeholder={`Option ${index + 1}`}
+                            />
+                          </div>
+                        ))}
+                        <p className="text-xs text-slate-500">
+                          Select the radio button for the correct answer.
+                        </p>
+                      </div>
+                      <div>
+                        <Label>Explanation (shown after submit)</Label>
+                        <Textarea
+                          value={questionDraft.explanation}
+                          onChange={(e) =>
+                            setQuestionDraft((d) => ({
+                              ...d,
+                              explanation: e.target.value,
+                            }))
+                          }
+                          rows={2}
+                          className="mt-2"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={handleSaveQuestion}>
+                          {editingQuestionId ? "Save Question" : "Add Question"}
+                        </Button>
+                        {editingQuestionId && (
+                          <Button variant="outline" onClick={resetQuestionForm}>
+                            Cancel
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+
+      {editingExam && editingExam.questions.length > 0 && (
+        <Badge variant="secondary" className="text-xs">
+          Students need {editingExam.passingScore}% to pass this exam
+        </Badge>
+      )}
+
+      <ConfirmDialog
+        open={deleteTarget?.type === "exam"}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Delete exam?"
+        description="This exam and all its questions will be permanently removed."
+        confirmLabel="Delete Exam"
+        variant="destructive"
+        loading={deleteLoading}
+        onConfirm={() => void handleDeleteConfirm()}
+      />
+
+      <ConfirmDialog
+        open={deleteTarget?.type === "question"}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Delete question?"
+        description="This question will be permanently removed from the exam."
+        confirmLabel="Delete Question"
+        variant="destructive"
+        loading={deleteLoading}
+        onConfirm={() => void handleDeleteConfirm()}
+      />
+    </div>
+  );
+}
