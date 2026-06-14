@@ -19,11 +19,20 @@ npm install
 
 ### 2. Configure environment
 
-```bash
-cp .env.example .env.local
+Create `.env.local` in the project root (this file is **never** committed to git):
+
+```env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
+NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-Fill in Clerk and Convex credentials (see `.env.example`).
+Fill in your real Clerk and Convex values from their dashboards.
 
 ### 3. Start Convex (required first time)
 
