@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMutation, useQuery } from "convex/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -17,7 +18,6 @@ export function AdminSettings() {
   const settings = useQuery(api.settings.get);
   const categories = useQuery(api.categories.list, {});
   const updateSettings = useMutation(api.settings.update);
-  const seedCategories = useMutation(api.seed.seedCategories);
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsFormSchema),
@@ -37,15 +37,6 @@ export function AdminSettings() {
     }
   }
 
-  async function handleSeedCategories() {
-    try {
-      await seedCategories({});
-      toast.success("Default categories created");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed");
-    }
-  }
-
   return (
     <div>
       <DashboardPageHeader
@@ -60,16 +51,18 @@ export function AdminSettings() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-slate-600">
-            Teachers need categories before they can create courses. Run this once
-            to add the default list (Web Development, Data Science, Business,
-            Design, Marketing).
+            Manage categories from the dedicated admin page. Teachers choose a
+            category when creating a course; students use them to filter the
+            catalog.
           </p>
           <p className="text-sm text-slate-500">
-            Current categories: {categories?.length ?? "…"}
+            Active categories:{" "}
+            {categories?.filter((cat) => cat.isActive).length ?? "…"} of{" "}
+            {categories?.length ?? "…"}
           </p>
-          <Button variant="outline" onClick={() => void handleSeedCategories()}>
-            Seed Default Categories
-          </Button>
+          <Link href="/dashboard/admin/categories">
+            <Button variant="outline">Manage categories</Button>
+          </Link>
         </CardContent>
       </Card>
 

@@ -10,6 +10,7 @@ import {
   MessageSquare,
   PenLine,
   Settings,
+  Tags,
   Users,
 } from "lucide-react";
 
@@ -26,6 +27,7 @@ const adminNav: DashboardNavItem[] = [
   { label: "Users", href: "/dashboard/admin/users", icon: Users },
   { label: "Payments", href: "/dashboard/admin/payments", icon: CreditCard },
   { label: "Course Review", href: "/dashboard/admin/courses", icon: BookOpen },
+  { label: "Categories", href: "/dashboard/admin/categories", icon: Tags },
   { label: "My Courses", href: "/dashboard/teacher/courses", icon: PenLine },
   { label: "Teachers", href: "/dashboard/admin/teachers", icon: GraduationCap },
   { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
@@ -99,7 +101,7 @@ export function getMobilePrimaryNav(role: DashboardRole): DashboardNavItem[] {
   switch (role) {
     case "owner":
     case "admin":
-      return [adminNav[0], adminNav[2], adminNav[6]];
+      return [adminNav[0], adminNav[2], adminNav[7]];
     case "teacher":
       return [teacherNav[0], teacherNav[1], teacherNav[2]];
     default:

@@ -19,15 +19,14 @@ export function AdminDashboard() {
     api.settings.getSetupStatus,
     isAuthenticated ? {} : "skip"
   );
-  const seedCategories = useMutation(api.seed.seedCategories);
   const dismissChecklist = useMutation(api.settings.dismissSetupChecklist);
 
   const setupSteps = [
     {
       done: setup?.hasCategories ?? false,
-      label: "Seed course categories",
-      href: "/dashboard/admin/settings",
-      action: "Seed now",
+      label: "Add course categories",
+      href: "/dashboard/admin/categories",
+      action: "Manage",
     },
     {
       done: setup?.hasPaymentSettings ?? false,
@@ -51,15 +50,6 @@ export function AdminDashboard() {
   const checklistLoading = isAuthenticated && setup === undefined;
   const showChecklist =
     setup && !setup.dismissed && !setup.allComplete;
-
-  async function handleSeedCategories() {
-    try {
-      await seedCategories({});
-      toast.success("Default categories created");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed");
-    }
-  }
 
   async function handleDismissChecklist() {
     try {
@@ -137,17 +127,7 @@ export function AdminDashboard() {
                       <span className={step.done ? "text-slate-500 line-through" : ""}>
                         {step.label}
                       </span>
-                      {!step.done && step.action === "Seed now" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="ml-auto"
-                          onClick={() => void handleSeedCategories()}
-                        >
-                          {step.action}
-                        </Button>
-                      )}
-                      {!step.done && step.action === "Open settings" && (
+                      {!step.done && step.action && (
                         <Link href={step.href} className="ml-auto">
                           <Button variant="outline" size="sm">
                             {step.action}
