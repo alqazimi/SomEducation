@@ -12,9 +12,9 @@ export default function SignInClient() {
     <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-8">
       <div className="w-full max-w-[min(100%,24rem)]">
         <SignIn
-        forceRedirectUrl={redirectUrl}
-        signUpForceRedirectUrl={redirectUrl}
-        appearance={clerkAppearance}
+          fallbackRedirectUrl={redirectUrl}
+          signUpFallbackRedirectUrl={redirectUrl}
+          appearance={clerkAppearance}
         />
       </div>
     </div>

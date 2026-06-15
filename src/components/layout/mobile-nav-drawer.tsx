@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Show, SignInButton } from "@clerk/nextjs";
+import { Show } from "@clerk/nextjs";
 import {
   BookOpen,
   HelpCircle,
@@ -20,6 +20,7 @@ import {
   isDashboardNavActive,
 } from "@/lib/dashboard-nav";
 import { PLATFORM_TAGLINE } from "@/lib/brand";
+import { getSignInUrl, getSignUpUrl } from "@/lib/auth-urls";
 import { cn } from "@/lib/utils";
 
 const exploreLinks = [
@@ -91,6 +92,8 @@ export function MobileNavDrawer({
   const pathname = usePathname();
   const dashboardItems = role ? getNavForRole(role) : [];
   const dashboardHref = getDashboardHref(role);
+  const signInUrl = getSignInUrl(pathname || "/dashboard");
+  const signUpUrl = getSignUpUrl(pathname || "/dashboard");
 
   useEffect(() => {
     if (!open) return;
@@ -192,12 +195,12 @@ export function MobileNavDrawer({
         <div className="border-t border-border p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <Show when="signed-out">
             <div className="flex flex-col gap-2">
-              <SignInButton mode="modal">
+              <Link href={signInUrl} className="w-full" onClick={onClose}>
                 <Button variant="outline" className="w-full">
                   Sign In
                 </Button>
-              </SignInButton>
-              <Link href="/sign-up" className="w-full" onClick={onClose}>
+              </Link>
+              <Link href={signUpUrl} className="w-full" onClick={onClose}>
                 <Button className="w-full">Sign up</Button>
               </Link>
             </div>

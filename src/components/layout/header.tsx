@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Show, SignInButton, UserButton, useAuth } from "@clerk/nextjs";
+import { Show, UserButton, useAuth } from "@clerk/nextjs";
 import { useConvexAuth, useQuery } from "convex/react";
 import { Compass, Menu, Search, X } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PLATFORM_NAME } from "@/lib/brand";
+import { getSignInUrl, getSignUpUrl } from "@/lib/auth-urls";
 import {
   getDashboardHref,
   isDashboardOverview,
@@ -35,6 +36,8 @@ export function Header() {
   const convexReady = clerkLoaded && isSignedIn && isAuthenticated;
   const user = useQuery(api.users.getMe, convexReady ? {} : "skip");
   const dashboardHref = getDashboardHref(user?.role);
+  const signInUrl = getSignInUrl(pathname || "/dashboard");
+  const signUpUrl = getSignUpUrl(pathname || "/dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [lastPathname, setLastPathname] = useState(pathname);
@@ -145,19 +148,19 @@ export function Header() {
               </Show>
 
               <Show when="signed-out">
-                <SignInButton mode="modal">
+                <Link href={signInUrl} className="hidden sm:inline-flex">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="hidden text-stone-700 sm:inline-flex"
+                    className="text-stone-700"
                   >
                     Log in
                   </Button>
-                </SignInButton>
-                <Link href="/sign-up" className="hidden sm:inline-flex">
+                </Link>
+                <Link href={signUpUrl} className="hidden sm:inline-flex">
                   <Button size="sm">Join for free</Button>
                 </Link>
-                <Link href="/sign-up" className="sm:hidden">
+                <Link href={signUpUrl} className="sm:hidden">
                   <Button size="sm" className="h-9 px-3 text-xs">
                     Join
                   </Button>

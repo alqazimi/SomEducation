@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
   AccountSetupState,
@@ -10,6 +11,7 @@ import { getDashboardHref } from "@/lib/dashboard-nav";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function DashboardRedirect() {
+  const router = useRouter();
   const { isLoaded: clerkLoaded } = useAuth();
   const { user, isLoading, syncError, retrySync, clerkSignedIn } =
     useEnsureConvexUser();
@@ -18,7 +20,7 @@ export function DashboardRedirect() {
     if (!clerkLoaded || isLoading) return;
 
     if (!clerkSignedIn) {
-      window.location.replace("/sign-in");
+      router.replace("/sign-in");
       return;
     }
 
@@ -26,9 +28,9 @@ export function DashboardRedirect() {
 
     const target = getDashboardHref(user.role);
     if (window.location.pathname !== target) {
-      window.location.replace(target);
+      router.replace(target);
     }
-  }, [clerkLoaded, isLoading, clerkSignedIn, user]);
+  }, [clerkLoaded, isLoading, clerkSignedIn, user, router]);
 
   if (!clerkLoaded || isLoading) {
     return <DashboardRedirectSkeleton />;
