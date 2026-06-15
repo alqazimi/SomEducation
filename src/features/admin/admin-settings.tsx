@@ -17,12 +17,12 @@ import { settingsFormSchema, type SettingsFormValues } from "@/schemas";
 export function AdminSettings() {
   const settings = useQuery(api.settings.get);
   const categories = useQuery(api.categories.list, {});
+  const paymentProviders = useQuery(api.paymentProviders.listForAdmin);
   const updateSettings = useMutation(api.settings.update);
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsFormSchema),
     values: {
-      paymentPhone: settings?.paymentPhone ?? "",
       paymentInstructions: settings?.paymentInstructions ?? "",
       supportEmail: settings?.supportEmail,
     },
@@ -37,12 +37,17 @@ export function AdminSettings() {
     }
   }
 
+  const activeProviders =
+    paymentProviders?.filter(
+      (provider) => provider.isActive && provider.accountNumber.trim()
+    ).length ?? 0;
+
   return (
     <div>
       <DashboardPageHeader
         eyebrow="Administration"
         title="Platform settings"
-        description="Payment details, categories, and support contact information."
+        description="Support contact and general payment notes."
       />
 
       <Card className="mt-8">
@@ -68,24 +73,36 @@ export function AdminSettings() {
 
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Payment Configuration</CardTitle>
+          <CardTitle>Payment Providers</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-slate-600">
+            Mobile money and bank numbers are managed per provider (EVC Plus,
+            Zaad, Premier Bank, etc.). Students only see the number for the
+            provider they choose.
+          </p>
+          <p className="text-sm text-slate-500">
+            Active providers with numbers: {activeProviders}
+          </p>
+          <Link href="/dashboard/admin/payment-providers">
+            <Button variant="outline">Manage payment providers</Button>
+          </Link>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>General Payment Notes</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="phone">Payment Phone/Number</Label>
-            <Input
-              id="phone"
-              {...form.register("paymentPhone")}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label htmlFor="instructions">Payment Instructions</Label>
+            <Label htmlFor="instructions">Optional platform-wide note</Label>
             <Textarea
               id="instructions"
               {...form.register("paymentInstructions")}
               className="mt-1"
-              rows={5}
+              rows={4}
+              placeholder="Optional extra instructions shown in support docs"
             />
           </div>
           <div>

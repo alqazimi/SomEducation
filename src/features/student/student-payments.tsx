@@ -63,6 +63,9 @@ export function StudentPayments() {
                     </strong>
                   </span>
                   <span>Ref: {payment.transactionReference}</span>
+                  {payment.provider && (
+                    <span>Via: {payment.provider.name}</span>
+                  )}
                 </div>
                 {payment.adminNote && (
                   <p className="mt-2 text-sm text-slate-600">

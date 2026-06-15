@@ -6,7 +6,7 @@ describe("paymentFormSchema", () => {
     const result = paymentFormSchema.safeParse({
       fullName: "John Doe",
       phone: "+44 7700 900123",
-      method: "bank_transfer",
+      paymentProviderId: "provider123",
       transactionReference: "TXN-12345",
       notes: "Paid via mobile app",
     });
@@ -17,7 +17,7 @@ describe("paymentFormSchema", () => {
     const result = paymentFormSchema.safeParse({
       fullName: "John Doe",
       phone: "abc",
-      method: "bank_transfer",
+      paymentProviderId: "provider123",
       transactionReference: "TXN-12345",
     });
     expect(result.success).toBe(false);
@@ -27,7 +27,7 @@ describe("paymentFormSchema", () => {
     const result = paymentFormSchema.safeParse({
       fullName: "John Doe",
       phone: "+44 7700 900123",
-      method: "bank_transfer",
+      paymentProviderId: "provider123",
       transactionReference: "AB",
     });
     expect(result.success).toBe(false);

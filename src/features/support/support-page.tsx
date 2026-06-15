@@ -31,7 +31,7 @@ const paymentSteps = [
   {
     title: "Send the payment",
     description:
-      "Pay using bank transfer, mobile money, or cash transfer to the number shown on the purchase page.",
+      "Pick Mobile Money or Bank Transfer, choose your provider, and pay the number shown for that provider only.",
   },
   {
     title: "Upload proof",
@@ -51,19 +51,14 @@ const paymentSteps = [
 
 const paymentMethods = [
   {
-    icon: CreditCard,
-    label: "Bank Transfer",
-    hint: "Include your name and course title in the transfer note.",
-  },
-  {
     icon: Smartphone,
     label: "Mobile Money",
-    hint: "Send the exact course amount and save the confirmation message.",
+    hint: "Choose EVC Plus, Zaad, eDahab, Sahal, or another wallet on the purchase page.",
   },
   {
     icon: CreditCard,
-    label: "Cash Transfer",
-    hint: "Use the reference number from your receipt when you submit payment.",
+    label: "Bank Transfer",
+    hint: "Choose your bank on the purchase page and send to the account number shown.",
   },
 ];
 
@@ -106,7 +101,7 @@ export function SupportPage() {
             </CardContent>
           </Card>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             {paymentMethods.map((method) => (
               <Card key={method.label} className="shadow-sm">
                 <CardContent className="p-5">

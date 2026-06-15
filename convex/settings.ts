@@ -7,29 +7,17 @@ import { sanitizeText } from "./lib/validation";
 
 const SETTINGS_KEY = "platform";
 const DEFAULT_PLATFORM_NAME = "SomEducation";
-const DEFAULT_PAYMENT_PHONE = "+44XXXXXXXXXX";
 
-function isPlaceholderPhone(phone: string) {
-  return (
-    phone === DEFAULT_PAYMENT_PHONE ||
-    /X{4,}/i.test(phone) ||
-    phone.replace(/\D/g, "").length < 8
-  );
-}
+async function isPaymentConfigured(ctx: {
+  db: import("./_generated/server").QueryCtx["db"];
+}) {
+  const activeProviders = await ctx.db
+    .query("paymentProviders")
+    .filter((q) => q.eq(q.field("isActive"), true))
+    .collect();
 
-function isPaymentConfigured(
-  settings: {
-    paymentPhone?: string;
-    paymentInstructions?: string;
-  } | null
-) {
-  if (!settings) return false;
-  const phone = settings.paymentPhone?.trim();
-  const instructions = settings.paymentInstructions?.trim();
-  if (!phone || !instructions) return false;
-  return (
-    !isPlaceholderPhone(phone) &&
-    instructions.length >= 10
+  return activeProviders.some(
+    (provider) => provider.accountNumber.trim().length > 0
   );
 }
 
@@ -41,19 +29,21 @@ export const getSetupStatus = query({
       return null;
     }
 
-    const [categories, platformSettings, courses, payments] = await Promise.all([
-      ctx.db.query("categories").collect(),
-      ctx.db
-        .query("settings")
-        .withIndex("by_key", (q) => q.eq("key", SETTINGS_KEY))
-        .unique(),
-      ctx.db.query("courses").collect(),
-      ctx.db.query("payments").collect(),
-    ]);
+    const [categories, courses, payments, paymentConfigured, platformSettings] =
+      await Promise.all([
+        ctx.db.query("categories").collect(),
+        ctx.db.query("courses").collect(),
+        ctx.db.query("payments").collect(),
+        isPaymentConfigured(ctx),
+        ctx.db
+          .query("settings")
+          .withIndex("by_key", (q) => q.eq("key", SETTINGS_KEY))
+          .unique(),
+      ]);
 
     const steps = {
       hasCategories: categories.some((c) => c.isActive),
-      hasPaymentSettings: isPaymentConfigured(platformSettings),
+      hasPaymentSettings: paymentConfigured,
       hasPublishedCourse: courses.some((c) => c.status === "published"),
       hasApprovedPayment: payments.some((p) => p.status === "approved"),
     };
@@ -100,37 +90,37 @@ export const dismissSetupChecklist = mutation({
 export const get = query({
   args: {},
   handler: async (ctx) => {
-    const settings = await ctx.db
-      .query("settings")
-      .withIndex("by_key", (q) => q.eq("key", SETTINGS_KEY))
-      .unique();
+    const [settings, paymentConfigured] = await Promise.all([
+      ctx.db
+        .query("settings")
+        .withIndex("by_key", (q) => q.eq("key", SETTINGS_KEY))
+        .unique(),
+      isPaymentConfigured(ctx),
+    ]);
 
     if (!settings) {
       return {
-        paymentPhone: DEFAULT_PAYMENT_PHONE,
         paymentInstructions:
-          "Send payment via Bank Transfer, Mobile Money, or Cash Transfer. Include your transaction reference in the payment note.",
+          "Choose your payment provider on the purchase page and send the exact course amount.",
         platformName: DEFAULT_PLATFORM_NAME,
         supportEmail: "support@someducation.com",
-        isPaymentConfigured: false,
+        isPaymentConfigured: paymentConfigured,
       };
     }
 
     return {
-      paymentPhone: settings.paymentPhone ?? DEFAULT_PAYMENT_PHONE,
       paymentInstructions:
         settings.paymentInstructions ??
-        "Send payment via Bank Transfer, Mobile Money, or Cash Transfer.",
+        "Choose your payment provider on the purchase page and send the exact course amount.",
       platformName: settings.platformName,
       supportEmail: settings.supportEmail ?? "support@someducation.com",
-      isPaymentConfigured: isPaymentConfigured(settings),
+      isPaymentConfigured: paymentConfigured,
     };
   },
 });
 
 export const update = mutation({
   args: {
-    paymentPhone: v.optional(v.string()),
     paymentInstructions: v.optional(v.string()),
     supportEmail: v.optional(v.string()),
   },
@@ -144,9 +134,6 @@ export const update = mutation({
       .unique();
 
     const data = {
-      paymentPhone: args.paymentPhone
-        ? sanitizeText(args.paymentPhone, 30)
-        : undefined,
       paymentInstructions: args.paymentInstructions
         ? sanitizeText(args.paymentInstructions, 2000)
         : undefined,

@@ -14,14 +14,13 @@ import {
   sanitizeText,
   validatePhone,
 } from "./lib/validation";
-import { paymentMethod } from "./schema";
 
 export const submit = mutation({
   args: {
     courseId: v.id("courses"),
     fullName: v.string(),
     phone: v.string(),
-    method: paymentMethod,
+    paymentProviderId: v.id("paymentProviders"),
     transactionReference: v.string(),
     notes: v.optional(v.string()),
     screenshotStorageId: v.id("_storage"),
@@ -33,6 +32,15 @@ export const submit = mutation({
     const course = await ctx.db.get(args.courseId);
     if (!course || course.status !== "published") {
       throw new Error("Course not available for purchase");
+    }
+
+    const provider = await ctx.db.get(args.paymentProviderId);
+    if (!provider || !provider.isActive || !provider.accountNumber.trim()) {
+      throw new Error("Selected payment method is not available");
+    }
+
+    if (provider.type !== "mobile_money" && provider.type !== "bank_transfer") {
+      throw new Error("Invalid payment method");
     }
 
     const existingEnrollment = await ctx.db
@@ -68,7 +76,8 @@ export const submit = mutation({
       courseId: args.courseId,
       fullName: sanitizeText(args.fullName, 100),
       phone: sanitizeText(args.phone, 20),
-      method: args.method,
+      method: provider.type,
+      paymentProviderId: provider._id,
       transactionReference: sanitizeText(args.transactionReference, 100),
       notes: args.notes ? sanitizeText(args.notes, 500) : undefined,
       screenshotStorageId: args.screenshotStorageId,
@@ -120,11 +129,16 @@ export const listMine = query({
 
     return await Promise.all(
       payments.map(async (payment) => {
-        const course = await ctx.db.get(payment.courseId);
+        const [course, provider] = await Promise.all([
+          ctx.db.get(payment.courseId),
+          payment.paymentProviderId
+            ? ctx.db.get(payment.paymentProviderId)
+            : null,
+        ]);
         const screenshotUrl = await ctx.storage.getUrl(
           payment.screenshotStorageId
         );
-        return { ...payment, course, screenshotUrl };
+        return { ...payment, course, provider, screenshotUrl };
       })
     );
   },
@@ -155,14 +169,17 @@ export const listForAdmin = query({
 
     return await Promise.all(
       payments.map(async (payment) => {
-        const [student, course] = await Promise.all([
+        const [student, course, provider] = await Promise.all([
           ctx.db.get(payment.studentId),
           ctx.db.get(payment.courseId),
+          payment.paymentProviderId
+            ? ctx.db.get(payment.paymentProviderId)
+            : null,
         ]);
         const screenshotUrl = await ctx.storage.getUrl(
           payment.screenshotStorageId
         );
-        return { ...payment, student, course, screenshotUrl };
+        return { ...payment, student, course, provider, screenshotUrl };
       })
     );
   },

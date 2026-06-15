@@ -30,9 +30,9 @@ export function AdminDashboard() {
     },
     {
       done: setup?.hasPaymentSettings ?? false,
-      label: "Configure payment phone and instructions",
-      href: "/dashboard/admin/settings",
-      action: "Open settings",
+      label: "Set up mobile money and bank numbers",
+      href: "/dashboard/admin/payment-providers",
+      action: "Manage",
     },
     {
       done: setup?.hasPublishedCourse ?? false,

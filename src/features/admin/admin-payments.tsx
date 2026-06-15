@@ -65,6 +65,15 @@ export function AdminPayments() {
                       {formatPrice(payment.amount, payment.currency)}
                     </p>
                     <p>
+                      <strong>Method:</strong>{" "}
+                      {payment.provider?.name ??
+                        (payment.method === "mobile_money"
+                          ? "Mobile Money"
+                          : payment.method === "bank_transfer"
+                            ? "Bank Transfer"
+                            : payment.method)}
+                    </p>
+                    <p>
                       <strong>Reference:</strong> {payment.transactionReference}
                     </p>
                     <p>

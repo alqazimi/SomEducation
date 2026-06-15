@@ -7,7 +7,7 @@ export const paymentFormSchema = z.object({
     .min(7, "Valid phone number required")
     .max(20)
     .regex(/^[\d\s+\-()]+$/, "Invalid phone format"),
-  method: z.enum(["bank_transfer", "mobile_money", "cash_transfer"]),
+  paymentProviderId: z.string().min(1, "Payment provider is required"),
   transactionReference: z
     .string()
     .min(3, "Transaction reference required")
@@ -57,8 +57,7 @@ export const messageFormSchema = z.object({
 export type MessageFormValues = z.infer<typeof messageFormSchema>;
 
 export const settingsFormSchema = z.object({
-  paymentPhone: z.string().min(5).max(30),
-  paymentInstructions: z.string().min(10).max(2000),
+  paymentInstructions: z.string().max(2000).optional().or(z.literal("")),
   supportEmail: z.string().email().optional(),
 });
 
@@ -70,3 +69,12 @@ export const categoryFormSchema = z.object({
 });
 
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
+
+export const paymentProviderFormSchema = z.object({
+  type: z.enum(["mobile_money", "bank_transfer"]),
+  name: z.string().min(2, "Name is required").max(100),
+  accountNumber: z.string().min(3, "Number is required").max(60),
+  instructions: z.string().max(500).optional().or(z.literal("")),
+});
+
+export type PaymentProviderFormValues = z.infer<typeof paymentProviderFormSchema>;

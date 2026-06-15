@@ -12,6 +12,7 @@ import {
   Settings,
   Tags,
   Users,
+  Wallet,
 } from "lucide-react";
 
 export type DashboardRole = "owner" | "admin" | "teacher" | "student";
@@ -26,6 +27,11 @@ const adminNav: DashboardNavItem[] = [
   { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard },
   { label: "Users", href: "/dashboard/admin/users", icon: Users },
   { label: "Payments", href: "/dashboard/admin/payments", icon: CreditCard },
+  {
+    label: "Payment Methods",
+    href: "/dashboard/admin/payment-providers",
+    icon: Wallet,
+  },
   { label: "Course Review", href: "/dashboard/admin/courses", icon: BookOpen },
   { label: "Categories", href: "/dashboard/admin/categories", icon: Tags },
   { label: "My Courses", href: "/dashboard/teacher/courses", icon: PenLine },
@@ -101,7 +107,7 @@ export function getMobilePrimaryNav(role: DashboardRole): DashboardNavItem[] {
   switch (role) {
     case "owner":
     case "admin":
-      return [adminNav[0], adminNav[2], adminNav[7]];
+      return [adminNav[0], adminNav[3], adminNav[8]];
     case "teacher":
       return [teacherNav[0], teacherNav[1], teacherNav[2]];
     default:

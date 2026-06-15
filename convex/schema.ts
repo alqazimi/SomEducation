@@ -41,6 +41,11 @@ export const paymentMethod = v.union(
   v.literal("cash_transfer")
 );
 
+export const paymentProviderType = v.union(
+  v.literal("mobile_money"),
+  v.literal("bank_transfer")
+);
+
 export const teacherRequestStatus = v.union(
   v.literal("pending"),
   v.literal("approved"),
@@ -111,6 +116,19 @@ export default defineSchema({
     .index("by_slug", ["slug"])
     .index("by_active", ["isActive"]),
 
+  paymentProviders: defineTable({
+    type: paymentProviderType,
+    name: v.string(),
+    slug: v.string(),
+    accountNumber: v.string(),
+    instructions: v.optional(v.string()),
+    isActive: v.boolean(),
+    order: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_type", ["type", "isActive"]),
+
   courses: defineTable({
     title: v.string(),
     slug: v.string(),
@@ -170,6 +188,7 @@ export default defineSchema({
     fullName: v.string(),
     phone: v.string(),
     method: paymentMethod,
+    paymentProviderId: v.optional(v.id("paymentProviders")),
     transactionReference: v.string(),
     notes: v.optional(v.string()),
     screenshotStorageId: v.id("_storage"),

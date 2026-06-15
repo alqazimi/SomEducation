@@ -4,26 +4,31 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Building2, Smartphone } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useMemo, useState } from "react";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { paymentFormSchema, type PaymentFormValues } from "@/schemas";
 import { type } from "@/lib/typography";
-import { formatPrice } from "@/lib/utils";
-import { useState } from "react";
+import { cn, formatPrice } from "@/lib/utils";
+
+type PaymentType = "mobile_money" | "bank_transfer";
+
+const typeOptions: Array<{
+  value: PaymentType;
+  label: string;
+  icon: typeof Smartphone;
+}> = [
+  { value: "mobile_money", label: "Mobile Money", icon: Smartphone },
+  { value: "bank_transfer", label: "Bank Transfer", icon: Building2 },
+];
 
 export function PurchaseCourseForm() {
   const params = useParams<{ slug: string }>();
@@ -31,18 +36,40 @@ export function PurchaseCourseForm() {
   const [step, setStep] = useState(1);
   const [uploading, setUploading] = useState(false);
   const [screenshotId, setScreenshotId] = useState<Id<"_storage"> | null>(null);
+  const [paymentType, setPaymentType] = useState<PaymentType | null>(null);
+  const [selectedProviderId, setSelectedProviderId] =
+    useState<Id<"paymentProviders"> | null>(null);
 
   const course = useQuery(api.courses.getBySlug, { slug: params.slug });
-  const settings = useQuery(api.settings.get);
+  const providers = useQuery(
+    api.paymentProviders.list,
+    paymentType ? { type: paymentType, activeOnly: true } : "skip"
+  );
   const generateUploadUrl = useMutation(api.files.generateUploadUrlMutation);
   const submitPayment = useMutation(api.payments.submit);
+
+  const selectedProvider = useMemo(
+    () => providers?.find((provider) => provider._id === selectedProviderId),
+    [providers, selectedProviderId]
+  );
 
   const form = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentFormSchema),
     defaultValues: {
-      method: "bank_transfer",
+      paymentProviderId: "",
     },
   });
+
+  function handleTypeChange(nextType: PaymentType) {
+    setPaymentType(nextType);
+    setSelectedProviderId(null);
+    form.setValue("paymentProviderId", "");
+  }
+
+  function handleProviderSelect(providerId: Id<"paymentProviders">) {
+    setSelectedProviderId(providerId);
+    form.setValue("paymentProviderId", providerId);
+  }
 
   async function handleFileUpload(file: File) {
     if (!["image/png", "image/jpeg", "image/jpg", "application/pdf"].includes(file.type)) {
@@ -88,7 +115,7 @@ export function PurchaseCourseForm() {
         courseId: course._id,
         fullName: data.fullName,
         phone: data.phone,
-        method: data.method,
+        paymentProviderId: data.paymentProviderId as Id<"paymentProviders">,
         transactionReference: data.transactionReference,
         notes: data.notes,
         screenshotStorageId: screenshotId,
@@ -134,9 +161,7 @@ export function PurchaseCourseForm() {
       >
         ← Back to course
       </Link>
-      <h1 className={`mt-4 ${type.pageTitle}`}>
-        Purchase: {course.title}
-      </h1>
+      <h1 className={`mt-4 ${type.pageTitle}`}>Purchase: {course.title}</h1>
       <p className={`mt-1 ${type.muted}`}>
         Amount: {formatPrice(course.price, course.currency)}
       </p>
@@ -155,7 +180,7 @@ export function PurchaseCourseForm() {
       {step === 1 && (
         <Card className="mt-8">
           <CardHeader>
-            <CardTitle>Payment Details</CardTitle>
+            <CardTitle>Your details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -167,26 +192,12 @@ export function PurchaseCourseForm() {
               <Input id="phone" {...form.register("phone")} className="mt-1" />
             </div>
             <div>
-              <Label>Payment Method</Label>
-              <Select
-                value={form.watch("method")}
-                onValueChange={(v) =>
-                  form.setValue("method", v as PaymentFormValues["method"])
-                }
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                  <SelectItem value="mobile_money">Mobile Money</SelectItem>
-                  <SelectItem value="cash_transfer">Cash Transfer</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
               <Label htmlFor="ref">Transaction Reference</Label>
-              <Input id="ref" {...form.register("transactionReference")} className="mt-1" />
+              <Input
+                id="ref"
+                {...form.register("transactionReference")}
+                className="mt-1"
+              />
             </div>
             <div>
               <Label htmlFor="notes">Notes (optional)</Label>
@@ -202,20 +213,100 @@ export function PurchaseCourseForm() {
       {step === 2 && (
         <Card className="mt-8">
           <CardHeader>
-            <CardTitle>Payment Instructions</CardTitle>
+            <CardTitle>Choose payment method</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-lg border border-border bg-stone-50 p-4">
-              <p className={type.cardTitle}>Send payment to:</p>
-              <p className={`mt-2 ${type.price}`}>
-                {settings?.paymentPhone ?? "+44XXXXXXXXXX"}
-              </p>
-              <p className={`mt-4 ${type.bodySm}`}>
-                {settings?.paymentInstructions}
-              </p>
+          <CardContent className="space-y-6">
+            <div className="grid gap-3 sm:grid-cols-2">
+              {typeOptions.map((option) => {
+                const Icon = option.icon;
+                const active = paymentType === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => handleTypeChange(option.value)}
+                    className={cn(
+                      "rounded-xl border p-4 text-left transition-colors",
+                      active
+                        ? "border-brand-600 bg-brand-50"
+                        : "border-border hover:bg-stone-50"
+                    )}
+                  >
+                    <Icon
+                      className={cn(
+                        "h-5 w-5",
+                        active ? "text-brand-700" : "text-stone-500"
+                      )}
+                    />
+                    <p className="mt-3 font-medium text-stone-900">
+                      {option.label}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
-            <Button onClick={() => setStep(3)} className="w-full">
-              I&apos;ve Made the Payment
+
+            {paymentType && (
+              <div className="space-y-3">
+                <p className={type.cardTitle}>
+                  Choose {paymentType === "mobile_money" ? "wallet" : "bank"}
+                </p>
+                {!providers ? (
+                  <p className="text-sm text-slate-500">Loading options...</p>
+                ) : providers.length === 0 ? (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                    No active {paymentType === "mobile_money" ? "mobile money" : "bank"}{" "}
+                    providers are available yet. Please contact support.
+                  </div>
+                ) : (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {providers.map((provider) => {
+                      const active = selectedProviderId === provider._id;
+                      return (
+                        <button
+                          key={provider._id}
+                          type="button"
+                          onClick={() => handleProviderSelect(provider._id)}
+                          className={cn(
+                            "rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors",
+                            active
+                              ? "border-brand-600 bg-brand-50 text-brand-800"
+                              : "border-border text-stone-700 hover:bg-stone-50"
+                          )}
+                        >
+                          {provider.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {selectedProvider && (
+              <div className="rounded-lg border border-brand-200 bg-brand-50/60 p-4">
+                <p className={type.cardTitle}>Send payment to {selectedProvider.name}</p>
+                <p className={`mt-2 font-mono text-lg ${type.price}`}>
+                  {selectedProvider.accountNumber}
+                </p>
+                {selectedProvider.instructions && (
+                  <p className={`mt-3 ${type.bodySm}`}>
+                    {selectedProvider.instructions}
+                  </p>
+                )}
+                <p className={`mt-3 ${type.bodySm}`}>
+                  Send exactly {formatPrice(course.price, course.currency)} and keep
+                  your transaction reference.
+                </p>
+              </div>
+            )}
+
+            <Button
+              onClick={() => setStep(3)}
+              className="w-full"
+              disabled={!selectedProviderId}
+            >
+              I&apos;ve made the payment
             </Button>
           </CardContent>
         </Card>
@@ -224,9 +315,14 @@ export function PurchaseCourseForm() {
       {step === 3 && (
         <Card className="mt-8">
           <CardHeader>
-            <CardTitle>Upload Payment Screenshot</CardTitle>
+            <CardTitle>Upload payment screenshot</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {selectedProvider && (
+              <p className="text-sm text-slate-600">
+                Upload proof for your {selectedProvider.name} payment.
+              </p>
+            )}
             <Input
               type="file"
               accept=".png,.jpg,.jpeg,.pdf"
@@ -236,9 +332,7 @@ export function PurchaseCourseForm() {
                 if (file) void handleFileUpload(file);
               }}
             />
-            {uploading && (
-              <p className="text-sm text-slate-500">Uploading...</p>
-            )}
+            {uploading && <p className="text-sm text-slate-500">Uploading...</p>}
             {screenshotId && (
               <p className="text-sm text-green-600">Screenshot uploaded successfully</p>
             )}
@@ -252,15 +346,25 @@ export function PurchaseCourseForm() {
       {step === 4 && (
         <Card className="mt-8">
           <CardHeader>
-            <CardTitle>Review & Submit</CardTitle>
+            <CardTitle>Review & submit</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {selectedProvider && (
+              <div className="rounded-lg border border-border bg-stone-50 p-4 text-sm text-slate-600">
+                <p>
+                  <strong>Provider:</strong> {selectedProvider.name}
+                </p>
+                <p className="mt-1">
+                  <strong>Number:</strong> {selectedProvider.accountNumber}
+                </p>
+              </div>
+            )}
             <p className="text-sm text-slate-600">
-              Your payment will be reviewed by our admin team. You&apos;ll receive
-              a notification once approved.
+              Your payment will be reviewed by our admin team. You&apos;ll receive a
+              notification once approved.
             </p>
             <Button onClick={form.handleSubmit(onSubmit)} className="w-full">
-              Submit Payment Request
+              Submit payment request
             </Button>
           </CardContent>
         </Card>
