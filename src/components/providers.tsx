@@ -6,6 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode, useMemo, useState } from "react";
 import { Toaster } from "sonner";
+import { ConvexAuthBanner } from "@/components/auth/convex-auth-banner";
 import { UserSync } from "@/components/auth/user-sync";
 import { getConvexClientUrl, isConvexConfigured } from "@/lib/convex-url";
 
@@ -39,6 +40,7 @@ export function Providers({
     <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
       <QueryClientProvider client={queryClient}>
         <UserSync />
+        <ConvexAuthBanner />
         {!configured && typeof window !== "undefined" && (
           <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900">
             Backend URL is not configured. Set{" "}

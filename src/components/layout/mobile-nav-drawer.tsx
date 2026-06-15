@@ -5,30 +5,27 @@ import { usePathname } from "next/navigation";
 import { Show, SignInButton } from "@clerk/nextjs";
 import {
   BookOpen,
-  FileText,
   HelpCircle,
   Home,
-  Scale,
+  LayoutDashboard,
+  Search,
   X,
 } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DashboardRole,
+  getDashboardHref,
   getNavForRole,
   isDashboardNavActive,
 } from "@/lib/dashboard-nav";
+import { PLATFORM_TAGLINE } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 const exploreLinks = [
   { href: "/", label: "Home", icon: Home },
   { href: "/courses", label: "Courses", icon: BookOpen },
   { href: "/support", label: "Support", icon: HelpCircle },
-] as const;
-
-const legalLinks = [
-  { href: "/privacy", label: "Privacy policy", icon: FileText },
-  { href: "/terms", label: "Terms of service", icon: Scale },
 ] as const;
 
 function isExploreActive(pathname: string, href: string) {
@@ -84,13 +81,16 @@ export function MobileNavDrawer({
   open,
   onClose,
   role,
+  onSearch,
 }: {
   open: boolean;
   onClose: () => void;
   role?: DashboardRole;
+  onSearch?: () => void;
 }) {
   const pathname = usePathname();
   const dashboardItems = role ? getNavForRole(role) : [];
+  const dashboardHref = getDashboardHref(role);
 
   useEffect(() => {
     if (!open) return;
@@ -114,7 +114,7 @@ export function MobileNavDrawer({
         <div className="flex items-center justify-between border-b border-border px-4 py-4">
           <div>
             <p className="text-sm font-medium text-stone-900">Menu</p>
-            <p className="text-xs text-stone-500">All pages in one place</p>
+            <p className="text-xs text-stone-500">{PLATFORM_TAGLINE}</p>
           </div>
           <button
             type="button"
@@ -127,7 +127,21 @@ export function MobileNavDrawer({
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-          <SectionLabel>Explore</SectionLabel>
+          {onSearch && (
+            <button
+              type="button"
+              onClick={() => {
+                onSearch();
+                onClose();
+              }}
+              className="mb-2 flex w-full items-center gap-3 rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 text-left text-sm text-stone-500 transition-colors hover:bg-stone-100"
+            >
+              <Search className="h-4 w-4 shrink-0" />
+              Search e-learning courses…
+            </button>
+          )}
+
+          <SectionLabel>E-Learning</SectionLabel>
           {exploreLinks.map((link) => (
             <DrawerLink
               key={link.href}
@@ -142,36 +156,37 @@ export function MobileNavDrawer({
           <Show when="signed-in">
             {dashboardItems.length > 0 && (
               <>
-                <SectionLabel>My dashboard</SectionLabel>
-                {dashboardItems.map((item) => (
-                  <DrawerLink
-                    key={item.href}
-                    href={item.href}
-                    label={item.label}
-                    icon={item.icon}
-                    active={
-                      role
-                        ? isDashboardNavActive(pathname, item.href, role)
-                        : false
-                    }
-                    onNavigate={onClose}
-                  />
-                ))}
+                <SectionLabel>Dashboard</SectionLabel>
+                <DrawerLink
+                  href={dashboardHref}
+                  label="Overview"
+                  icon={LayoutDashboard}
+                  active={
+                    role
+                      ? isDashboardNavActive(pathname, dashboardHref, role)
+                      : false
+                  }
+                  onNavigate={onClose}
+                />
+                {dashboardItems
+                  .filter((item) => item.href !== dashboardHref)
+                  .map((item) => (
+                    <DrawerLink
+                      key={item.href}
+                      href={item.href}
+                      label={item.label}
+                      icon={item.icon}
+                      active={
+                        role
+                          ? isDashboardNavActive(pathname, item.href, role)
+                          : false
+                      }
+                      onNavigate={onClose}
+                    />
+                  ))}
               </>
             )}
           </Show>
-
-          <SectionLabel>Legal</SectionLabel>
-          {legalLinks.map((link) => (
-            <DrawerLink
-              key={link.href}
-              href={link.href}
-              label={link.label}
-              icon={link.icon}
-              active={pathname === link.href}
-              onNavigate={onClose}
-            />
-          ))}
         </nav>
 
         <div className="border-t border-border p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">

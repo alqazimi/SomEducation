@@ -6,6 +6,11 @@ import {
 import { PLATFORM_NAME } from "@/lib/brand";
 import { type } from "@/lib/typography";
 
+const legalLinks = [
+  { href: "/privacy", label: "Privacy Policy" },
+  { href: "/terms", label: "Terms of Service" },
+] as const;
+
 export function Footer() {
   return (
     <footer className="mt-auto border-t border-border bg-muted">
@@ -42,23 +47,51 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className={type.cardTitle}>Legal</h4>
+            <h4 className={type.cardTitle}>Learn</h4>
             <ul className={`mt-3 space-y-2 ${type.bodySm}`}>
               <li>
-                <Link href="/privacy" className="hover:text-stone-900">
-                  Privacy policy
+                <Link href="/courses" className="hover:text-stone-900">
+                  E-Learning courses
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="hover:text-stone-900">
-                  Terms of service
+                <Link href="/sign-in" className="hover:text-stone-900">
+                  Sign in
                 </Link>
               </li>
             </ul>
           </div>
         </div>
-        <div className={`mt-8 border-t border-border pt-6 text-center ${type.caption}`}>
-          © {new Date().getFullYear()} {PLATFORM_NAME}. All rights reserved.
+
+        <div
+          className={`mt-8 flex flex-col items-center gap-3 border-t border-border pt-6 text-center ${type.caption}`}
+        >
+          <p>
+            © {new Date().getFullYear()} {PLATFORM_NAME}. All rights reserved.
+          </p>
+          <nav
+            aria-label="Legal"
+            className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 text-stone-600"
+          >
+            {legalLinks.map((link, index) => (
+              <span key={link.href} className="inline-flex items-center">
+                {index > 0 && (
+                  <span aria-hidden className="mx-2 text-stone-300">
+                    ·
+                  </span>
+                )}
+                <Link href={link.href} className="hover:text-stone-900">
+                  {link.label}
+                </Link>
+              </span>
+            ))}
+            <span aria-hidden className="mx-2 text-stone-300">
+              ·
+            </span>
+            <Link href="/support" className="hover:text-stone-900">
+              Support
+            </Link>
+          </nav>
         </div>
       </div>
     </footer>

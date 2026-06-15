@@ -18,10 +18,5 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPolicyPage() {
-  return (
-    <LegalDocumentPage
-      document={privacyPolicy}
-      relatedDocument={{ href: "/terms", label: "Terms of service" }}
-    />
-  );
+  return <LegalDocumentPage document={privacyPolicy} />;
 }

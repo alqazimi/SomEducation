@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { Bell, CheckCheck } from "lucide-react";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
@@ -21,7 +21,11 @@ const typeLabels: Record<string, string> = {
 };
 
 export function NotificationBell() {
-  const unreadCount = useQuery(api.notifications.unreadCount);
+  const { isAuthenticated } = useConvexAuth();
+  const unreadCount = useQuery(
+    api.notifications.unreadCount,
+    isAuthenticated ? {} : "skip"
+  );
   const count = unreadCount ?? 0;
 
   return (

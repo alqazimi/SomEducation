@@ -102,8 +102,26 @@ export function useEnsureConvexUser() {
     setSyncError(null);
     setAuthTimedOut(false);
     diagnosedRef.current = false;
+
+    try {
+      const token = await getToken({ template: "convex" });
+      if (!token) {
+        setAuthError(
+          "Could not get a Convex token from Clerk. Add a JWT template named \"convex\" in Clerk Production."
+        );
+        return;
+      }
+    } catch (error: unknown) {
+      setAuthError(
+        error instanceof Error
+          ? error.message
+          : "Clerk could not issue a Convex JWT."
+      );
+      return;
+    }
+
     await runSync();
-  }, [runSync]);
+  }, [getToken, runSync]);
 
   return {
     user: convexUser ?? null,
