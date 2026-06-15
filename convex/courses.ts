@@ -127,6 +127,23 @@ export const listPublished = query({
   },
 });
 
+/** Public slug list for SEO sitemap generation (no auth, minimal payload). */
+export const listPublishedForSitemap = query({
+  args: {},
+  handler: async (ctx) => {
+    const courses = await ctx.db
+      .query("courses")
+      .withIndex("by_status", (q) => q.eq("status", "published"))
+      .collect();
+
+    return courses.map((course) => ({
+      slug: course.slug,
+      updatedAt: course.updatedAt,
+      publishedAt: course.publishedAt,
+    }));
+  },
+});
+
 export const getBySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {

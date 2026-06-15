@@ -69,7 +69,7 @@ In **Vercel → Project → Settings → Environment Variables**, add these for 
 | Variable | Value |
 |----------|--------|
 | `NEXT_PUBLIC_CONVEX_URL` | `https://precious-duck-100.eu-west-1.convex.cloud` (no trailing slash) |
-| `NEXT_PUBLIC_APP_URL` | Your Vercel URL (e.g. `https://som-education.vercel.app`) |
+| `NEXT_PUBLIC_APP_URL` | `https://www.someducation.com` (your live domain, no trailing slash) |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | From Clerk Dashboard |
 | `CLERK_SECRET_KEY` | From Clerk Dashboard |
 | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | `/sign-in` |

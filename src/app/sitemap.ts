@@ -3,13 +3,15 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../convex/_generated/api";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
 
+/** Regenerate sitemap on each request so course URLs stay current on Vercel. */
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = getSiteUrl();
   const now = new Date();
 
   const staticPages: MetadataRoute.Sitemap = [
     {
-      url: baseUrl,
+      url: getSiteUrl(),
       lastModified: now,
       changeFrequency: "weekly",
       priority: 1,
@@ -27,6 +29,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
+      url: absoluteUrl("/sign-in"),
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
       url: absoluteUrl("/sign-up"),
       lastModified: now,
       changeFrequency: "monthly",
@@ -41,11 +49,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const client = new ConvexHttpClient(convexUrl);
-    const courses = await client.query(api.courses.listPublished, { limit: 50 });
+    const courses = await client.query(api.courses.listPublishedForSitemap, {});
 
     const coursePages: MetadataRoute.Sitemap = courses.map((course) => ({
       url: absoluteUrl(`/courses/${course.slug}`),
-      lastModified: new Date(course.updatedAt ?? course.createdAt ?? now),
+      lastModified: new Date(
+        course.updatedAt ?? course.publishedAt ?? now.getTime()
+      ),
       changeFrequency: "weekly" as const,
       priority: 0.8,
     }));
