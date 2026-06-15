@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireAdmin, slugify } from "./lib/auth";
+import { getCurrentUser, requireAdmin, slugify } from "./lib/auth";
+import { isAdminOrOwner } from "./lib/roles";
 import { sanitizeText } from "./lib/validation";
 import { paymentProviderType } from "./schema";
 
@@ -46,22 +47,28 @@ export const list = query({
 export const listForAdmin = query({
   args: {},
   handler: async (ctx) => {
-    await requireAdmin(ctx);
-    const providers = await ctx.db.query("paymentProviders").collect();
+    const user = await getCurrentUser(ctx);
+    if (!user || !isAdminOrOwner(user.role)) return null;
 
-    const withStats = await Promise.all(
-      providers.map(async (provider) => {
-        const payments = await ctx.db
-          .query("payments")
-          .filter((q) => q.eq(q.field("paymentProviderId"), provider._id))
-          .collect();
+    const [providers, payments] = await Promise.all([
+      ctx.db.query("paymentProviders").collect(),
+      ctx.db.query("payments").collect(),
+    ]);
 
-        return {
-          ...provider,
-          paymentCount: payments.length,
-        };
-      })
-    );
+    const paymentCountByProvider = new Map<string, number>();
+    for (const payment of payments) {
+      if (!payment.paymentProviderId) continue;
+      const key = payment.paymentProviderId;
+      paymentCountByProvider.set(
+        key,
+        (paymentCountByProvider.get(key) ?? 0) + 1
+      );
+    }
+
+    const withStats = providers.map((provider) => ({
+      ...provider,
+      paymentCount: paymentCountByProvider.get(provider._id) ?? 0,
+    }));
 
     return withStats.sort(
       (a, b) => a.order - b.order || a.name.localeCompare(b.name)
@@ -184,7 +191,9 @@ export const remove = mutation({
 
     const used = await ctx.db
       .query("payments")
-      .filter((q) => q.eq(q.field("paymentProviderId"), args.providerId))
+      .withIndex("by_paymentProviderId", (q) =>
+        q.eq("paymentProviderId", args.providerId)
+      )
       .first();
 
     if (used) {

@@ -1,6 +1,5 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
-import { insertDefaultCategories } from "./lib/defaultCategories";
 import { getOwnerEmails } from "./lib/roles";
 
 export const setupPlatform = mutation({
@@ -8,7 +7,6 @@ export const setupPlatform = mutation({
     adminEmail: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const categoriesCreated = await insertDefaultCategories(ctx);
     const categoryCount = (await ctx.db.query("categories").collect()).length;
 
     const owners = (await ctx.db.query("users").collect()).filter(
@@ -54,14 +52,13 @@ export const setupPlatform = mutation({
     ).length;
 
     return {
-      categoriesCreated,
       categoryCount,
       promotedUser,
       adminCount,
       message: promotedUser
         ? `Setup complete. Sign in as ${promotedUser.email} (${promotedUser.role}) and open /dashboard/admin.`
         : categoryCount > 0
-          ? "Categories ready. Sign in as owner/admin and open /dashboard/admin."
+          ? "Platform ready. Sign in as owner/admin and open /dashboard/admin."
           : "No users found. Sign up in the app first, then run setup again.",
     };
   },

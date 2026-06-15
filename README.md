@@ -130,8 +130,8 @@ The site already includes:
 ## Admin Setup
 
 1. Sign up with an email in `ADMIN_EMAILS`
-2. Open **Dashboard → Admin → Settings** — set payment phone and instructions
-3. Run `seed:seedCategories` in Convex dashboard to create default categories
+2. Open **Dashboard → Admin → Categories** — add your own course categories
+3. Open **Dashboard → Admin → Payment Methods** — add mobile money and bank numbers
 4. Approve teacher requests and course submissions from the admin dashboard
 
 ## Project Structure

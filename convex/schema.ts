@@ -204,7 +204,8 @@ export default defineSchema({
     .index("by_studentId", ["studentId", "createdAt"])
     .index("by_courseId", ["courseId", "status"])
     .index("by_status", ["status", "createdAt"])
-    .index("by_student_course", ["studentId", "courseId"]),
+    .index("by_student_course", ["studentId", "courseId"])
+    .index("by_paymentProviderId", ["paymentProviderId"]),
 
   enrollments: defineTable({
     studentId: v.id("users"),

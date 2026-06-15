@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "convex/react";
-import { Pencil, Plus, Sparkles } from "lucide-react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -45,7 +45,7 @@ function CategoryForm({
           id="category-name"
           {...form.register("name")}
           className="mt-1"
-          placeholder="e.g. Web Development"
+          placeholder="e.g. Programming, Business, Design"
         />
         {form.formState.errors.name && (
           <p className="mt-1 text-sm text-red-600">
@@ -78,13 +78,19 @@ function CategoryForm({
 }
 
 export function AdminCategories() {
-  const categories = useQuery(api.categories.listForAdmin);
+  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const categories = useQuery(
+    api.categories.listForAdmin,
+    isAuthenticated ? {} : "skip"
+  );
   const createCategory = useMutation(api.categories.create);
   const updateCategory = useMutation(api.categories.update);
-  const seedCategories = useMutation(api.seed.seedCategories);
+  const removeCategory = useMutation(api.categories.remove);
 
   const [editingId, setEditingId] = useState<Id<"categories"> | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+
+  const isLoading = authLoading || (isAuthenticated && categories === undefined);
 
   async function handleCreate(values: CategoryFormValues) {
     try {
@@ -128,12 +134,12 @@ export function AdminCategories() {
     }
   }
 
-  async function handleSeedDefaults() {
+  async function handleDelete(categoryId: Id<"categories">) {
     try {
-      await seedCategories({});
-      toast.success("Starter categories added");
+      await removeCategory({ categoryId });
+      toast.success("Category deleted");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to seed");
+      toast.error(error instanceof Error ? error.message : "Failed to delete");
     }
   }
 
@@ -144,17 +150,13 @@ export function AdminCategories() {
       <DashboardPageHeader
         eyebrow="Administration"
         title="Course categories"
-        description="Create and manage categories teachers pick when publishing courses."
+        description="Create and manage your own categories. Nothing is hardcoded."
       />
 
-      <div className="mt-8 flex flex-wrap gap-3">
+      <div className="mt-8">
         <Button onClick={() => setShowCreateForm((open) => !open)}>
           <Plus className="mr-2 h-4 w-4" />
           {showCreateForm ? "Close form" : "Add category"}
-        </Button>
-        <Button variant="outline" onClick={() => void handleSeedDefaults()}>
-          <Sparkles className="mr-2 h-4 w-4" />
-          Add starter categories
         </Button>
       </div>
 
@@ -177,20 +179,25 @@ export function AdminCategories() {
       <Card className="mt-8">
         <CardHeader>
           <CardTitle>
-            All categories ({categories?.length ?? "…"})
+            All categories ({categories?.length ?? (isLoading ? "…" : 0)})
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!categories ? (
+          {isLoading ? (
             <div className="space-y-3">
               <Skeleton className="h-16 w-full" />
               <Skeleton className="h-16 w-full" />
             </div>
-          ) : categories.length === 0 ? (
+          ) : categories === null ? (
+            <p className="text-sm text-slate-500">
+              Could not load categories. Check your admin access and Convex
+              connection.
+            </p>
+          ) : !categories || categories.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border py-12 text-center">
               <p className="text-sm text-slate-600">No categories yet.</p>
               <p className="mt-1 text-sm text-slate-500">
-                Add your first category or load the starter list above.
+                Click Add category above to create your first one.
               </p>
             </div>
           ) : (
@@ -256,6 +263,16 @@ export function AdminCategories() {
                       >
                         {category.isActive ? "Hide" : "Activate"}
                       </Button>
+                      {category.courseCount === 0 && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => void handleDelete(category._id)}
+                        >
+                          <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                          Delete
+                        </Button>
+                      )}
                     </div>
                   </div>
                 )}

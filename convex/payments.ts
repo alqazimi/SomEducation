@@ -157,7 +157,8 @@ export const listForAdmin = query({
     ),
   },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const user = await getCurrentUser(ctx);
+    if (!user || !isAdminOrOwner(user.role)) return null;
 
     const payments = args.status
       ? await ctx.db

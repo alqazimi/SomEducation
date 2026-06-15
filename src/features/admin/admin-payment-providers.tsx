@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { Building2, Pencil, Plus, Smartphone, Sparkles, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -140,7 +140,11 @@ function ProviderForm({
 }
 
 export function AdminPaymentProviders() {
-  const providers = useQuery(api.paymentProviders.listForAdmin);
+  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const providers = useQuery(
+    api.paymentProviders.listForAdmin,
+    isAuthenticated ? {} : "skip"
+  );
   const createProvider = useMutation(api.paymentProviders.create);
   const updateProvider = useMutation(api.paymentProviders.update);
   const removeProvider = useMutation(api.paymentProviders.remove);
@@ -220,6 +224,7 @@ export function AdminPaymentProviders() {
   }
 
   const editingProvider = providers?.find((provider) => provider._id === editingId);
+  const isLoading = authLoading || (isAuthenticated && providers === undefined);
 
   return (
     <div>
@@ -258,15 +263,22 @@ export function AdminPaymentProviders() {
 
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>All providers ({providers?.length ?? "…"})</CardTitle>
+          <CardTitle>
+            All providers ({providers?.length ?? (isLoading ? "…" : 0)})
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!providers ? (
+          {isLoading ? (
             <div className="space-y-3">
               <Skeleton className="h-16 w-full" />
               <Skeleton className="h-16 w-full" />
             </div>
-          ) : providers.length === 0 ? (
+          ) : providers === null ? (
+            <p className="text-sm text-slate-500">
+              Could not load payment providers. Check your admin access and
+              Convex connection.
+            </p>
+          ) : !providers || providers.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border py-12 text-center">
               <p className="text-sm text-slate-600">No payment providers yet.</p>
               <p className="mt-1 text-sm text-slate-500">

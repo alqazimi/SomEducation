@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -15,9 +15,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { settingsFormSchema, type SettingsFormValues } from "@/schemas";
 
 export function AdminSettings() {
+  const { isAuthenticated } = useConvexAuth();
   const settings = useQuery(api.settings.get);
   const categories = useQuery(api.categories.list, {});
-  const paymentProviders = useQuery(api.paymentProviders.listForAdmin);
+  const paymentProviders = useQuery(
+    api.paymentProviders.list,
+    isAuthenticated ? {} : "skip"
+  );
   const updateSettings = useMutation(api.settings.update);
 
   const form = useForm<SettingsFormValues>({

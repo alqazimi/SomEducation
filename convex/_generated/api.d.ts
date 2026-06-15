@@ -18,7 +18,6 @@ import type * as lessons from "../lessons.js";
 import type * as lib_audit from "../lib/audit.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_courseAccess from "../lib/courseAccess.js";
-import type * as lib_defaultCategories from "../lib/defaultCategories.js";
 import type * as lib_defaultPaymentProviders from "../lib/defaultPaymentProviders.js";
 import type * as lib_enrollmentStats from "../lib/enrollmentStats.js";
 import type * as lib_errors from "../lib/errors.js";
@@ -56,7 +55,6 @@ declare const fullApi: ApiFromModules<{
   "lib/audit": typeof lib_audit;
   "lib/auth": typeof lib_auth;
   "lib/courseAccess": typeof lib_courseAccess;
-  "lib/defaultCategories": typeof lib_defaultCategories;
   "lib/defaultPaymentProviders": typeof lib_defaultPaymentProviders;
   "lib/enrollmentStats": typeof lib_enrollmentStats;
   "lib/errors": typeof lib_errors;

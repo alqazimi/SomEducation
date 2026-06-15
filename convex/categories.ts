@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireAdmin, slugify } from "./lib/auth";
+import { getCurrentUser, requireAdmin, slugify } from "./lib/auth";
+import { isAdminOrOwner } from "./lib/roles";
 import { sanitizeText } from "./lib/validation";
 
 export const list = query({
@@ -20,7 +21,9 @@ export const list = query({
 export const listForAdmin = query({
   args: {},
   handler: async (ctx) => {
-    await requireAdmin(ctx);
+    const user = await getCurrentUser(ctx);
+    if (!user || !isAdminOrOwner(user.role)) return null;
+
     const categories = await ctx.db.query("categories").collect();
 
     const withStats = await Promise.all(
@@ -121,5 +124,27 @@ export const update = mutation({
 
     await ctx.db.patch(args.categoryId, updates);
     return args.categoryId;
+  },
+});
+
+export const remove = mutation({
+  args: { categoryId: v.id("categories") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const category = await ctx.db.get(args.categoryId);
+    if (!category) throw new Error("Category not found");
+
+    const used = await ctx.db
+      .query("courses")
+      .withIndex("by_category", (q) => q.eq("categoryId", args.categoryId))
+      .first();
+
+    if (used) {
+      throw new Error(
+        "This category is used by courses. Hide it instead of deleting."
+      );
+    }
+
+    await ctx.db.delete(args.categoryId);
   },
 });

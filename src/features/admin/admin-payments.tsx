@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
@@ -11,7 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate, formatPrice } from "@/lib/utils";
 
 export function AdminPayments() {
-  const payments = useQuery(api.payments.listForAdmin, { status: "pending" });
+  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const payments = useQuery(
+    api.payments.listForAdmin,
+    isAuthenticated ? { status: "pending" } : "skip"
+  );
   const approve = useMutation(api.payments.approve);
   const reject = useMutation(api.payments.reject);
   const requestResubmit = useMutation(api.payments.requestResubmit);
@@ -34,9 +38,14 @@ export function AdminPayments() {
       />
 
       <div className="mt-8 space-y-6">
-        {!payments ? (
+        {authLoading || (isAuthenticated && payments === undefined) ? (
           <p>Loading...</p>
-        ) : payments.length === 0 ? (
+        ) : payments === null ? (
+          <p className="text-sm text-slate-500">
+            Could not load payments. Check your admin access and Convex
+            connection.
+          </p>
+        ) : !payments || payments.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center text-slate-500">
               No pending payments
