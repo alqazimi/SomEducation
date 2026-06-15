@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CourseProgressBar } from "@/components/ui/course-progress-bar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ConvexQueryGate } from "@/components/convex/convex-query-gate";
 
 export default function LearnPage() {
   const params = useParams<{ slug: string }>();
@@ -26,8 +27,18 @@ export default function LearnPage() {
       <>
         <Header />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <Skeleton className="h-10 w-72" />
-          <Skeleton className="mt-8 h-64 w-full rounded-2xl" />
+          <ConvexQueryGate
+            isLoading
+            errorTitle="Could not load course"
+            fallback={
+              <>
+                <Skeleton className="h-10 w-72" />
+                <Skeleton className="mt-8 h-64 w-full rounded-2xl" />
+              </>
+            }
+          >
+            <></>
+          </ConvexQueryGate>
         </main>
       </>
     );

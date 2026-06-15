@@ -5,6 +5,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
+export const dynamic = "force-dynamic";
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -46,7 +48,9 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={`${inter.variable} h-full`} data-scroll-behavior="smooth">
         <body className="min-h-full flex flex-col antialiased">
-          <Providers>{children}</Providers>
+          <Providers convexUrl={process.env.NEXT_PUBLIC_CONVEX_URL ?? ""}>
+            {children}
+          </Providers>
         </body>
       </html>
     </ClerkProvider>

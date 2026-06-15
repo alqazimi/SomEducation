@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ConvexQueryGate } from "@/components/convex/convex-query-gate";
 import { formatPrice } from "@/lib/utils";
 
 export function CourseDetailClient({ slug }: { slug: string }) {
@@ -22,7 +23,13 @@ export function CourseDetailClient({ slug }: { slug: string }) {
       <>
         <Header />
         <main className="mx-auto max-w-7xl px-4 py-12">
-          <Skeleton className="h-96 w-full rounded-xl" />
+          <ConvexQueryGate
+            isLoading
+            errorTitle="Could not load course"
+            fallback={<Skeleton className="h-96 w-full rounded-xl" />}
+          >
+            <></>
+          </ConvexQueryGate>
         </main>
       </>
     );

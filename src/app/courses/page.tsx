@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ConvexQueryGate } from "@/components/convex/convex-query-gate";
 
 const difficulties = [
   { value: "all", label: "All levels" },
@@ -115,13 +116,18 @@ export default function CoursesPage() {
         </div>
 
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-          {courses === undefined ? (
-            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-80 rounded-xl" />
-              ))}
-            </div>
-          ) : courses.length === 0 ? (
+          <ConvexQueryGate
+            isLoading={courses === undefined}
+            errorTitle="Could not load courses"
+            fallback={
+              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-80 rounded-xl" />
+                ))}
+              </div>
+            }
+          >
+            {courses !== undefined && courses.length === 0 ? (
             <div className="rounded-2xl border border-border bg-white p-12 text-center shadow-sm">
               <p className="text-lg font-medium text-slate-700">No courses found</p>
               <p className="mt-2 text-sm text-slate-500">
@@ -133,7 +139,7 @@ export default function CoursesPage() {
                 </Button>
               )}
             </div>
-          ) : (
+          ) : courses !== undefined ? (
             <>
               <p className="mb-6 text-sm text-slate-500">
                 {courses.length} course{courses.length === 1 ? "" : "s"} found
@@ -159,7 +165,8 @@ export default function CoursesPage() {
                 ))}
               </div>
             </>
-          )}
+          ) : null}
+          </ConvexQueryGate>
         </div>
       </main>
       <Footer />

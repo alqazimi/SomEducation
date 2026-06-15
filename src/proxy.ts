@@ -9,6 +9,7 @@ const isPublicRoute = createRouteMatcher([
   "/sitemap.xml",
   "/courses",
   "/courses/:slug",
+  "/courses/:slug/purchase",
   "/support",
   "/learn/:slug",
   "/learn/:slug/lessons/:lessonId",

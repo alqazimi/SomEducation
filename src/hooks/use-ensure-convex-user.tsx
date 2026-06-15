@@ -14,6 +14,7 @@ export function useEnsureConvexUser() {
   const syncUser = useMutation(api.users.syncUser);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [authTimedOut, setAuthTimedOut] = useState(false);
   const syncingRef = useRef(false);
   const diagnosedRef = useRef(false);
 
@@ -79,16 +80,27 @@ export function useEnsureConvexUser() {
   const waitingForConvexAuth =
     clerkSignedIn && !authLoading && !isAuthenticated && !authError;
 
+  useEffect(() => {
+    if (!waitingForConvexAuth) {
+      setAuthTimedOut(false);
+      return;
+    }
+
+    const id = window.setTimeout(() => setAuthTimedOut(true), 12_000);
+    return () => window.clearTimeout(id);
+  }, [waitingForConvexAuth]);
+
   const isLoading =
     authLoading ||
     !clerkLoaded ||
-    convexUser === undefined ||
-    waitingForConvexAuth ||
-    (needsSync && !syncError && !authError);
+    (convexUser === undefined && !authTimedOut && !authError) ||
+    (waitingForConvexAuth && !authError && !authTimedOut) ||
+    (needsSync && !syncError && !authError && !authTimedOut);
 
   const retrySync = useCallback(async () => {
     setAuthError(null);
     setSyncError(null);
+    setAuthTimedOut(false);
     diagnosedRef.current = false;
     await runSync();
   }, [runSync]);
@@ -96,7 +108,12 @@ export function useEnsureConvexUser() {
   return {
     user: convexUser ?? null,
     isLoading,
-    syncError: authError ?? syncError,
+    syncError:
+      authError ??
+      syncError ??
+      (authTimedOut
+        ? "Timed out connecting Clerk to Convex. Check the JWT template named \"convex\" and your Convex production deployment."
+        : null),
     retrySync,
     isAuthenticated,
     clerkSignedIn,
