@@ -45,7 +45,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      signInFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
+    >
       <html lang="en" className={`${inter.variable} h-full`} data-scroll-behavior="smooth">
         <body className="min-h-full flex flex-col antialiased">
           <Providers convexUrl={process.env.NEXT_PUBLIC_CONVEX_URL ?? ""}>

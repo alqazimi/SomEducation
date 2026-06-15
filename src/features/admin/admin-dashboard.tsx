@@ -1,17 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { CheckCircle2, Circle, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice } from "@/lib/utils";
 
 export function AdminDashboard() {
+  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
   const analytics = useQuery(api.users.getAnalytics);
-  const setup = useQuery(api.settings.getSetupStatus);
+  const setup = useQuery(
+    api.settings.getSetupStatus,
+    isAuthenticated ? {} : "skip"
+  );
   const seedCategories = useMutation(api.seed.seedCategories);
   const dismissChecklist = useMutation(api.settings.dismissSetupChecklist);
 
@@ -20,12 +25,13 @@ export function AdminDashboard() {
       done: setup?.hasCategories ?? false,
       label: "Seed course categories",
       href: "/dashboard/admin/settings",
-      action: "Seed categories",
+      action: "Seed now",
     },
     {
       done: setup?.hasPaymentSettings ?? false,
-      label: "Configure payment phone & instructions",
+      label: "Configure payment phone and instructions",
       href: "/dashboard/admin/settings",
+      action: "Open settings",
     },
     {
       done: setup?.hasPublishedCourse ?? false,
@@ -40,10 +46,9 @@ export function AdminDashboard() {
   ];
 
   const completedCount = setupSteps.filter((step) => step.done).length;
+  const checklistLoading = isAuthenticated && setup === undefined;
   const showChecklist =
-    setup &&
-    !setup.dismissed &&
-    !setup.allComplete;
+    setup && !setup.dismissed && !setup.allComplete;
 
   async function handleSeedCategories() {
     try {
@@ -94,62 +99,81 @@ export function AdminDashboard() {
         </Card>
       )}
 
-      {showChecklist && (
+      {(checklistLoading || showChecklist) && (
         <Card className="mt-8 border-brand-100 bg-brand-50/50">
           <CardHeader className="flex flex-row items-center justify-between gap-4">
             <CardTitle>Setup Checklist</CardTitle>
-            <span className="text-sm text-slate-500">
-              {completedCount}/{setupSteps.length} complete
-            </span>
+            {!checklistLoading && setup && (
+              <span className="text-sm text-slate-500">
+                {completedCount}/{setupSteps.length} complete
+              </span>
+            )}
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-slate-600">
-              Complete these steps to launch your learning platform.
-            </p>
-            <ul className="space-y-3">
-              {setupSteps.map((step) => (
-                <li key={step.label} className="flex items-center gap-3 text-sm">
-                  {step.done ? (
-                    <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
-                  ) : (
-                    <Circle className="h-5 w-5 shrink-0 text-slate-400" />
-                  )}
-                  <span className={step.done ? "text-slate-500 line-through" : ""}>
-                    {step.label}
-                  </span>
-                  {!step.done && step.action && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="ml-auto"
-                      onClick={() => void handleSeedCategories()}
-                    >
-                      {step.action}
-                    </Button>
-                  )}
-                  {!step.done && !step.action && (
-                    <Link href={step.href} className="ml-auto">
-                      <Button variant="outline" size="sm">
-                        Open
-                      </Button>
-                    </Link>
-                  )}
-                </li>
-              ))}
-            </ul>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-              <p className="text-xs text-slate-500">
-                Save payment settings in Admin → Settings (not just the default
-                placeholder phone).
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => void handleDismissChecklist()}
-              >
-                Hide checklist
-              </Button>
-            </div>
+            {checklistLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-4/6" />
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-slate-600">
+                  Complete these steps to launch your learning platform.
+                </p>
+                <ul className="space-y-3">
+                  {setupSteps.map((step) => (
+                    <li key={step.label} className="flex items-center gap-3 text-sm">
+                      {step.done ? (
+                        <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
+                      ) : (
+                        <Circle className="h-5 w-5 shrink-0 text-slate-400" />
+                      )}
+                      <span className={step.done ? "text-slate-500 line-through" : ""}>
+                        {step.label}
+                      </span>
+                      {!step.done && step.action === "Seed now" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="ml-auto"
+                          onClick={() => void handleSeedCategories()}
+                        >
+                          {step.action}
+                        </Button>
+                      )}
+                      {!step.done && step.action === "Open settings" && (
+                        <Link href={step.href} className="ml-auto">
+                          <Button variant="outline" size="sm">
+                            {step.action}
+                          </Button>
+                        </Link>
+                      )}
+                      {!step.done && !step.action && (
+                        <Link href={step.href} className="ml-auto">
+                          <Button variant="outline" size="sm">
+                            Open
+                          </Button>
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+                  <p className="text-xs text-slate-500">
+                    Use a real payment number (not the placeholder) and save
+                    instructions in Admin → Settings.
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => void handleDismissChecklist()}
+                  >
+                    Hide checklist
+                  </Button>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       )}
@@ -163,7 +187,9 @@ export function AdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
+              <div className="text-2xl font-bold">
+                {authLoading || analytics === undefined ? "…" : stat.value}
+              </div>
             </CardContent>
           </Card>
         ))}

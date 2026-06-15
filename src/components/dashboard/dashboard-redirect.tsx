@@ -1,39 +1,57 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useAuth } from "@clerk/nextjs";
 import { useEffect } from "react";
-import { api } from "convex/_generated/api";
+import {
+  AccountSetupState,
+  useEnsureConvexUser,
+} from "@/hooks/use-ensure-convex-user";
+import { getDashboardHref } from "@/lib/dashboard-nav";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function DashboardRedirect() {
-  const router = useRouter();
-  const user = useQuery(api.users.getMe);
+  const { isLoaded: clerkLoaded } = useAuth();
+  const { user, isLoading, syncError, retrySync, clerkSignedIn } =
+    useEnsureConvexUser();
 
   useEffect(() => {
-    if (user === undefined) return;
-    if (!user) {
-      router.replace("/sign-in");
+    if (!clerkLoaded || isLoading) return;
+
+    if (!clerkSignedIn) {
+      window.location.replace("/sign-in");
       return;
     }
 
-    switch (user.role) {
-      case "owner":
-      case "admin":
-        router.replace("/dashboard/admin");
-        break;
-      case "teacher":
-        router.replace("/dashboard/teacher");
-        break;
-      default:
-        router.replace("/dashboard/student");
-    }
-  }, [user, router]);
+    if (!user) return;
 
+    const target = getDashboardHref(user.role);
+    if (window.location.pathname !== target) {
+      window.location.replace(target);
+    }
+  }, [clerkLoaded, isLoading, clerkSignedIn, user]);
+
+  if (!clerkLoaded || isLoading) {
+    return <DashboardRedirectSkeleton />;
+  }
+
+  if (clerkSignedIn && !user) {
+    return (
+      <AccountSetupState
+        syncError={syncError}
+        onRetry={() => void retrySync()}
+      />
+    );
+  }
+
+  return <DashboardRedirectSkeleton />;
+}
+
+function DashboardRedirectSkeleton() {
   return (
     <div className="min-h-screen bg-muted p-8">
       <Skeleton className="h-8 w-48" />
       <Skeleton className="mt-4 h-64 w-full" />
+      <p className="mt-4 text-sm text-slate-500">Preparing your dashboard...</p>
     </div>
   );
 }

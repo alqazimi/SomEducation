@@ -1,12 +1,21 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireAdmin } from "./lib/auth";
+import { getCurrentUser, requireAdmin } from "./lib/auth";
+import { isAdminOrOwner } from "./lib/roles";
 import { logAudit } from "./lib/audit";
 import { sanitizeText } from "./lib/validation";
 
 const SETTINGS_KEY = "platform";
 const DEFAULT_PLATFORM_NAME = "SomEducation";
 const DEFAULT_PAYMENT_PHONE = "+44XXXXXXXXXX";
+
+function isPlaceholderPhone(phone: string) {
+  return (
+    phone === DEFAULT_PAYMENT_PHONE ||
+    /X{4,}/i.test(phone) ||
+    phone.replace(/\D/g, "").length < 8
+  );
+}
 
 function isPaymentConfigured(
   settings: {
@@ -17,18 +26,20 @@ function isPaymentConfigured(
   if (!settings) return false;
   const phone = settings.paymentPhone?.trim();
   const instructions = settings.paymentInstructions?.trim();
+  if (!phone || !instructions) return false;
   return (
-    Boolean(phone) &&
-    phone !== DEFAULT_PAYMENT_PHONE &&
-    Boolean(instructions) &&
-    (instructions?.length ?? 0) >= 10
+    !isPlaceholderPhone(phone) &&
+    instructions.length >= 10
   );
 }
 
 export const getSetupStatus = query({
   args: {},
   handler: async (ctx) => {
-    await requireAdmin(ctx);
+    const user = await getCurrentUser(ctx);
+    if (!user || !isAdminOrOwner(user.role)) {
+      return null;
+    }
 
     const [categories, platformSettings, courses, payments] = await Promise.all([
       ctx.db.query("categories").collect(),
