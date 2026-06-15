@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { PLATFORM_NAME } from "@/lib/brand";
+import { absoluteUrl, buildPageTitle, siteSeo } from "@/lib/seo";
 import {
   ArrowRight,
   Award,
@@ -12,6 +14,20 @@ import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: buildPageTitle(),
+  description: siteSeo.description,
+  alternates: {
+    canonical: absoluteUrl("/"),
+  },
+  openGraph: {
+    title: buildPageTitle(),
+    description: siteSeo.description,
+    url: absoluteUrl("/"),
+    type: "website",
+  },
+};
 
 const features = [
   {
@@ -63,9 +79,9 @@ export default function HomePage() {
                 <span className="text-brand-600">{PLATFORM_NAME}</span>
               </h1>
               <p className="mt-6 text-lg leading-8 text-slate-600">
-                A modern learning platform built for students, teachers, and
-                administrators. Browse courses, verify payments manually, and
-                access premium content securely.
+                {PLATFORM_NAME} is a modern learning platform built for students,
+                teachers, and administrators. Browse courses, verify payments
+                manually, and access premium content securely.
               </p>
               <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Link href="/courses">

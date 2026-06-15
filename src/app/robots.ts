@@ -1,13 +1,14 @@
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
+import { absoluteUrl } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   return {
     rules: {
       userAgent: "*",
-      allow: "/",
-      disallow: ["/dashboard/", "/api/"],
+      allow: ["/", "/courses", "/courses/", "/support", "/sign-in", "/sign-up"],
+      disallow: ["/dashboard/", "/learn/", "/api/"],
     },
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: absoluteUrl("/sitemap.xml"),
+    host: absoluteUrl(),
   };
 }

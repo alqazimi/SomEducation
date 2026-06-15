@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
-import { PLATFORM_NAME, PLATFORM_TAGLINE } from "@/lib/brand";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/components/providers";
+import { SiteJsonLd } from "@/components/seo/site-json-ld";
+import {
+  absoluteUrl,
+  buildPageTitle,
+  SITE_KEYWORDS,
+  siteSeo,
+} from "@/lib/seo";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -12,30 +18,62 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const googleVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(absoluteUrl()),
   title: {
-    default: `${PLATFORM_NAME} — ${PLATFORM_TAGLINE}`,
-    template: `%s | ${PLATFORM_NAME}`,
+    default: buildPageTitle(),
+    template: `%s | ${siteSeo.name}`,
   },
-  description:
-    `Learn from expert teachers with ${PLATFORM_NAME}. Browse courses, submit manual payments, and start learning today.`,
+  description: siteSeo.description,
+  applicationName: siteSeo.name,
+  keywords: [...SITE_KEYWORDS],
+  authors: [{ name: siteSeo.name, url: absoluteUrl() }],
+  creator: siteSeo.name,
+  publisher: siteSeo.name,
+  category: "education",
+  alternates: {
+    canonical: absoluteUrl(),
+  },
   openGraph: {
     type: "website",
-    locale: "en_US",
-    siteName: PLATFORM_NAME,
-    title: `${PLATFORM_NAME} — ${PLATFORM_TAGLINE}`,
-    description:
-      `Learn from expert teachers with ${PLATFORM_NAME}. Browse courses and start your learning journey.`,
+    locale: siteSeo.locale,
+    url: absoluteUrl(),
+    siteName: siteSeo.name,
+    title: buildPageTitle(),
+    description: siteSeo.description,
+    images: [
+      {
+        url: absoluteUrl("/icon.svg"),
+        width: 512,
+        height: 512,
+        alt: `${siteSeo.name} logo`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: PLATFORM_NAME,
-    description: PLATFORM_TAGLINE,
+    title: siteSeo.name,
+    description: siteSeo.tagline,
+    images: [absoluteUrl("/icon.svg")],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  verification: googleVerification
+    ? { google: googleVerification }
+    : undefined,
+  other: {
+    "apple-mobile-web-app-title": siteSeo.name,
   },
 };
 
@@ -51,6 +89,7 @@ export default function RootLayout({
     >
       <html lang="en" className={`${inter.variable} h-full`} data-scroll-behavior="smooth">
         <body className="min-h-full flex flex-col antialiased">
+          <SiteJsonLd />
           <Providers convexUrl={process.env.NEXT_PUBLIC_CONVEX_URL ?? ""}>
             {children}
           </Providers>

@@ -76,8 +76,32 @@ In **Vercel → Project → Settings → Environment Variables**, add these for 
 | `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | `/sign-up` |
 | `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` | `/dashboard` |
 | `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` | `/dashboard` |
+| `GOOGLE_SITE_VERIFICATION` | From Google Search Console (optional, for indexing) |
 
 Redeploy after saving env vars. Use your **production** Convex URL (`precious-duck-100`), not the dev URL (`mild-seahorse-699`).
+
+## Google Search (show SomEducation in search results)
+
+To appear when people search **SomEducation** or **someducation** (without typing `.com`):
+
+1. Set `NEXT_PUBLIC_APP_URL` to your real domain (e.g. `https://som-education.vercel.app` or your custom domain)
+2. Go to [Google Search Console](https://search.google.com/search-console)
+3. Add your site property (use the same URL as `NEXT_PUBLIC_APP_URL`)
+4. Copy the verification code and add to Vercel:
+   ```
+   GOOGLE_SITE_VERIFICATION=your_google_verification_code
+   ```
+5. Redeploy, then click **Verify** in Search Console
+6. Submit your sitemap: `https://your-domain.com/sitemap.xml`
+7. Request indexing for your homepage
+
+The site already includes:
+- Brand-focused page titles (`SomEducation — Premium Online Learning Platform`)
+- JSON-LD structured data (Organization, WebSite, EducationalOrganization)
+- `sitemap.xml` with public pages and published courses
+- `robots.txt` allowing Google on public pages
+
+**Tip:** A custom domain (e.g. `someducation.com`) helps Google show your brand more prominently than a `.vercel.app` URL.
 
 ## Admin Setup
 

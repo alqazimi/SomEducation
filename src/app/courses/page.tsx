@@ -2,7 +2,8 @@
 
 import { useQuery } from "convex/react";
 import { Search, X } from "lucide-react";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
 import { CourseCard } from "@/components/courses/course-card";
@@ -29,9 +30,40 @@ const difficulties = [
 ] as const;
 
 export default function CoursesPage() {
-  const [search, setSearch] = useState("");
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-muted">
+          <Header />
+          <main className="mx-auto max-w-7xl px-4 py-8">
+            <Skeleton className="h-10 w-64" />
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-80 rounded-xl" />
+              ))}
+            </div>
+          </main>
+        </div>
+      }
+    >
+      <CoursesPageContent />
+    </Suspense>
+  );
+}
+
+function CoursesPageContent() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("search") ?? "";
+  const [search, setSearch] = useState(initialSearch);
   const [categoryId, setCategoryId] = useState<string>("all");
   const [difficulty, setDifficulty] = useState<string>("all");
+
+  useEffect(() => {
+    const query = searchParams.get("search");
+    if (query !== null) {
+      setSearch(query);
+    }
+  }, [searchParams]);
 
   const categories = useQuery(api.categories.list, { activeOnly: true });
   const courses = useQuery(api.courses.listPublished, {
