@@ -18,7 +18,8 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const googleVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+const googleVerification =
+  process.env.GOOGLE_SITE_VERIFICATION?.trim() ?? "ca20de5c3c61d824";
 
 export const metadata: Metadata = {
   metadataBase: new URL(absoluteUrl()),
@@ -69,9 +70,9 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
-  verification: googleVerification
-    ? { google: googleVerification }
-    : undefined,
+  verification: {
+    google: googleVerification,
+  },
   other: {
     "apple-mobile-web-app-title": siteSeo.name,
   },

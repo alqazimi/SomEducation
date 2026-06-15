@@ -76,24 +76,29 @@ In **Vercel → Project → Settings → Environment Variables**, add these for 
 | `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | `/sign-up` |
 | `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` | `/dashboard` |
 | `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` | `/dashboard` |
-| `GOOGLE_SITE_VERIFICATION` | From Google Search Console (optional, for indexing) |
+| `GOOGLE_SITE_VERIFICATION` | `ca20de5c3c61d824` (optional — already built into the site) |
 
 Redeploy after saving env vars. Use your **production** Convex URL (`precious-duck-100`), not the dev URL (`mild-seahorse-699`).
 
 ## Google Search (show SomEducation in search results)
 
+Google verification is already included in the repo:
+- HTML file: `/googleca20de5c3c61d824.html`
+- Meta tag: `ca20de5c3c61d824`
+
+**You do not need a Vercel env var** for HTML-file verification. After deploy, open:
+`https://your-domain.com/googleca20de5c3c61d824.html`
+
 To appear when people search **SomEducation** or **someducation** (without typing `.com`):
 
 1. Set `NEXT_PUBLIC_APP_URL` to your real domain (e.g. `https://som-education.vercel.app` or your custom domain)
-2. Go to [Google Search Console](https://search.google.com/search-console)
-3. Add your site property (use the same URL as `NEXT_PUBLIC_APP_URL`)
-4. Copy the verification code and add to Vercel:
-   ```
-   GOOGLE_SITE_VERIFICATION=your_google_verification_code
-   ```
-5. Redeploy, then click **Verify** in Search Console
-6. Submit your sitemap: `https://your-domain.com/sitemap.xml`
-7. Request indexing for your homepage
+2. **Redeploy** on Vercel
+3. Go to [Google Search Console](https://search.google.com/search-console)
+4. Add your site property (use the same URL as `NEXT_PUBLIC_APP_URL`)
+5. Choose **HTML file** verification — file is already on your site
+6. Click **Verify**
+7. Submit your sitemap: `https://your-domain.com/sitemap.xml`
+8. Request indexing for your homepage
 
 The site already includes:
 - Brand-focused page titles (`SomEducation — Premium Online Learning Platform`)
