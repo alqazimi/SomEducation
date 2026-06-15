@@ -293,7 +293,12 @@ export function AdminUsers() {
       </div>
 
       <div className="mt-6 space-y-4 md:hidden">
-        {users?.map((user) => (
+        {users === undefined ? (
+          <p className="text-center text-sm text-slate-500">Loading users...</p>
+        ) : users.length === 0 ? (
+          <p className="text-center text-sm text-slate-500">No users found</p>
+        ) : (
+          users.map((user) => (
           <Card key={user._id}>
             <CardContent className="space-y-4 p-4">
               <div>
@@ -319,7 +324,8 @@ export function AdminUsers() {
               {renderActions(user)}
             </CardContent>
           </Card>
-        ))}
+          ))
+        )}
       </div>
 
       <ConfirmDialog

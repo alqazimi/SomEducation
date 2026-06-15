@@ -16,7 +16,10 @@ import { cn } from "@/lib/utils";
 import { PLATFORM_NAME } from "@/lib/brand";
 import {
   getDashboardHref,
+  getNavForRole,
+  isDashboardNavActive,
   isDashboardOverview,
+  isDashboardPath,
 } from "@/lib/dashboard-nav";
 import { NotificationBell } from "@/features/notifications/notifications-inbox";
 
@@ -52,7 +55,7 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border bg-white shadow-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
@@ -73,7 +76,7 @@ export function Header() {
               aria-label={`${PLATFORM_NAME} home`}
             >
               <SomEducationLogo size={36} />
-              <SomEducationWordmark className="text-lg sm:text-xl" />
+              <SomEducationWordmark className="text-base sm:text-xl" />
             </Link>
 
             <Link
@@ -169,8 +172,8 @@ export function Header() {
             aria-label="Close menu overlay"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="absolute left-0 top-16 w-full max-w-sm border-b border-r border-border bg-white shadow-xl">
-            <nav className="space-y-1 p-4">
+          <div className="absolute left-0 top-16 flex h-[calc(100dvh-4rem)] w-full max-w-sm flex-col border-b border-r border-border bg-white shadow-xl">
+            <nav className="flex-1 space-y-1 overflow-y-auto p-4">
               {publicNavLinks.map((link) => {
                 const isActive =
                   link.href === "/"
@@ -195,17 +198,40 @@ export function Header() {
                 );
               })}
               <Show when="signed-in">
-                <Link
-                  href={dashboardHref}
-                  className={cn(
-                    "block rounded-lg px-4 py-3 text-sm font-medium",
-                    isDashboardOverview(pathname)
-                      ? "bg-brand-50 text-brand-700"
-                      : "text-slate-700 hover:bg-slate-50"
-                  )}
-                >
-                  Dashboard
-                </Link>
+                {!isDashboardPath(pathname) && (
+                  <Link
+                    href={dashboardHref}
+                    className={cn(
+                      "block rounded-lg px-4 py-3 text-sm font-medium",
+                      isDashboardOverview(pathname)
+                        ? "bg-brand-50 text-brand-700"
+                        : "text-slate-700 hover:bg-slate-50"
+                    )}
+                  >
+                    Dashboard
+                  </Link>
+                )}
+                {user?.role && isDashboardPath(pathname) && (
+                  <>
+                    <p className="px-4 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      Dashboard
+                    </p>
+                    {getNavForRole(user.role).map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={cn(
+                          "block rounded-lg px-4 py-3 text-sm font-medium",
+                          isDashboardNavActive(pathname, item.href, user.role)
+                            ? "bg-brand-50 text-brand-700"
+                            : "text-slate-700 hover:bg-slate-50"
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </>
+                )}
                 {signedInNavLinks.map((link) => {
                   const isActive =
                     pathname === link.href ||

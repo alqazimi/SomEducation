@@ -2,75 +2,24 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  BarChart3,
-  Bell,
-  BookOpen,
-  CreditCard,
-  GraduationCap,
-  Home,
-  LayoutDashboard,
-  MessageSquare,
-  PenLine,
-  Settings,
-  Users,
-} from "lucide-react";
+import { Home } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DashboardRole,
+  getNavForRole,
+  isDashboardNavActive,
+} from "@/lib/dashboard-nav";
 import { Header } from "./header";
 import { DashboardMobileNav } from "./dashboard-mobile-nav";
 
-type NavItem = {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-};
-
-const adminNav: NavItem[] = [
-  { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard },
-  { label: "Users", href: "/dashboard/admin/users", icon: Users },
-  { label: "Payments", href: "/dashboard/admin/payments", icon: CreditCard },
-  { label: "Course Review", href: "/dashboard/admin/courses", icon: BookOpen },
-  { label: "My Courses", href: "/dashboard/teacher/courses", icon: PenLine },
-  { label: "Teachers", href: "/dashboard/admin/teachers", icon: GraduationCap },
-  { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
-  { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
-  { label: "Analytics", href: "/dashboard/admin/analytics", icon: BarChart3 },
-  { label: "Settings", href: "/dashboard/admin/settings", icon: Settings },
-];
-
-const teacherNav: NavItem[] = [
-  { label: "Overview", href: "/dashboard/teacher", icon: LayoutDashboard },
-  { label: "My Courses", href: "/dashboard/teacher/courses", icon: BookOpen },
-  { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
-  { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
-];
-
-const studentNav: NavItem[] = [
-  { label: "Overview", href: "/dashboard/student", icon: LayoutDashboard },
-  { label: "Payments", href: "/dashboard/student/payments", icon: CreditCard },
-  { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
-  { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
-  { label: "Become Teacher", href: "/dashboard/student/become-teacher", icon: GraduationCap },
-];
-
-export function getNavForRole(role: "owner" | "admin" | "teacher" | "student") {
-  switch (role) {
-    case "owner":
-    case "admin":
-      return adminNav;
-    case "teacher":
-      return teacherNav;
-    default:
-      return studentNav;
-  }
-}
+export { getNavForRole } from "@/lib/dashboard-nav";
 
 export function DashboardShell({
   children,
   role,
 }: {
   children: React.ReactNode;
-  role: "owner" | "admin" | "teacher" | "student";
+  role: DashboardRole;
 }) {
   const pathname = usePathname();
   const navItems = getNavForRole(role);
@@ -78,9 +27,9 @@ export function DashboardShell({
   return (
     <div className="min-h-screen bg-muted">
       <Header />
-      <div className="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:pb-8 pb-24">
+      <div className="mx-auto flex max-w-7xl gap-8 px-4 py-4 sm:px-6 sm:py-8 lg:px-8 lg:pb-8 pb-[calc(6.5rem+env(safe-area-inset-bottom))]">
         <aside className="hidden w-64 shrink-0 lg:block">
-          <nav className="sticky top-20 space-y-1 rounded-xl border border-border bg-white p-3 shadow-sm">
+          <nav className="sticky top-20 max-h-[calc(100vh-6rem)] space-y-1 overflow-y-auto rounded-xl border border-border bg-white p-3 shadow-sm">
             <Link
               href="/"
               className={cn(
@@ -95,13 +44,7 @@ export function DashboardShell({
             </Link>
             <div className="my-2 border-t border-border" />
             {navItems.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href !==
-                  (role === "owner" || role === "admin"
-                    ? "/dashboard/admin"
-                    : `/dashboard/${role}`) &&
-                  pathname.startsWith(item.href));
+              const isActive = isDashboardNavActive(pathname, item.href, role);
               return (
                 <Link
                   key={item.href}
@@ -120,7 +63,7 @@ export function DashboardShell({
             })}
           </nav>
         </aside>
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="min-w-0 flex-1 overflow-x-hidden">{children}</main>
       </div>
       <DashboardMobileNav role={role} />
     </div>
