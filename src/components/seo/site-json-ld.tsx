@@ -2,7 +2,7 @@ import { absoluteUrl, siteSeo } from "@/lib/seo";
 
 export function SiteJsonLd() {
   const siteUrl = absoluteUrl();
-  const logoUrl = absoluteUrl("/icon.svg");
+  const logoUrl = absoluteUrl("/icon");
 
   const website = {
     "@context": "https://schema.org",

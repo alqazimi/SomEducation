@@ -1,4 +1,5 @@
 import { BRAND_BLUE } from "@/lib/brand";
+import { LOGO_S_PATH } from "@/lib/logo-mark";
 import { cn } from "@/lib/utils";
 
 type SomEducationLogoProps = {
@@ -6,7 +7,7 @@ type SomEducationLogoProps = {
   size?: number;
 };
 
-/** Coursera-style mark: blue tile with white S. */
+/** Coursera-style mark: blue tile with white S (vector path, not text). */
 export function SomEducationLogo({
   className,
   size = 36,
@@ -21,18 +22,7 @@ export function SomEducationLogo({
       className={cn("shrink-0", className)}
     >
       <rect width="40" height="40" rx="8" fill={BRAND_BLUE} />
-      <text
-        x="20"
-        y="21"
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fill="white"
-        fontSize="26"
-        fontWeight="700"
-        fontFamily="var(--font-dm-sans), 'DM Sans', system-ui, sans-serif"
-      >
-        S
-      </text>
+      <path fill="white" d={LOGO_S_PATH} />
     </svg>
   );
 }
