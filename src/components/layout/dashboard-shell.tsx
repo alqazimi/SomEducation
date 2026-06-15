@@ -10,7 +10,6 @@ import {
   isDashboardNavActive,
 } from "@/lib/dashboard-nav";
 import { Header } from "./header";
-import { DashboardMobileNav } from "./dashboard-mobile-nav";
 
 export { getNavForRole } from "@/lib/dashboard-nav";
 
@@ -27,7 +26,7 @@ export function DashboardShell({
   return (
     <div className="min-h-screen bg-muted">
       <Header />
-      <div className="mx-auto flex max-w-7xl gap-8 px-4 py-4 sm:px-6 sm:py-8 lg:px-8 lg:pb-8 pb-[calc(6.5rem+env(safe-area-inset-bottom))]">
+      <div className="mx-auto flex max-w-7xl gap-8 px-4 py-4 sm:px-6 sm:py-8 lg:px-8 lg:pb-8">
         <aside className="hidden w-64 shrink-0 lg:block">
           <nav className="sticky top-20 max-h-[calc(100vh-6rem)] space-y-1 overflow-y-auto rounded-xl border border-border bg-white p-3 shadow-sm">
             <Link
@@ -65,7 +64,6 @@ export function DashboardShell({
         </aside>
         <main className="min-w-0 flex-1 overflow-x-hidden">{children}</main>
       </div>
-      <DashboardMobileNav role={role} />
     </div>
   );
 }

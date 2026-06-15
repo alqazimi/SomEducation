@@ -43,6 +43,7 @@ const teacherNav: DashboardNavItem[] = [
 
 const studentNav: DashboardNavItem[] = [
   { label: "Overview", href: "/dashboard/student", icon: LayoutDashboard },
+  { label: "My Courses", href: "/dashboard/student/courses", icon: BookOpen },
   { label: "Payments", href: "/dashboard/student/payments", icon: CreditCard },
   { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
   { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
@@ -93,16 +94,12 @@ export function isDashboardNavActive(
   return pathname.startsWith(`${href}/`) || pathname.startsWith(href);
 }
 
-/** Shortcuts shown in the mobile bottom bar (full list is in the menu drawer). */
+/** Shortcuts for desktop sidebar grouping only; mobile uses one header menu. */
 export function getMobilePrimaryNav(role: DashboardRole): DashboardNavItem[] {
   switch (role) {
     case "owner":
     case "admin":
-      return [
-        adminNav[0],
-        adminNav[2],
-        adminNav[6],
-      ];
+      return [adminNav[0], adminNav[2], adminNav[6]];
     case "teacher":
       return [teacherNav[0], teacherNav[1], teacherNav[2]];
     default:

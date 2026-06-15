@@ -22,7 +22,7 @@ export function DashboardLayoutClient({
     return (
       <div className="min-h-screen bg-muted">
         <Header />
-        <div className="mx-auto max-w-7xl px-4 py-8 pb-[calc(6.5rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="mt-4 h-64 w-full" />
         </div>
