@@ -10,12 +10,14 @@ function SignUpClient() {
   const redirectUrl = searchParams.get("redirect_url") ?? "/dashboard";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted">
-      <SignUp
-        forceRedirectUrl={redirectUrl}
-        signInForceRedirectUrl={redirectUrl}
-        appearance={clerkAppearance}
-      />
+    <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-8">
+      <div className="w-full max-w-[min(100%,24rem)]">
+        <SignUp
+          forceRedirectUrl={redirectUrl}
+          signInForceRedirectUrl={redirectUrl}
+          appearance={clerkAppearance}
+        />
+      </div>
     </div>
   );
 }

@@ -10,6 +10,7 @@ import {
   siteSeo,
 } from "@/lib/seo";
 import { clerkAppearance } from "@/lib/clerk-appearance";
+import "@/lib/clerk-env";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -92,7 +93,7 @@ export default function RootLayout({
       appearance={clerkAppearance}
     >
       <html lang="en" className={`${dmSans.variable} h-full`} data-scroll-behavior="smooth">
-        <body className="min-h-full flex flex-col antialiased">
+        <body className="flex min-h-full flex-col overflow-x-hidden antialiased">
           <SiteJsonLd />
           <Providers convexUrl={process.env.NEXT_PUBLIC_CONVEX_URL ?? ""}>
             {children}

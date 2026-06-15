@@ -80,6 +80,25 @@ In **Vercel → Project → Settings → Environment Variables**, add these for 
 
 Redeploy after saving env vars. Use your **production** Convex URL (`precious-duck-100`), not the dev URL (`mild-seahorse-699`).
 
+### Clerk + Convex auth (required for sign-in)
+
+After switching to Clerk **Production** (`pk_live_` keys on Vercel), configure both sides:
+
+**Clerk (Production instance):**
+1. Open [Clerk Convex setup](https://dashboard.clerk.com/apps/setup/convex)
+2. JWT template name must be exactly **`convex`** (Convex preset)
+
+**Convex production (`precious-duck-100`):**
+
+```bash
+npx convex env set CLERK_JWT_ISSUER_DOMAIN https://clerk.someducation.com --prod
+```
+
+Use your Clerk **Production** Frontend API URL (from Clerk → Production → API Keys).  
+Do **not** use the dev URL (`https://stirring-grizzly-43.clerk.accounts.dev`).
+
+Then sign out, sign in again, and test `/dashboard`.
+
 ## Google Search (show SomEducation in search results)
 
 Google verification is already included in the repo:

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Show, SignInButton, UserButton } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
-import { Home, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "convex/_generated/api";
 import {
@@ -16,8 +16,6 @@ import { cn } from "@/lib/utils";
 import { PLATFORM_NAME } from "@/lib/brand";
 import {
   getDashboardHref,
-  getNavForRole,
-  isDashboardNavActive,
   isDashboardOverview,
   isDashboardPath,
 } from "@/lib/dashboard-nav";
@@ -52,39 +50,35 @@ export function Header() {
     };
   }, [mobileOpen]);
 
+  const showMobileMenu = !isDashboardPath(pathname);
+
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border bg-white shadow-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-3">
-            <button
-              type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 md:hidden"
-              aria-label={mobileOpen ? "Close menu" : "Open menu"}
-              onClick={() => setMobileOpen((open) => !open)}
-            >
-              {mobileOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </button>
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-3 sm:h-16 sm:gap-4 sm:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            {showMobileMenu && (
+              <button
+                type="button"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100 md:hidden"
+                aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                onClick={() => setMobileOpen((open) => !open)}
+              >
+                {mobileOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
+              </button>
+            )}
 
             <Link
               href="/"
               className="flex min-w-0 items-center gap-2 rounded-lg transition-opacity hover:opacity-90"
               aria-label={`${PLATFORM_NAME} home`}
             >
-              <SomEducationLogo size={36} />
-              <SomEducationWordmark className="text-base sm:text-xl" />
-            </Link>
-
-            <Link
-              href="/"
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 md:hidden"
-              aria-label="Go to home page"
-            >
-              <Home className="h-5 w-5" />
+              <SomEducationLogo size={32} />
+              <SomEducationWordmark className="hidden min-[380px]:inline text-base sm:text-xl" />
             </Link>
           </div>
 
@@ -164,7 +158,7 @@ export function Header() {
         </div>
       </header>
 
-      {mobileOpen && (
+      {showMobileMenu && mobileOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <button
             type="button"
@@ -172,7 +166,7 @@ export function Header() {
             aria-label="Close menu overlay"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="absolute left-0 top-16 flex h-[calc(100dvh-4rem)] w-full max-w-sm flex-col border-b border-r border-border bg-white shadow-xl">
+          <div className="absolute left-0 top-14 flex h-[calc(100dvh-3.5rem)] w-full max-w-sm flex-col border-b border-r border-border bg-white shadow-xl sm:top-16 sm:h-[calc(100dvh-4rem)]">
             <nav className="flex-1 space-y-1 overflow-y-auto p-4">
               {publicNavLinks.map((link) => {
                 const isActive =
@@ -203,34 +197,13 @@ export function Header() {
                     href={dashboardHref}
                     className={cn(
                       "block rounded-lg px-4 py-3 text-sm font-medium",
-                    isDashboardOverview(pathname)
-                      ? "bg-stone-100 text-stone-900"
-                      : "text-stone-700 hover:bg-stone-50"
+                      isDashboardOverview(pathname)
+                        ? "bg-stone-100 text-stone-900"
+                        : "text-stone-700 hover:bg-stone-50"
                     )}
                   >
                     Dashboard
                   </Link>
-                )}
-                {user?.role && isDashboardPath(pathname) && (
-                  <>
-                    <p className="px-4 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      Dashboard
-                    </p>
-                    {getNavForRole(user.role).map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className={cn(
-                          "block rounded-lg px-4 py-3 text-sm font-medium",
-                          isDashboardNavActive(pathname, item.href, user.role)
-                            ? "bg-stone-100 text-stone-900"
-                            : "text-stone-700 hover:bg-stone-50"
-                        )}
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-                  </>
                 )}
                 {signedInNavLinks.map((link) => {
                   const isActive =
@@ -263,7 +236,7 @@ export function Header() {
                     </Button>
                   </SignInButton>
                   <Link href="/sign-up" className="w-full">
-                    <Button className="w-full">Join for Free</Button>
+                    <Button className="w-full">Sign up</Button>
                   </Link>
                 </div>
               </Show>

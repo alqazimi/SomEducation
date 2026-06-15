@@ -133,14 +133,60 @@ export function AccountSetupState({
         <>
           <h1 className="text-xl font-semibold">Could not set up your account</h1>
           <p className="max-w-md text-sm text-slate-500">{syncError}</p>
-          <div className="max-w-md rounded-lg border border-border bg-white p-4 text-left text-xs text-slate-600">
-            <p className="font-medium text-foreground">Fix in Clerk Dashboard:</p>
-            <ol className="mt-2 list-decimal space-y-1 pl-4">
-              <li>Go to JWT Templates → New template</li>
-              <li>Choose the <strong>Convex</strong> preset</li>
-              <li>Name must be exactly: <strong>convex</strong></li>
-              <li>Save, then refresh this page</li>
-            </ol>
+          <div className="max-w-lg space-y-4 text-left text-xs text-slate-600">
+            <div className="rounded-lg border border-border bg-white p-4">
+              <p className="font-medium text-foreground">
+                1. Clerk Production → JWT Templates
+              </p>
+              <ol className="mt-2 list-decimal space-y-1 pl-4">
+                <li>
+                  Open{" "}
+                  <a
+                    href="https://dashboard.clerk.com/apps/setup/convex"
+                    className="font-medium text-brand-700 hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Clerk Convex setup
+                  </a>{" "}
+                  (Production instance, not Development)
+                </li>
+                <li>
+                  Create template with the <strong>Convex</strong> preset
+                </li>
+                <li>
+                  Name must be exactly: <strong>convex</strong>
+                </li>
+                <li>Save</li>
+              </ol>
+            </div>
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <p className="font-medium text-amber-950">
+                2. Convex Production → environment variable
+              </p>
+              <p className="mt-2 text-amber-900">
+                In Convex dashboard for <strong>precious-duck-100</strong>, set:
+              </p>
+              <pre className="mt-2 overflow-x-auto rounded bg-white p-2 font-mono text-[11px] text-stone-800">
+                CLERK_JWT_ISSUER_DOMAIN=https://clerk.someducation.com
+              </pre>
+              <p className="mt-2 text-amber-900">
+                Use your Clerk <strong>Production</strong> Frontend API URL — not
+                the dev URL (<code>stirring-grizzly-43...</code>).
+              </p>
+              <p className="mt-2 font-mono text-[11px] text-amber-950">
+                npx convex env set CLERK_JWT_ISSUER_DOMAIN
+                https://clerk.someducation.com --prod
+              </p>
+            </div>
+            <div className="rounded-lg border border-border bg-white p-4">
+              <p className="font-medium text-foreground">3. After fixing</p>
+              <ol className="mt-2 list-decimal space-y-1 pl-4">
+                <li>Sign out completely</li>
+                <li>Hard refresh or use incognito</li>
+                <li>Sign in again</li>
+              </ol>
+            </div>
           </div>
           <Button onClick={onRetry}>Try again</Button>
         </>

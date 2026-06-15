@@ -45,12 +45,12 @@ export function Footer() {
             <h4 className={type.cardTitle}>Legal</h4>
             <ul className={`mt-3 space-y-2 ${type.bodySm}`}>
               <li>
-                <Link href="#" className="hover:text-stone-900">
+                <Link href="/privacy" className="hover:text-stone-900">
                   Privacy policy
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-stone-900">
+                <Link href="/terms" className="hover:text-stone-900">
                   Terms of service
                 </Link>
               </li>

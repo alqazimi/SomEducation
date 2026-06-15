@@ -9,12 +9,14 @@ export default function SignInClient() {
   const redirectUrl = searchParams.get("redirect_url") ?? "/dashboard";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted">
-      <SignIn
+    <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-8">
+      <div className="w-full max-w-[min(100%,24rem)]">
+        <SignIn
         forceRedirectUrl={redirectUrl}
         signUpForceRedirectUrl={redirectUrl}
         appearance={clerkAppearance}
-      />
+        />
+      </div>
     </div>
   );
 }

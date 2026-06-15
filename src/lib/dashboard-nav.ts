@@ -5,7 +5,6 @@ import {
   BookOpen,
   CreditCard,
   GraduationCap,
-  Home,
   LayoutDashboard,
   Menu,
   MessageSquare,
@@ -111,11 +110,6 @@ export function getMobilePrimaryNav(role: DashboardRole): DashboardNavItem[] {
   }
 }
 
-export const dashboardHomeNavItem: DashboardNavItem = {
-  label: "Home",
-  href: "/",
-  icon: Home,
-};
 
 export const dashboardMenuNavItem: DashboardNavItem = {
   label: "Menu",
