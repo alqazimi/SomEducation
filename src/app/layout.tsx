@@ -9,6 +9,7 @@ import {
   SITE_KEYWORDS,
   siteSeo,
 } from "@/lib/seo";
+import { clerkAppearance } from "@/lib/clerk-appearance";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -88,6 +89,7 @@ export default function RootLayout({
     <ClerkProvider
       signInFallbackRedirectUrl="/dashboard"
       signUpFallbackRedirectUrl="/dashboard"
+      appearance={clerkAppearance}
     >
       <html lang="en" className={`${dmSans.variable} h-full`} data-scroll-behavior="smooth">
         <body className="min-h-full flex flex-col antialiased">

@@ -2,6 +2,7 @@
 
 import { SignIn } from "@clerk/nextjs";
 import { useSearchParams } from "next/navigation";
+import { clerkAppearance } from "@/lib/clerk-appearance";
 
 export default function SignInClient() {
   const searchParams = useSearchParams();
@@ -9,7 +10,11 @@ export default function SignInClient() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted">
-      <SignIn forceRedirectUrl={redirectUrl} signUpForceRedirectUrl={redirectUrl} />
+      <SignIn
+        forceRedirectUrl={redirectUrl}
+        signUpForceRedirectUrl={redirectUrl}
+        appearance={clerkAppearance}
+      />
     </div>
   );
 }
