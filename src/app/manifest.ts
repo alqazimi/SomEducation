@@ -10,12 +10,18 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
-    theme_color: "#2563eb",
+    theme_color: "#0056D2",
     icons: [
       {
         src: "/icon.svg",
         sizes: "any",
         type: "image/svg+xml",
+      },
+      {
+        src: "/som-education-logo.svg",
+        sizes: "512x512",
+        type: "image/svg+xml",
+        purpose: "any",
       },
     ],
   };
