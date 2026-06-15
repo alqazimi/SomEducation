@@ -15,6 +15,7 @@ import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageTitle } from "@/components/ui/typography";
 import { getYoutubeEmbedUrl } from "@/lib/youtube";
 
 function getNextLessonId(
@@ -87,7 +88,7 @@ export default function LessonPage() {
         <main className="flex min-h-[60vh] items-center justify-center px-4">
           <Card className="w-full max-w-md text-center shadow-sm">
             <CardContent className="py-12">
-              <h1 className="text-2xl font-bold">Lesson Not Found</h1>
+              <PageTitle>Lesson not found</PageTitle>
               <Link href={`/learn/${params.slug}`} className="mt-6 inline-block">
                 <Button variant="outline" className="gap-2">
                   <ChevronLeft className="h-4 w-4" />
@@ -108,7 +109,7 @@ export default function LessonPage() {
         <main className="flex min-h-[60vh] items-center justify-center px-4">
           <Card className="w-full max-w-md text-center shadow-sm">
             <CardContent className="py-12">
-              <h1 className="text-xl font-bold">{lesson.title}</h1>
+              <h1 className="text-xl font-medium text-stone-900">{lesson.title}</h1>
               <p className="mt-2 text-slate-500">
                 Purchase this course to watch this lesson.
               </p>

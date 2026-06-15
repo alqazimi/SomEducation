@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConvexQueryGate } from "@/components/convex/convex-query-gate";
+import { PageTitle, SectionTitle } from "@/components/ui/typography";
+import { type } from "@/lib/typography";
 import { formatPrice } from "@/lib/utils";
 
 export function CourseDetailClient({ slug }: { slug: string }) {
@@ -41,7 +43,7 @@ export function CourseDetailClient({ slug }: { slug: string }) {
         <Header />
         <main className="flex min-h-[50vh] items-center justify-center px-4">
           <div className="text-center">
-            <h1 className="text-2xl font-bold">Course Not Found</h1>
+            <PageTitle>Course not found</PageTitle>
             <Link href="/courses" className="mt-4 inline-block">
               <Button variant="outline">Back to Courses</Button>
             </Link>
@@ -73,13 +75,11 @@ export function CourseDetailClient({ slug }: { slug: string }) {
                     <Badge variant="outline">{course.category.name}</Badge>
                   )}
                 </div>
-                <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                  {course.title}
-                </h1>
-                <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
+                <h1 className={`mt-3 ${type.display}`}>{course.title}</h1>
+                <p className={`mt-3 max-w-2xl ${type.lead}`}>
                   {course.description}
                 </p>
-                <div className="mt-6 flex flex-wrap gap-4 text-sm text-slate-500">
+                <div className={`mt-5 flex flex-wrap gap-4 ${type.caption}`}>
                   {course.teacher && (
                     <span className="flex items-center gap-2">
                       <User className="h-4 w-4" />
@@ -104,7 +104,7 @@ export function CourseDetailClient({ slug }: { slug: string }) {
                 )}
               </div>
 
-              <Card className="sticky top-20 overflow-hidden shadow-lg lg:top-24">
+              <Card className="sticky top-20 overflow-hidden border-border shadow-sm lg:top-24">
                 {course.thumbnailUrl && (
                   <div className="hidden lg:block">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -116,10 +116,10 @@ export function CourseDetailClient({ slug }: { slug: string }) {
                   </div>
                 )}
                 <CardContent className="space-y-4 p-6">
-                  <div className="text-3xl font-bold text-brand-600">
+                  <div className={type.price}>
                     {formatPrice(course.price, course.currency)}
                   </div>
-                  <ul className="space-y-2 text-sm text-slate-600">
+                  <ul className={`space-y-2 ${type.bodySm}`}>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-success" />
                       Full lifetime access
@@ -178,8 +178,8 @@ export function CourseDetailClient({ slug }: { slug: string }) {
         </div>
 
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold">What you&apos;ll learn</h2>
-          <p className="mt-2 max-w-3xl text-slate-600">
+          <SectionTitle>What you&apos;ll learn</SectionTitle>
+          <p className={`mt-2 max-w-3xl ${type.lead}`}>
             A structured curriculum designed to take you from fundamentals to
             practical skills step by step.
           </p>

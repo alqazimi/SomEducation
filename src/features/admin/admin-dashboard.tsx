@@ -5,8 +5,10 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { CheckCircle2, Circle, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
+import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { type } from "@/lib/typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice } from "@/lib/utils";
 
@@ -82,8 +84,11 @@ export function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-      <p className="mt-1 text-slate-500">Platform overview</p>
+      <DashboardPageHeader
+        eyebrow="Administration"
+        title="Platform overview"
+        description="Monitor users, courses, payments, and launch checklist progress."
+      />
 
       {setup?.allComplete && (
         <Card className="mt-8 border-green-200 bg-green-50/60">
@@ -182,12 +187,10 @@ export function AdminDashboard() {
         {stats.map((stat) => (
           <Card key={stat.label}>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-slate-500">
-                {stat.label}
-              </CardTitle>
+              <CardTitle className={type.muted}>{stat.label}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className={type.stat}>
                 {authLoading || analytics === undefined ? "…" : stat.value}
               </div>
             </CardContent>

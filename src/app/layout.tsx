@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/components/providers";
 import { SiteJsonLd } from "@/components/seo/site-json-ld";
@@ -13,9 +13,10 @@ import "./globals.css";
 
 export const dynamic = "force-dynamic";
 
-const inter = Inter({
-  variable: "--font-inter",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const googleVerification =
@@ -88,7 +89,7 @@ export default function RootLayout({
       signInFallbackRedirectUrl="/dashboard"
       signUpFallbackRedirectUrl="/dashboard"
     >
-      <html lang="en" className={`${inter.variable} h-full`} data-scroll-behavior="smooth">
+      <html lang="en" className={`${dmSans.variable} h-full`} data-scroll-behavior="smooth">
         <body className="min-h-full flex flex-col antialiased">
           <SiteJsonLd />
           <Providers convexUrl={process.env.NEXT_PUBLIC_CONVEX_URL ?? ""}>

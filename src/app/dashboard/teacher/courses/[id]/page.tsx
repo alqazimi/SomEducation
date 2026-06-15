@@ -16,7 +16,9 @@ import { useState } from "react";
 import { ImageUploadField } from "@/components/ui/image-upload-field";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ExamManager } from "@/features/teacher/exam-manager";
+import { PageTitle, SectionTitle } from "@/components/ui/typography";
 import { formatEnrollmentCount } from "@/lib/enrollment";
+import { type } from "@/lib/typography";
 
 type LessonDraft = {
   title: string;
@@ -235,17 +237,17 @@ export default function EditCoursePage() {
         <div>
           <Link
             href="/dashboard/teacher/courses"
-            className="text-sm text-slate-500 hover:text-slate-700"
+            className={`${type.muted} hover:text-stone-800`}
           >
             ← Back to courses
           </Link>
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{course.title}</h1>
+            <PageTitle>{course.title}</PageTitle>
             <Badge variant="secondary" className="capitalize">
               {course.status}
             </Badge>
           </div>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className={`mt-2 ${type.muted}`}>
             Manage curriculum, settings, and publishing ·{" "}
             {formatEnrollmentCount(course.enrollmentCount)}
           </p>
@@ -268,7 +270,7 @@ export default function EditCoursePage() {
       </div>
 
       <section className="mt-10">
-        <h2 className="text-base font-semibold text-slate-900">Curriculum</h2>
+        <SectionTitle>Curriculum</SectionTitle>
         <p className="mt-1 text-sm text-slate-500">
           Organize your course into modules and video lessons.
         </p>
@@ -405,7 +407,7 @@ export default function EditCoursePage() {
       <Separator className="my-10" />
 
       <section>
-        <h2 className="text-base font-semibold text-slate-900">Module Exams</h2>
+        <SectionTitle>Module Exams</SectionTitle>
         <p className="mt-1 text-sm text-slate-500">
           Create practice quizzes and graded exams for each module, like Coursera.
         </p>
@@ -417,9 +419,7 @@ export default function EditCoursePage() {
       <Separator className="my-10" />
 
       <section>
-        <h2 className="text-base font-semibold text-slate-900">
-          Course Settings
-        </h2>
+        <SectionTitle>Course settings</SectionTitle>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <Label>Title</Label>

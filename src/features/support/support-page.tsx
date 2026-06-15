@@ -15,7 +15,9 @@ import { Header } from "@/components/layout/header";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SectionTitle } from "@/components/ui/typography";
 import { PLATFORM_NAME, PLATFORM_SUPPORT_EMAIL } from "@/lib/brand";
+import { type } from "@/lib/typography";
 
 const paymentSteps = [
   {
@@ -74,14 +76,14 @@ export function SupportPage() {
       <main className="min-h-screen bg-muted">
         <PageHeader
           title="Support"
-          description={`How to pay for courses on ${PLATFORM_NAME} — simple manual verification, no card gateway required.`}
+          description={`Payment steps and help for ${PLATFORM_NAME} courses.`}
         />
 
         <div className="mx-auto max-w-3xl space-y-8 px-4 py-10 sm:px-6 lg:px-8">
           <Card className="shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <HelpCircle className="h-5 w-5 text-brand-600" />
+              <CardTitle className="flex items-center gap-2">
+                <HelpCircle className="h-4 w-4 text-brand-600" />
                 How to pay
               </CardTitle>
             </CardHeader>
@@ -89,12 +91,12 @@ export function SupportPage() {
               <ol className="space-y-4">
                 {paymentSteps.map((step, index) => (
                   <li key={step.title} className="flex gap-4">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-semibold text-white">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-700 text-xs font-medium text-white">
                       {index + 1}
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900">{step.title}</p>
-                      <p className="mt-1 text-sm text-slate-600">
+                      <p className={type.cardTitle}>{step.title}</p>
+                      <p className={`mt-1 ${type.bodySm}`}>
                         {step.description}
                       </p>
                     </div>
@@ -109,10 +111,10 @@ export function SupportPage() {
               <Card key={method.label} className="shadow-sm">
                 <CardContent className="p-5">
                   <method.icon className="h-5 w-5 text-brand-600" />
-                  <p className="mt-3 font-medium text-slate-900">
+                  <p className={`mt-3 ${type.cardTitle}`}>
                     {method.label}
                   </p>
-                  <p className="mt-1 text-sm text-slate-500">{method.hint}</p>
+                  <p className={`mt-1 ${type.muted}`}>{method.hint}</p>
                 </CardContent>
               </Card>
             ))}
@@ -123,8 +125,8 @@ export function SupportPage() {
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" />
                 <div>
-                  <p className="font-medium text-slate-900">After you pay</p>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className={type.cardTitle}>After you pay</p>
+                  <p className={`mt-1 ${type.bodySm}`}>
                     Track your submission under Dashboard → Payments. If
                     rejected, you can resubmit with a clearer screenshot.
                   </p>
@@ -145,8 +147,8 @@ export function SupportPage() {
             <CardContent className="flex items-start gap-4 p-6">
               <Mail className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" />
               <div>
-                <p className="font-medium text-slate-900">Need more help?</p>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className={type.cardTitle}>Need more help?</p>
+                <p className={`mt-1 ${type.bodySm}`}>
                   Email us at{" "}
                   <a
                     href={`mailto:${settings?.supportEmail ?? PLATFORM_SUPPORT_EMAIL}`}

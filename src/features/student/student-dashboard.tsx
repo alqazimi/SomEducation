@@ -11,8 +11,11 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { api } from "convex/_generated/api";
+import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SectionTitle } from "@/components/ui/typography";
+import { type } from "@/lib/typography";
 import { StudentCoursesSection } from "@/features/student/student-courses-section";
 
 export function StudentDashboard() {
@@ -46,23 +49,20 @@ export function StudentDashboard() {
 
   return (
     <div>
-      <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-medium text-slate-500">Dashboard</p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-          {user?.firstName ? `Welcome back, ${user.firstName}` : "Welcome back"}
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-slate-600 sm:text-base">
-          Your courses, payments, and learning progress — all in one place.
-        </p>
-        <div className="mt-6">
-          <Link href="/courses">
-            <Button variant="outline" className="gap-2">
-              Browse Courses
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      </div>
+      <DashboardPageHeader
+        eyebrow="Dashboard"
+        title={
+          user?.firstName ? `Welcome back, ${user.firstName}` : "Welcome back"
+        }
+        description="Your courses, payments, and learning progress — all in one place."
+      >
+        <Link href="/courses">
+          <Button variant="outline" className="gap-2">
+            Browse Courses
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </Link>
+      </DashboardPageHeader>
 
       {pendingPayments.length > 0 && (
         <Card className="mt-6 border-amber-200 bg-amber-50 shadow-sm">
@@ -108,8 +108,8 @@ export function StudentDashboard() {
           <Card key={stat.label} className="shadow-sm">
             <CardContent className="flex items-center justify-between p-5">
               <div>
-                <p className="text-sm text-slate-500">{stat.label}</p>
-                <p className="mt-1 text-2xl font-bold">{stat.value}</p>
+                <p className={type.muted}>{stat.label}</p>
+                <p className={`mt-1 ${type.stat}`}>{stat.value}</p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
                 <stat.icon className="h-5 w-5" />
@@ -120,7 +120,7 @@ export function StudentDashboard() {
       </div>
 
       <section className="mt-10">
-        <h2 className="text-lg font-semibold">Quick actions</h2>
+        <SectionTitle className="mt-10">Quick actions</SectionTitle>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {quickLinks.map((item) => (
             <Link key={item.href} href={item.href}>
@@ -130,10 +130,8 @@ export function StudentDashboard() {
                     <item.icon className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="font-medium text-slate-900">{item.label}</p>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {item.description}
-                    </p>
+                    <p className={type.cardTitle}>{item.label}</p>
+                    <p className={`mt-1 ${type.muted}`}>{item.description}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -143,8 +141,8 @@ export function StudentDashboard() {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-lg font-semibold">My courses</h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <SectionTitle>My courses</SectionTitle>
+        <p className={`mt-1 ${type.muted}`}>
           Continue learning or review completed programs.
         </p>
         <div className="mt-6">

@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
+import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -97,12 +98,11 @@ export function AdminCourses() {
 
   return (
     <div>
-      <div className="border-b border-border pb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Course Management</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Publish, make private, edit, or remove any course on the platform
-        </p>
-      </div>
+      <DashboardPageHeader
+        eyebrow="Administration"
+        title="Course management"
+        description="Publish, review, edit, or remove courses across the platform."
+      />
 
       <div className="mt-6 flex flex-wrap gap-2">
         {filters.map((item) => (

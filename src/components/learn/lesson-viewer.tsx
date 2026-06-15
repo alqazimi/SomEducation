@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CourseProgressBar } from "@/components/ui/course-progress-bar";
 import { cn } from "@/lib/utils";
+import { type } from "@/lib/typography";
 
 type ExamItem = {
   _id: Id<"exams">;
@@ -295,14 +296,14 @@ export function LessonViewerShell({
             <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
                 {nav.moduleTitle && (
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <p className={type.eyebrow}>
                     {nav.moduleTitle}
                   </p>
                 )}
-                <h1 className="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                <h1 className={`mt-1 ${type.pageTitle}`}>
                   {lessonTitle}
                 </h1>
-                <p className="mt-2 text-sm text-slate-500">
+                <p className={`mt-2 ${type.caption}`}>
                   Lesson {nav.index} of {nav.total}
                 </p>
               </div>

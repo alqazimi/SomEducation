@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { Bell, CheckCheck } from "lucide-react";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
+import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Button } from "@/components/ui/button";
 import { cn, formatDate } from "@/lib/utils";
 
@@ -48,16 +49,11 @@ export function NotificationsInbox() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
-        <div>
-          <p className="text-sm font-medium text-slate-500">Updates</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-            Notifications
-          </h1>
-          <p className="mt-2 text-sm text-slate-600">
-            Payment updates, course approvals, and messages.
-          </p>
-        </div>
+      <DashboardPageHeader
+        eyebrow="Updates"
+        title="Notifications"
+        description="Payment updates, course approvals, and messages."
+      >
         {unread > 0 && (
           <Button
             variant="outline"
@@ -69,7 +65,7 @@ export function NotificationsInbox() {
             Mark all read
           </Button>
         )}
-      </div>
+      </DashboardPageHeader>
 
       <div className="mt-8 space-y-3">
         {notifications === undefined ? (

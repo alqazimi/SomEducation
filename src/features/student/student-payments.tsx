@@ -2,6 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
+import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate, formatPrice } from "@/lib/utils";
@@ -22,8 +23,11 @@ export function StudentPayments() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Payment History</h1>
-      <p className="mt-1 text-slate-500">Track your payment requests</p>
+      <DashboardPageHeader
+        eyebrow="Billing"
+        title="Payment history"
+        description="Track submissions and approval status for your course enrollments."
+      />
 
       <div className="mt-8 space-y-4">
         {!payments ? (

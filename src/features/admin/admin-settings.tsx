@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
+import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -47,7 +48,11 @@ export function AdminSettings() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Platform Settings</h1>
+      <DashboardPageHeader
+        eyebrow="Administration"
+        title="Platform settings"
+        description="Payment details, categories, and support contact information."
+      />
 
       <Card className="mt-8">
         <CardHeader>

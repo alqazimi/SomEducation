@@ -13,6 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CourseProgressBar } from "@/components/ui/course-progress-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConvexQueryGate } from "@/components/convex/convex-query-gate";
+import { PageEyebrow, PageLead, PageTitle } from "@/components/ui/typography";
+import { type } from "@/lib/typography";
 
 export default function LearnPage() {
   const params = useParams<{ slug: string }>();
@@ -54,10 +56,10 @@ export default function LearnPage() {
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-brand-600">
                 <BookOpen className="h-7 w-7" />
               </div>
-              <h1 className="mt-5 text-2xl font-bold">Access Required</h1>
-              <p className="mt-2 text-slate-500">
+              <PageTitle className="mt-5">Access required</PageTitle>
+              <PageLead className="mt-2">
                 Sign in and purchase this course to access the content.
-              </p>
+              </PageLead>
               <Link
                 href={`/sign-in?redirect_url=${encodeURIComponent(
                   `/courses/${params.slug}/purchase`
@@ -92,18 +94,16 @@ export default function LearnPage() {
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             <Link
               href="/dashboard/student"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 transition-colors hover:text-brand-700"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-500 transition-colors hover:text-stone-900"
             >
               <ChevronLeft className="h-4 w-4" />
               Back to my courses
             </Link>
             <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-500">Course home</p>
-                <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-                  {course.title}
-                </h1>
-                <p className="mt-3 max-w-3xl text-sm text-slate-600 sm:text-base">
+                <PageEyebrow>Course home</PageEyebrow>
+                <h1 className={`mt-1 ${type.display}`}>{course.title}</h1>
+                <p className={`mt-3 max-w-3xl ${type.lead}`}>
                   {course.description}
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">

@@ -3,6 +3,7 @@
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { Header } from "@/components/layout/header";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageTitle } from "@/components/ui/typography";
 import {
   AccountSetupState,
   useEnsureConvexUser,
@@ -46,7 +47,7 @@ export function DashboardLayoutClient({
         <Header />
         <div className="flex min-h-[60vh] items-center justify-center px-4">
           <div className="text-center">
-            <h1 className="text-2xl font-bold">Access Denied</h1>
+            <PageTitle className="mt-5">Access denied</PageTitle>
             <p className="mt-2 text-slate-500">
               You don&apos;t have permission to view this page.
             </p>

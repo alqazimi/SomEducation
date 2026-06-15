@@ -14,6 +14,8 @@ import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SectionTitle } from "@/components/ui/typography";
+import { type } from "@/lib/typography";
 
 export const metadata: Metadata = {
   title: buildPageTitle(),
@@ -68,22 +70,19 @@ export default function HomePage() {
     <>
       <Header />
       <main>
-        <section className="relative overflow-hidden bg-gradient-to-b from-brand-50 to-white">
-          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
-            <div className="mx-auto max-w-3xl text-center">
-              <div className="mb-6 inline-flex items-center rounded-full border border-brand-100 bg-white px-4 py-1.5 text-sm font-medium text-brand-700 shadow-sm">
-                Premium Online Learning
-              </div>
-              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
-                Learn Without Limits on{" "}
-                <span className="text-brand-600">{PLATFORM_NAME}</span>
+        <section className="border-b border-border bg-white">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className={type.eyebrow}>Online learning</p>
+              <h1 className={`mt-3 ${type.display}`}>
+                Learn with purpose on{" "}
+                <span className="text-brand-700">{PLATFORM_NAME}</span>
               </h1>
-              <p className="mt-6 text-lg leading-8 text-slate-600">
-                {PLATFORM_NAME} is a modern learning platform built for students,
-                teachers, and administrators. Browse courses, verify payments
-                manually, and access premium content securely.
+              <p className={`mx-auto mt-5 max-w-xl ${type.lead}`}>
+                Structured courses from working instructors. Browse programs,
+                submit payment proof, and study at your own pace.
               </p>
-              <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <Link href="/courses">
                   <Button size="lg" className="gap-2">
                     Browse Courses
@@ -92,7 +91,7 @@ export default function HomePage() {
                 </Link>
                 <Link href="/sign-up">
                   <Button variant="outline" size="lg">
-                    Create Free Account
+                    Create account
                   </Button>
                 </Link>
               </div>
@@ -100,31 +99,28 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="py-24">
+        <section className="py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold tracking-tight">
-                Why Choose {PLATFORM_NAME}?
-              </h2>
-              <p className="mt-4 text-slate-600">
-                Built with enterprise standards for security, performance, and
-                user experience.
+            <div className="max-w-xl">
+              <SectionTitle>Why {PLATFORM_NAME}</SectionTitle>
+              <p className={`mt-3 ${type.lead}`}>
+                Practical courses, clear enrollment, and support when you need it.
               </p>
             </div>
-            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {features.map((feature) => (
                 <Card
                   key={feature.title}
                   className="border-border transition-shadow hover:shadow-md"
                 >
-                  <CardContent className="p-6">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
-                      <feature.icon className="h-6 w-6" />
+                  <CardContent className="p-5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-50 text-brand-700">
+                      <feature.icon className="h-5 w-5" />
                     </div>
-                    <h3 className="mt-4 text-lg font-semibold">
+                    <h3 className={`mt-4 ${type.cardTitle}`}>
                       {feature.title}
                     </h3>
-                    <p className="mt-2 text-sm text-slate-500">
+                    <p className={`mt-2 ${type.bodySm}`}>
                       {feature.description}
                     </p>
                   </CardContent>
@@ -134,38 +130,36 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="bg-muted py-24">
+        <section className="border-y border-border bg-muted py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-14">
               <div>
-                <h2 className="text-3xl font-bold tracking-tight">
-                  Simple Payment Flow
-                </h2>
-                <p className="mt-4 text-slate-600">
-                  No automated payment gateways needed. Submit your payment
-                  proof, get verified by our team, and start learning.
+                <SectionTitle>How payment works</SectionTitle>
+                <p className={`mt-3 ${type.lead}`}>
+                  Pay by bank transfer or mobile money, upload your receipt, and
+                  start once an admin confirms enrollment.
                 </p>
-                <ul className="mt-8 space-y-4">
+                <ul className="mt-8 space-y-3">
                   {steps.map((step, i) => (
-                    <li key={step} className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-semibold text-white">
+                    <li key={step} className="flex items-start gap-3">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-700 text-xs font-semibold text-white">
                         {i + 1}
                       </div>
-                      <span className="text-foreground">{step}</span>
+                      <span className={type.body}>{step}</span>
                     </li>
                   ))}
                 </ul>
               </div>
-              <Card className="shadow-lg">
-                <CardContent className="p-8">
-                  <div className="space-y-4">
+              <Card>
+                <CardContent className="p-5 sm:p-6">
+                  <div className="space-y-3">
                     {steps.map((step) => (
                       <div
                         key={step}
-                        className="flex items-center gap-3 rounded-lg border border-border p-4"
+                        className="flex items-center gap-3 rounded-md border border-border bg-white p-3.5"
                       >
-                        <CheckCircle2 className="h-5 w-5 text-success" />
-                        <span className="text-sm font-medium">{step}</span>
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
+                        <span className="text-sm font-medium text-slate-800">{step}</span>
                       </div>
                     ))}
                   </div>
@@ -175,21 +169,20 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="py-24">
-          <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold tracking-tight">
-              Ready to Start Learning?
-            </h2>
-            <p className="mt-4 text-slate-600">
-              Join thousands of learners on {PLATFORM_NAME} and take the next step in
-              your career.
+        <section className="py-16 sm:py-20">
+          <div className="mx-auto max-w-xl px-4 sm:px-6 lg:px-8">
+            <SectionTitle className="text-center">Start learning</SectionTitle>
+            <p className={`mt-3 text-center ${type.lead}`}>
+              Browse the catalog and enroll in your first course today.
             </p>
-            <Link href="/courses" className="mt-8 inline-block">
-              <Button size="lg" className="gap-2">
-                Browse All Courses
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+            <div className="mt-7 text-center">
+              <Link href="/courses">
+                <Button size="lg" className="gap-2">
+                  Browse all courses
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
       </main>

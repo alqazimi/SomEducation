@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatDate } from "@/lib/utils";
 
@@ -176,15 +177,15 @@ export function AdminUsers() {
 
   return (
     <div>
-      <div className="border-b border-border pb-6">
-        <p className="text-sm font-medium text-slate-500">Administration</p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight">User Management</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          {isOwner
-            ? "As platform owner, you can manage admins, teachers, and students."
-            : "Admins can manage students and teachers only."}
-        </p>
-      </div>
+      <DashboardPageHeader
+        eyebrow="Administration"
+        title="User management"
+        description={
+          isOwner
+            ? "Manage admins, teachers, and students across the platform."
+            : "Manage students and teachers. Admin accounts are owner-only."
+        }
+      />
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <div className="relative min-w-[220px] flex-1">

@@ -68,12 +68,15 @@ export function SomEducationWordmark({
   compact = false,
 }: SomEducationWordmarkProps) {
   return (
-    <span className={cn("truncate font-bold tracking-tight", className)}>
-      <span className="text-brand-700">Som</span>
-      <span className="text-foreground">Education</span>
-      {!compact && (
-        <span className="sr-only">SomEducation</span>
+    <span
+      className={cn(
+        "truncate text-[0.9375rem] font-medium tracking-[-0.02em] sm:text-base",
+        className
       )}
+    >
+      <span className="text-brand-700">Som</span>
+      <span className="text-stone-900">Education</span>
+      {!compact && <span className="sr-only">SomEducation</span>}
     </span>
   );
 }

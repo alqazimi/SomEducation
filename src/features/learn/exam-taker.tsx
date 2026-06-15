@@ -17,6 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageTitle } from "@/components/ui/typography";
+import { type } from "@/lib/typography";
 import { cn } from "@/lib/utils";
 
 type ExamTakerProps = {
@@ -85,7 +87,7 @@ export function ExamTaker({ slug, examId }: ExamTakerProps) {
         <main className="flex min-h-[60vh] items-center justify-center px-4">
           <Card className="w-full max-w-md text-center">
             <CardContent className="py-12">
-              <h1 className="text-xl font-bold">Exam not found</h1>
+              <PageTitle>Exam not found</PageTitle>
               <Link href={`/learn/${slug}`} className="mt-4 inline-block">
                 <Button variant="outline">Back to course</Button>
               </Link>
@@ -111,7 +113,7 @@ export function ExamTaker({ slug, examId }: ExamTakerProps) {
                 Back to course home
               </Link>
               <div className="mt-4 flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl font-bold">{result.exam.title}</h1>
+                <h1 className={type.pageTitle}>{result.exam.title}</h1>
                 <Badge variant={result.attempt.passed ? "default" : "secondary"}>
                   {result.attempt.passed ? "Passed" : "Not passed"}
                 </Badge>
@@ -214,7 +216,7 @@ export function ExamTaker({ slug, examId }: ExamTakerProps) {
                 <p className="text-sm font-medium text-slate-500">
                   {examData.moduleTitle}
                 </p>
-                <h1 className="text-2xl font-bold">{examData.exam.title}</h1>
+                <h1 className={type.pageTitle}>{examData.exam.title}</h1>
                 <p className="mt-2 text-sm text-slate-600">
                   {examData.exam.questionCount} questions · Pass{" "}
                   {examData.exam.passingScore}%

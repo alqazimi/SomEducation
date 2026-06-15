@@ -5,10 +5,13 @@ import { useQuery } from "convex/react";
 import { BookOpen, Plus, Users } from "lucide-react";
 import { api } from "convex/_generated/api";
 import { Badge } from "@/components/ui/badge";
+import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatPrice } from "@/lib/utils";
+import { SectionTitle } from "@/components/ui/typography";
 import { formatEnrollmentCount } from "@/lib/enrollment";
+import { type } from "@/lib/typography";
+import { formatPrice } from "@/lib/utils";
 
 const statusVariant: Record<
   string,
@@ -48,32 +51,27 @@ export function TeacherDashboard() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
-        <div>
-          <p className="text-sm font-medium text-slate-500">Instructor Studio</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">My Courses</h1>
-          <p className="mt-2 text-sm text-slate-600">
-            Track enrollments and manage your course catalog
-          </p>
-        </div>
+      <DashboardPageHeader
+        eyebrow="Instructor"
+        title="My courses"
+        description="Track enrollments and manage your catalog."
+      >
         <Link href="/dashboard/teacher/courses/new">
           <Button className="gap-2">
             <Plus className="h-4 w-4" />
-            New Course
+            New course
           </Button>
         </Link>
-      </div>
+      </DashboardPageHeader>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         {summaryStats.map((item) => (
           <Card key={item.label}>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-slate-500">
-                {item.label}
-              </CardTitle>
+              <CardTitle className={type.muted}>{item.label}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{item.value}</div>
+              <div className={type.stat}>{item.value}</div>
             </CardContent>
           </Card>
         ))}
@@ -81,13 +79,13 @@ export function TeacherDashboard() {
 
       <div className="mt-8 space-y-4">
         {courses === undefined ? (
-          <p className="text-sm text-slate-500">Loading courses...</p>
+          <p className={type.muted}>Loading courses...</p>
         ) : courses.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center py-16 text-center">
               <BookOpen className="h-10 w-10 text-slate-300" />
-              <p className="mt-4 font-medium text-slate-700">No courses yet</p>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className={`mt-4 ${type.cardTitle}`}>No courses yet</p>
+              <p className={`mt-1 ${type.muted}`}>
                 Create your first course to start building your curriculum.
               </p>
               <Link href="/dashboard/teacher/courses/new" className="mt-6">
@@ -116,14 +114,14 @@ export function TeacherDashboard() {
                 <div className="flex flex-1 flex-col justify-center gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-lg font-semibold text-slate-900">
+                      <h3 className={type.cardTitle}>
                         {course.title}
                       </h3>
                       <Badge variant={statusVariant[course.status] ?? "outline"}>
                         {statusLabel[course.status] ?? course.status}
                       </Badge>
                     </div>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className={`mt-1 ${type.muted}`}>
                       {formatPrice(course.price, course.currency)} ·{" "}
                       <span className="capitalize">{course.difficulty}</span>
                       {course.moduleCount > 0 && (

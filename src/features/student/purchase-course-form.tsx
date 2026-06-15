@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { paymentFormSchema, type PaymentFormValues } from "@/schemas";
+import { type } from "@/lib/typography";
 import { formatPrice } from "@/lib/utils";
 import { useState } from "react";
 
@@ -133,10 +134,10 @@ export function PurchaseCourseForm() {
       >
         ← Back to course
       </Link>
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight">
+      <h1 className={`mt-4 ${type.pageTitle}`}>
         Purchase: {course.title}
       </h1>
-      <p className="mt-1 text-slate-500">
+      <p className={`mt-1 ${type.muted}`}>
         Amount: {formatPrice(course.price, course.currency)}
       </p>
 
@@ -204,12 +205,12 @@ export function PurchaseCourseForm() {
             <CardTitle>Payment Instructions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-lg border border-border bg-slate-50 p-4">
-              <p className="font-medium text-slate-900">Send payment to:</p>
-              <p className="mt-2 text-2xl font-semibold">
+            <div className="rounded-lg border border-border bg-stone-50 p-4">
+              <p className={type.cardTitle}>Send payment to:</p>
+              <p className={`mt-2 ${type.price}`}>
                 {settings?.paymentPhone ?? "+44XXXXXXXXXX"}
               </p>
-              <p className="mt-4 text-sm text-slate-600">
+              <p className={`mt-4 ${type.bodySm}`}>
                 {settings?.paymentInstructions}
               </p>
             </div>

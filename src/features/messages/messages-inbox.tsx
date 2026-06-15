@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { formatDate } from "@/lib/utils";
 
 export function MessagesInbox() {
@@ -11,8 +12,11 @@ export function MessagesInbox() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Messages</h1>
-      <p className="mt-1 text-slate-500">Your inbox</p>
+      <DashboardPageHeader
+        eyebrow="Inbox"
+        title="Messages"
+        description="Conversations with students, teachers, and administrators."
+      />
 
       <div className="mt-8 space-y-4">
         {!messages ? (

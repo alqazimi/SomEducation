@@ -9,6 +9,8 @@ import { CourseCard } from "@/components/courses/course-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { SectionTitle } from "@/components/ui/typography";
+import { type } from "@/lib/typography";
 
 type EnrolledCourse = NonNullable<
   FunctionReturnType<typeof api.lessons.listEnrolledCourses>[number]
@@ -24,7 +26,7 @@ function renderCourseGrid(items: EnrolledCourse[], emptyLabel: string) {
   if (items.length === 0) {
     if (!emptyLabel) return null;
     return (
-      <p className="rounded-lg border border-dashed border-border px-4 py-8 text-center text-sm text-slate-500">
+      <p className={`rounded-lg border border-dashed border-border px-4 py-8 text-center ${type.muted}`}>
         {emptyLabel}
       </p>
     );
@@ -85,8 +87,8 @@ export function StudentCoursesSection() {
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-brand-600">
             <BookOpen className="h-7 w-7" />
           </div>
-          <h2 className="mt-5 text-xl font-semibold">No courses yet</h2>
-          <p className="mt-2 max-w-md text-sm text-slate-500">
+          <SectionTitle className="mt-5">No courses yet</SectionTitle>
+          <p className={`mt-2 max-w-md ${type.muted}`}>
             Browse the catalog, enroll in a course, and it will appear here on
             your dashboard.
           </p>
@@ -105,7 +107,7 @@ export function StudentCoursesSection() {
     <div className="space-y-10">
       <section>
         <div className="mb-4 flex items-center gap-3">
-          <h2 className="text-lg font-semibold">In progress</h2>
+          <SectionTitle>In progress</SectionTitle>
           <Badge variant="secondary">{inProgress.length}</Badge>
         </div>
         {renderCourseGrid(
@@ -117,7 +119,7 @@ export function StudentCoursesSection() {
       {completed.length > 0 && (
         <section>
           <div className="mb-4 flex items-center gap-3">
-            <h2 className="text-lg font-semibold">Completed</h2>
+            <SectionTitle>Completed</SectionTitle>
             <Badge variant="secondary">{completed.length}</Badge>
           </div>
           {renderCourseGrid(completed, "")}

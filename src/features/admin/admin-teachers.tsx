@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
 import { Badge } from "@/components/ui/badge";
+import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -14,8 +15,11 @@ export function AdminTeachers() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Teacher Requests</h1>
-      <p className="mt-1 text-slate-500">Approve or reject teacher applications</p>
+      <DashboardPageHeader
+        eyebrow="Administration"
+        title="Teacher requests"
+        description="Approve or reject applications to become an instructor."
+      />
 
       <div className="mt-8 space-y-4">
         {!requests ? (

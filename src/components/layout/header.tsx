@@ -92,10 +92,10 @@ export function Header() {
             <Link
               href="/"
               className={cn(
-                "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 pathname === "/"
-                  ? "bg-brand-50 text-brand-700"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-foreground"
+                  ? "text-stone-900"
+                  : "text-stone-600 hover:text-stone-900"
               )}
             >
               Home
@@ -103,10 +103,10 @@ export function Header() {
             <Link
               href="/courses"
               className={cn(
-                "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 pathname.startsWith("/courses")
-                  ? "bg-brand-50 text-brand-700"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-foreground"
+                  ? "text-stone-900"
+                  : "text-stone-600 hover:text-stone-900"
               )}
             >
               Courses
@@ -114,10 +114,10 @@ export function Header() {
             <Link
               href="/support"
               className={cn(
-                "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 pathname === "/support"
-                  ? "bg-brand-50 text-brand-700"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-foreground"
+                  ? "text-stone-900"
+                  : "text-stone-600 hover:text-stone-900"
               )}
             >
               Support
@@ -126,10 +126,10 @@ export function Header() {
               <Link
                 href={dashboardHref}
                 className={cn(
-                  "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   isDashboardOverview(pathname)
-                    ? "bg-brand-50 text-brand-700"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-foreground"
+                    ? "text-stone-900"
+                    : "text-stone-600 hover:text-stone-900"
                 )}
               >
                 Dashboard
@@ -148,7 +148,7 @@ export function Header() {
                 </Button>
               </SignInButton>
               <Link href="/sign-up">
-                <Button size="sm">Join for Free</Button>
+                <Button size="sm">Sign up</Button>
               </Link>
             </Show>
             <Show when="signed-in">
@@ -189,8 +189,8 @@ export function Header() {
                     className={cn(
                       "block rounded-lg px-4 py-3 text-sm font-medium",
                       isActive
-                        ? "bg-brand-50 text-brand-700"
-                        : "text-slate-700 hover:bg-slate-50"
+                        ? "bg-stone-100 text-stone-900"
+                        : "text-stone-700 hover:bg-stone-50"
                     )}
                   >
                     {link.label}
@@ -203,9 +203,9 @@ export function Header() {
                     href={dashboardHref}
                     className={cn(
                       "block rounded-lg px-4 py-3 text-sm font-medium",
-                      isDashboardOverview(pathname)
-                        ? "bg-brand-50 text-brand-700"
-                        : "text-slate-700 hover:bg-slate-50"
+                    isDashboardOverview(pathname)
+                      ? "bg-stone-100 text-stone-900"
+                      : "text-stone-700 hover:bg-stone-50"
                     )}
                   >
                     Dashboard
@@ -223,8 +223,8 @@ export function Header() {
                         className={cn(
                           "block rounded-lg px-4 py-3 text-sm font-medium",
                           isDashboardNavActive(pathname, item.href, user.role)
-                            ? "bg-brand-50 text-brand-700"
-                            : "text-slate-700 hover:bg-slate-50"
+                            ? "bg-stone-100 text-stone-900"
+                            : "text-stone-700 hover:bg-stone-50"
                         )}
                       >
                         {item.label}

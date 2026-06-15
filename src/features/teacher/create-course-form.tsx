@@ -7,6 +7,7 @@ import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
+import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -82,15 +83,11 @@ export function CreateCourseForm() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="border-b border-border pb-6">
-        <p className="text-sm font-medium text-slate-500">Instructor Studio</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
-          Create New Course
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Set up your course details and initial curriculum structure.
-        </p>
-      </div>
+      <DashboardPageHeader
+        eyebrow="Instructor"
+        title="Create new course"
+        description="Set up course details and your first module."
+      />
 
       <form className="mt-8 space-y-10" onSubmit={form.handleSubmit(onSubmit)}>
         <section>

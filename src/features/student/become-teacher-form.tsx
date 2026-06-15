@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
+import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,10 +62,11 @@ export function BecomeTeacherForm() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Become a Teacher</h1>
-      <p className="mt-1 text-slate-500">
-        Request access to create and publish courses
-      </p>
+      <DashboardPageHeader
+        eyebrow="Instructor"
+        title="Become a teacher"
+        description="Request access to create and publish courses on the platform."
+      />
 
       <Card className="mt-8">
         <CardHeader>

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
 import { Badge } from "@/components/ui/badge";
+import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate, formatPrice } from "@/lib/utils";
@@ -26,8 +27,11 @@ export function AdminPayments() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Payment Verification</h1>
-      <p className="mt-1 text-slate-500">Review and verify student payments</p>
+      <DashboardPageHeader
+        eyebrow="Administration"
+        title="Payment verification"
+        description="Review and approve student payment submissions."
+      />
 
       <div className="mt-8 space-y-6">
         {!payments ? (
