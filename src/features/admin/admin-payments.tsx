@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
@@ -8,7 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatDate, formatPrice } from "@/lib/utils";
+
+type NoteAction = "reject" | "resubmit";
 
 export function AdminPayments() {
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
@@ -20,12 +24,38 @@ export function AdminPayments() {
   const reject = useMutation(api.payments.reject);
   const requestResubmit = useMutation(api.payments.requestResubmit);
 
+  const [noteDialog, setNoteDialog] = useState<{
+    paymentId: Id<"payments">;
+    action: NoteAction;
+  } | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
   async function handleApprove(paymentId: Id<"payments">) {
     try {
       await approve({ paymentId });
       toast.success("Payment approved");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed");
+    }
+  }
+
+  async function handleNoteConfirm(note?: string) {
+    if (!noteDialog || !note?.trim()) return;
+
+    setActionLoading(true);
+    try {
+      if (noteDialog.action === "reject") {
+        await reject({ paymentId: noteDialog.paymentId, note });
+        toast.success("Payment rejected");
+      } else {
+        await requestResubmit({ paymentId: noteDialog.paymentId, note });
+        toast.success("Resubmit request sent");
+      }
+      setNoteDialog(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed");
+    } finally {
+      setActionLoading(false);
     }
   }
 
@@ -112,9 +142,9 @@ export function AdminPayments() {
                     size="sm"
                     variant="destructive"
                     onClick={() =>
-                      reject({
+                      setNoteDialog({
                         paymentId: payment._id,
-                        note: "Payment could not be verified",
+                        action: "reject",
                       })
                     }
                   >
@@ -124,9 +154,9 @@ export function AdminPayments() {
                     size="sm"
                     variant="outline"
                     onClick={() =>
-                      requestResubmit({
+                      setNoteDialog({
                         paymentId: payment._id,
-                        note: "Please upload a clearer screenshot",
+                        action: "resubmit",
                       })
                     }
                   >
@@ -138,6 +168,36 @@ export function AdminPayments() {
           ))
         )}
       </div>
+
+      <ConfirmDialog
+        open={noteDialog?.action === "reject"}
+        onOpenChange={(open) => !open && setNoteDialog(null)}
+        title="Reject payment"
+        description="Tell the student why this payment was rejected."
+        confirmLabel="Reject payment"
+        variant="destructive"
+        inputMode="textarea"
+        inputLabel="Message to student"
+        inputPlaceholder="e.g. Transaction reference does not match the screenshot"
+        requiredInput
+        loading={actionLoading}
+        onConfirm={handleNoteConfirm}
+      />
+
+      <ConfirmDialog
+        open={noteDialog?.action === "resubmit"}
+        onOpenChange={(open) => !open && setNoteDialog(null)}
+        title="Request new screenshot"
+        description="Explain what the student should fix or upload again."
+        confirmLabel="Send request"
+        inputMode="textarea"
+        inputLabel="Message to student"
+        inputPlaceholder="e.g. Please upload a clearer screenshot showing the full transaction details"
+        defaultInputValue="Please upload a clearer screenshot showing the full transaction details."
+        requiredInput
+        loading={actionLoading}
+        onConfirm={handleNoteConfirm}
+      />
     </div>
   );
 }

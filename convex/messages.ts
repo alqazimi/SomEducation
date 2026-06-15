@@ -1,6 +1,11 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireAdmin, requireCurrentUser, isAdminOrOwner } from "./lib/auth";
+import {
+  requireAdmin,
+  requireCurrentUser,
+  isAdminOrOwner,
+} from "./lib/auth";
+import { UserRole } from "./lib/types";
 import { createNotification } from "./lib/notifications";
 import { checkRateLimit, sanitizeText } from "./lib/validation";
 
@@ -87,6 +92,58 @@ export const sendAsAdmin = mutation({
     });
 
     return messageId;
+  },
+});
+
+function canMessageRole(senderRole: UserRole, recipientRole: UserRole) {
+  if (senderRole === "student") {
+    return isAdminOrOwner(recipientRole);
+  }
+  if (senderRole === "teacher") {
+    return isAdminOrOwner(recipientRole) || recipientRole === "student";
+  }
+  return true;
+}
+
+export const listMessageRecipients = query({
+  args: {
+    search: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireCurrentUser(ctx);
+    const search = args.search?.trim().toLowerCase();
+
+    const users = await ctx.db.query("users").collect();
+    return users
+      .filter(
+        (candidate) =>
+          candidate.status === "active" &&
+          candidate._id !== user._id &&
+          canMessageRole(user.role, candidate.role)
+      )
+      .filter((candidate) => {
+        if (!search) return true;
+        const name = `${candidate.firstName ?? ""} ${candidate.lastName ?? ""}`
+          .trim()
+          .toLowerCase();
+        return (
+          candidate.email.toLowerCase().includes(search) || name.includes(search)
+        );
+      })
+      .sort((a, b) => {
+        const aAdmin = isAdminOrOwner(a.role) ? 0 : 1;
+        const bAdmin = isAdminOrOwner(b.role) ? 0 : 1;
+        if (aAdmin !== bAdmin) return aAdmin - bAdmin;
+        return a.email.localeCompare(b.email);
+      })
+      .slice(0, 50)
+      .map((candidate) => ({
+        _id: candidate._id,
+        firstName: candidate.firstName,
+        lastName: candidate.lastName,
+        email: candidate.email,
+        role: candidate.role,
+      }));
   },
 });
 
