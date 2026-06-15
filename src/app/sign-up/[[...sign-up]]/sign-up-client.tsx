@@ -1,23 +1,23 @@
 "use client";
 
-import { SignIn } from "@clerk/nextjs";
+import { SignUp } from "@clerk/nextjs";
 import { useSearchParams } from "next/navigation";
 import { clerkAppearance } from "@/lib/clerk-appearance";
 import { sanitizeRedirectPath } from "@/lib/auth-urls";
 
-export default function SignInClient() {
+export default function SignUpClient() {
   const searchParams = useSearchParams();
   const redirectUrl = sanitizeRedirectPath(searchParams.get("redirect_url"));
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-8">
       <div className="w-full max-w-[min(100%,24rem)]">
-        <SignIn
-          path="/sign-in"
+        <SignUp
+          path="/sign-up"
           routing="path"
-          signUpUrl="/sign-up"
+          signInUrl="/sign-in"
           fallbackRedirectUrl={redirectUrl}
-          signUpFallbackRedirectUrl={redirectUrl}
+          signInFallbackRedirectUrl={redirectUrl}
           appearance={clerkAppearance}
         />
       </div>
