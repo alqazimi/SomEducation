@@ -7,10 +7,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode, useState } from "react";
 import { Toaster } from "sonner";
 import { UserSync } from "@/components/auth/user-sync";
+import { getConvexClientUrl } from "@/lib/convex-url";
 
-const convex = new ConvexReactClient(
-  process.env.NEXT_PUBLIC_CONVEX_URL as string
-);
+const convex = new ConvexReactClient(getConvexClientUrl());
 
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(

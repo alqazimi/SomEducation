@@ -62,6 +62,23 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Vercel deployment
+
+In **Vercel → Project → Settings → Environment Variables**, add these for **Production**:
+
+| Variable | Value |
+|----------|--------|
+| `NEXT_PUBLIC_CONVEX_URL` | `https://precious-duck-100.eu-west-1.convex.cloud` |
+| `NEXT_PUBLIC_APP_URL` | Your Vercel URL (e.g. `https://som-education.vercel.app`) |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | From Clerk Dashboard |
+| `CLERK_SECRET_KEY` | From Clerk Dashboard |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | `/sign-in` |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | `/sign-up` |
+| `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` | `/dashboard` |
+| `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` | `/dashboard` |
+
+Redeploy after saving env vars. Use your **production** Convex URL (`precious-duck-100`), not the dev URL (`mild-seahorse-699`).
+
 ## Admin Setup
 
 1. Sign up with an email in `ADMIN_EMAILS`
