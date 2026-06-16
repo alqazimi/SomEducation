@@ -10,6 +10,10 @@ import { logAudit } from "./lib/audit";
 import { createNotification } from "./lib/notifications";
 import { validateStorageFile } from "./lib/files";
 import {
+  findOpenPaymentForCourse,
+  isFixablePaymentStatus,
+} from "./lib/payments";
+import {
   checkRateLimit,
   sanitizeText,
   validatePhone,
@@ -53,15 +57,15 @@ export const submit = mutation({
       throw new Error("You are already enrolled in this course");
     }
 
-    const pendingPayment = await ctx.db
-      .query("payments")
-      .withIndex("by_student_course", (q) =>
-        q.eq("studentId", user._id).eq("courseId", args.courseId)
-      )
-      .filter((q) => q.eq(q.field("status"), "pending"))
-      .first();
-    if (pendingPayment) {
-      throw new Error("You already have a pending payment for this course");
+    const openPayment = await findOpenPaymentForCourse(
+      ctx,
+      user._id,
+      args.courseId
+    );
+    if (openPayment) {
+      throw new Error(
+        "You already have a payment request for this course. Update it from your payment history instead of submitting again."
+      );
     }
 
     if (!validatePhone(args.phone)) {
@@ -90,6 +94,60 @@ export const submit = mutation({
   },
 });
 
+export const fixAndResubmit = mutation({
+  args: {
+    paymentId: v.id("payments"),
+    screenshotStorageId: v.id("_storage"),
+    paymentProviderId: v.id("paymentProviders"),
+    transactionReference: v.string(),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireCurrentUser(ctx);
+    await checkRateLimit(ctx, `payment-fix:${user._id}`, 10);
+
+    const payment = await ctx.db.get(args.paymentId);
+    if (!payment || payment.studentId !== user._id) {
+      throw new Error("Payment not found");
+    }
+    if (!isFixablePaymentStatus(payment.status)) {
+      throw new Error("This payment cannot be updated right now");
+    }
+
+    const provider = await ctx.db.get(args.paymentProviderId);
+    if (!provider || !provider.isActive || !provider.accountNumber.trim()) {
+      throw new Error("Selected payment method is not available");
+    }
+    if (provider.type !== "mobile_money" && provider.type !== "bank_transfer") {
+      throw new Error("Invalid payment method");
+    }
+
+    await validateStorageFile(ctx, args.screenshotStorageId);
+
+    const now = Date.now();
+    await ctx.db.patch(args.paymentId, {
+      screenshotStorageId: args.screenshotStorageId,
+      paymentProviderId: provider._id,
+      method: provider.type,
+      transactionReference: sanitizeText(args.transactionReference, 100),
+      notes: args.notes ? sanitizeText(args.notes, 500) : payment.notes,
+      status: "pending",
+      adminNote: undefined,
+      reviewedBy: undefined,
+      reviewedAt: undefined,
+      updatedAt: now,
+    });
+
+    await logAudit(ctx, {
+      actorId: user._id,
+      action: "payment.resubmitted",
+      entityType: "payments",
+      entityId: args.paymentId,
+    });
+  },
+});
+
+/** @deprecated Use fixAndResubmit */
 export const resubmitScreenshot = mutation({
   args: {
     paymentId: v.id("payments"),
@@ -101,8 +159,11 @@ export const resubmitScreenshot = mutation({
     if (!payment || payment.studentId !== user._id) {
       throw new Error("Payment not found");
     }
-    if (payment.status !== "resubmit_requested") {
+    if (!isFixablePaymentStatus(payment.status)) {
       throw new Error("Screenshot resubmission not requested");
+    }
+    if (!payment.paymentProviderId) {
+      throw new Error("Payment provider missing — use the full fix form");
     }
 
     await validateStorageFile(ctx, args.screenshotStorageId);
@@ -110,8 +171,38 @@ export const resubmitScreenshot = mutation({
     await ctx.db.patch(args.paymentId, {
       screenshotStorageId: args.screenshotStorageId,
       status: "pending",
+      adminNote: undefined,
+      reviewedBy: undefined,
+      reviewedAt: undefined,
       updatedAt: Date.now(),
     });
+  },
+});
+
+export const getOpenForCourse = query({
+  args: { courseId: v.id("courses") },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) return null;
+
+    const payment = await findOpenPaymentForCourse(
+      ctx,
+      user._id,
+      args.courseId
+    );
+    if (!payment) return null;
+
+    const [course, provider] = await Promise.all([
+      ctx.db.get(payment.courseId),
+      payment.paymentProviderId
+        ? ctx.db.get(payment.paymentProviderId)
+        : null,
+    ]);
+    const screenshotUrl = await ctx.storage.getUrl(
+      payment.screenshotStorageId
+    );
+
+    return { ...payment, course, provider, screenshotUrl };
   },
 });
 

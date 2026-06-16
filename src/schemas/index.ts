@@ -17,6 +17,17 @@ export const paymentFormSchema = z.object({
 
 export type PaymentFormValues = z.infer<typeof paymentFormSchema>;
 
+export const paymentFixSchema = z.object({
+  paymentProviderId: z.string().min(1, "Payment provider is required"),
+  transactionReference: z
+    .string()
+    .min(3, "Transaction reference required")
+    .max(100),
+  notes: z.string().max(500).optional(),
+});
+
+export type PaymentFixValues = z.infer<typeof paymentFixSchema>;
+
 export const courseFormSchema = z.object({
   title: z.string().min(3).max(200),
   description: z.string().min(10).max(10000),

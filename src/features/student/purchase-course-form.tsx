@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2, Smartphone } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { paymentFormSchema, type PaymentFormValues } from "@/schemas";
+import { PaymentFixFormFromRecord } from "@/features/student/payment-fix-form";
+import {
+  PAYMENT_PROOF_ACCEPT,
+  uploadPaymentProofToConvex,
+} from "@/lib/payment-upload";
 import { type } from "@/lib/typography";
 import { cn, formatPrice } from "@/lib/utils";
 
@@ -33,6 +38,8 @@ const typeOptions: Array<{
 export function PurchaseCourseForm() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
+  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(1);
   const [uploading, setUploading] = useState(false);
   const [screenshotId, setScreenshotId] = useState<Id<"_storage"> | null>(null);
@@ -41,6 +48,10 @@ export function PurchaseCourseForm() {
     useState<Id<"paymentProviders"> | null>(null);
 
   const course = useQuery(api.courses.getBySlug, { slug: params.slug });
+  const openPayment = useQuery(
+    api.payments.getOpenForCourse,
+    course ? { courseId: course._id } : "skip"
+  );
   const providers = useQuery(
     api.paymentProviders.list,
     paymentType ? { type: paymentType, activeOnly: true } : "skip"
@@ -72,35 +83,29 @@ export function PurchaseCourseForm() {
   }
 
   async function handleFileUpload(file: File) {
-    if (!["image/png", "image/jpeg", "image/jpg", "application/pdf"].includes(file.type)) {
-      toast.error("Only PNG, JPG, JPEG, and PDF files are allowed");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File must be under 5MB");
+    if (!isAuthenticated) {
+      toast.error("Please wait until you are signed in, then try again.");
       return;
     }
 
     setUploading(true);
     try {
-      const uploadUrl = await generateUploadUrl();
-      const result = await fetch(uploadUrl, {
-        method: "POST",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
-      if (!result.ok) {
-        throw new Error("Upload request failed");
-      }
-      const { storageId } = await result.json();
-      setScreenshotId(storageId as Id<"_storage">);
+      const storageId = await uploadPaymentProofToConvex(
+        () => generateUploadUrl(),
+        file
+      );
+      setScreenshotId(storageId);
       toast.success("Payment screenshot uploaded");
     } catch (error) {
+      setScreenshotId(null);
       toast.error(
         error instanceof Error ? error.message : "Upload failed. Please sign in again and retry."
       );
     } finally {
       setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   }
 
@@ -150,6 +155,54 @@ export function PurchaseCourseForm() {
           <Button>Continue Learning</Button>
         </Link>
       </div>
+    );
+  }
+
+  if (openPayment === undefined) {
+    return <p className="text-sm text-slate-500">Loading payment status...</p>;
+  }
+
+  if (openPayment?.status === "pending") {
+    return (
+      <div className="text-center">
+        <p className="text-slate-600">
+          You already submitted payment for this course. It is awaiting admin
+          review.
+        </p>
+        <Link href="/dashboard/student/payments" className="mt-4 inline-block">
+          <Button>View payment status</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  if (
+    openPayment &&
+    (openPayment.status === "rejected" ||
+      openPayment.status === "resubmit_requested")
+  ) {
+    return (
+      <>
+        <Link
+          href={`/courses/${params.slug}`}
+          className="text-sm text-slate-600 hover:text-slate-900"
+        >
+          ← Back to course
+        </Link>
+        <h1 className={`mt-4 ${type.pageTitle}`}>Update payment: {course.title}</h1>
+        <p className={`mt-1 ${type.muted}`}>
+          Amount: {formatPrice(course.price, course.currency)}
+        </p>
+        <Card className="mt-8">
+          <CardContent className="pt-6">
+            <PaymentFixFormFromRecord
+              payment={openPayment}
+              showSupportLink={false}
+              onSuccess={() => router.push("/dashboard/student/payments")}
+            />
+          </CardContent>
+        </Card>
+      </>
     );
   }
 
@@ -324,14 +377,18 @@ export function PurchaseCourseForm() {
               </p>
             )}
             <Input
+              ref={fileInputRef}
               type="file"
-              accept=".png,.jpg,.jpeg,.pdf"
-              disabled={uploading}
+              accept={PAYMENT_PROOF_ACCEPT}
+              disabled={uploading || authLoading || !isAuthenticated}
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) void handleFileUpload(file);
               }}
             />
+            {authLoading && (
+              <p className="text-sm text-slate-500">Connecting your account...</p>
+            )}
             {uploading && <p className="text-sm text-slate-500">Uploading...</p>}
             {screenshotId && (
               <p className="text-sm text-green-600">Screenshot uploaded successfully</p>

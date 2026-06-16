@@ -20,6 +20,7 @@ import {
   isCourseInstructor,
 } from "./lib/courseAccess";
 import { getActiveEnrollmentCount } from "./lib/enrollmentStats";
+import { findOpenPaymentForCourse } from "./lib/payments";
 import { courseDifficulty, courseStatus } from "./schema";
 import { Doc, Id } from "./_generated/dataModel";
 import { QueryCtx } from "./_generated/server";
@@ -172,6 +173,7 @@ export const getBySlug = query({
     ]);
 
     let isEnrolled = false;
+    let activePayment: { _id: Id<"payments">; status: string } | null = null;
     if (user) {
       const enrollment = await ctx.db
         .query("enrollments")
@@ -180,6 +182,20 @@ export const getBySlug = query({
         )
         .first();
       isEnrolled = enrollment?.status === "active";
+
+      if (!isEnrolled) {
+        const openPayment = await findOpenPaymentForCourse(
+          ctx,
+          user._id,
+          course._id
+        );
+        if (openPayment) {
+          activePayment = {
+            _id: openPayment._id,
+            status: openPayment.status,
+          };
+        }
+      }
     }
 
     const modulesWithLessons = await Promise.all(
@@ -292,6 +308,7 @@ export const getBySlug = query({
       modules: modulesWithLessons,
       thumbnailUrl,
       isEnrolled,
+      activePayment,
       isCourseInstructor: isInstructor,
       canLearn,
     };

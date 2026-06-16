@@ -31,9 +31,19 @@ export async function validateStorageFile(
   }
 
   const contentType = metadata.contentType ?? "";
-  if (!ALLOWED_MIME_TYPES.has(contentType)) {
+  const normalizedType =
+    contentType === "application/octet-stream" ? "" : contentType;
+
+  if (normalizedType && !ALLOWED_MIME_TYPES.has(normalizedType)) {
     throwError(
-      "Invalid file type. Only PNG, JPG, JPEG, and PDF are allowed.",
+      "Invalid file type. Only PNG, JPG, JPEG, WEBP, and PDF are allowed.",
+      "VALIDATION"
+    );
+  }
+
+  if (!normalizedType && (!metadata.size || metadata.size <= 0)) {
+    throwError(
+      "Invalid file type. Only PNG, JPG, JPEG, WEBP, and PDF are allowed.",
       "VALIDATION"
     );
   }

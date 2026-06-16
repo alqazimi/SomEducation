@@ -25,6 +25,10 @@ export function StudentDashboard() {
 
   const pendingPayments =
     payments?.filter((p) => p.status === "pending") ?? [];
+  const fixPayments =
+    payments?.filter(
+      (p) => p.status === "rejected" || p.status === "resubmit_requested"
+    ) ?? [];
 
   const quickLinks = [
     {
@@ -63,6 +67,28 @@ export function StudentDashboard() {
           </Button>
         </Link>
       </DashboardPageHeader>
+
+      {fixPayments.length > 0 && (
+        <Card className="mt-6 border-red-200 bg-red-50 shadow-sm">
+          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-medium text-red-900">
+                {fixPayments.length} payment
+                {fixPayments.length === 1 ? " needs" : "s need"} your attention
+              </p>
+              <p className="mt-1 text-sm text-red-800">
+                Upload new proof or change your payment method — no need to
+                purchase again.
+              </p>
+            </div>
+            <Link href="/dashboard/student/payments">
+              <Button variant="outline" className="border-red-300 bg-white">
+                Fix Payment
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
 
       {pendingPayments.length > 0 && (
         <Card className="mt-6 border-amber-200 bg-amber-50 shadow-sm">

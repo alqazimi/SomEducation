@@ -145,14 +145,36 @@ export function CourseDetailClient({ slug }: { slug: string }) {
                   ) : (
                     <>
                       <Show when="signed-in">
-                        <Link
-                          href={`/courses/${course.slug}/purchase`}
-                          className="block"
-                        >
-                          <Button className="w-full" size="lg">
-                            Enroll Now
-                          </Button>
-                        </Link>
+                        {course.activePayment?.status === "pending" ? (
+                          <Link
+                            href="/dashboard/student/payments"
+                            className="block"
+                          >
+                            <Button className="w-full" size="lg" variant="outline">
+                              Payment Pending Review
+                            </Button>
+                          </Link>
+                        ) : course.activePayment?.status === "rejected" ||
+                          course.activePayment?.status ===
+                            "resubmit_requested" ? (
+                          <Link
+                            href={`/courses/${course.slug}/purchase`}
+                            className="block"
+                          >
+                            <Button className="w-full" size="lg">
+                              Fix Payment
+                            </Button>
+                          </Link>
+                        ) : (
+                          <Link
+                            href={`/courses/${course.slug}/purchase`}
+                            className="block"
+                          >
+                            <Button className="w-full" size="lg">
+                              Enroll Now
+                            </Button>
+                          </Link>
+                        )}
                       </Show>
                       <Show when="signed-out">
                         <Link

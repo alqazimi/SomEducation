@@ -123,7 +123,9 @@ export function SupportPage() {
                   <p className={type.cardTitle}>After you pay</p>
                   <p className={`mt-1 ${type.bodySm}`}>
                     Track your submission under Dashboard → Payments. If
-                    rejected, you can resubmit with a clearer screenshot.
+                    rejected or asked for a new screenshot, fix the same
+                    payment there — upload new proof or change your payment
+                    method without starting over.
                   </p>
                 </div>
               </div>

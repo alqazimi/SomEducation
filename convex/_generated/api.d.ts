@@ -23,6 +23,7 @@ import type * as lib_enrollmentStats from "../lib/enrollmentStats.js";
 import type * as lib_errors from "../lib/errors.js";
 import type * as lib_files from "../lib/files.js";
 import type * as lib_notifications from "../lib/notifications.js";
+import type * as lib_payments from "../lib/payments.js";
 import type * as lib_roles from "../lib/roles.js";
 import type * as lib_types from "../lib/types.js";
 import type * as lib_validation from "../lib/validation.js";
@@ -60,6 +61,7 @@ declare const fullApi: ApiFromModules<{
   "lib/errors": typeof lib_errors;
   "lib/files": typeof lib_files;
   "lib/notifications": typeof lib_notifications;
+  "lib/payments": typeof lib_payments;
   "lib/roles": typeof lib_roles;
   "lib/types": typeof lib_types;
   "lib/validation": typeof lib_validation;
