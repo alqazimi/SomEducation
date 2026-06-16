@@ -89,11 +89,6 @@ export default function HomePage() {
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/sign-up">
-                  <Button variant="outline" size="lg">
-                    Create account
-                  </Button>
-                </Link>
               </div>
             </div>
           </div>

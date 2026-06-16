@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Show, UserButton, useAuth } from "@clerk/nextjs";
 import { useConvexAuth, useQuery } from "convex/react";
-import { Compass, Menu, Search, X } from "lucide-react";
+import { BookOpen, Home, Menu, Search, X } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { api } from "convex/_generated/api";
 import {
@@ -65,7 +65,7 @@ export function Header() {
             <div className="flex shrink-0 items-center gap-1 sm:gap-2">
               <button
                 type="button"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100 lg:hidden"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100 md:hidden"
                 aria-label={mobileOpen ? "Close menu" : "Open menu"}
                 onClick={() => {
                   setMobileSearchOpen(false);
@@ -93,18 +93,32 @@ export function Header() {
                 </div>
               </Link>
 
-              <Link
-                href="/courses"
-                className={cn(
-                  "ml-1 hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors lg:inline-flex",
-                  pathname.startsWith("/courses")
-                    ? "bg-brand-50 text-brand-700"
-                    : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
-                )}
-              >
-                <Compass className="h-4 w-4 shrink-0" />
-                Explore
-              </Link>
+              <nav className="ml-1 hidden items-center gap-0.5 md:flex">
+                <Link
+                  href="/"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    pathname === "/"
+                      ? "bg-brand-50 text-brand-700"
+                      : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+                  )}
+                >
+                  <Home className="h-4 w-4 shrink-0" />
+                  Home
+                </Link>
+                <Link
+                  href="/courses"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    pathname.startsWith("/courses")
+                      ? "bg-brand-50 text-brand-700"
+                      : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+                  )}
+                >
+                  <BookOpen className="h-4 w-4 shrink-0" />
+                  Courses
+                </Link>
+              </nav>
             </div>
 
             {/* Desktop search — center */}
