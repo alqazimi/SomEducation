@@ -3,15 +3,19 @@
 import { useMutation, useQuery } from "convex/react";
 import { toast } from "sonner";
 import { ClipboardCheck, Plus, Trash2 } from "lucide-react";
+import { useCallback, useState } from "react";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
+import { DragHandle, reorderDropClass } from "@/components/ui/drag-handle";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { useState } from "react";
+import { useDragReorder } from "@/hooks/use-drag-reorder";
+import { getOrderUpdates } from "@/lib/reorder";
+import { cn } from "@/lib/utils";
 
 type DeleteTarget =
   | { type: "exam"; examId: Id<"exams"> }
@@ -174,8 +178,83 @@ export function ExamManager({
     useState<Id<"examQuestions"> | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [reorderingExams, setReorderingExams] = useState(false);
+  const [reorderingQuestionsExamId, setReorderingQuestionsExamId] =
+    useState<Id<"exams"> | null>(null);
+  const [questionDrag, setQuestionDrag] = useState<{
+    examId: Id<"exams">;
+    fromIndex: number;
+  } | null>(null);
+  const [questionDropIndex, setQuestionDropIndex] = useState<number | null>(
+    null
+  );
 
   const editingExam = exams?.find((e) => e._id === editingExamId);
+
+  const handleExamReorder = useCallback(
+    async (
+      reordered: NonNullable<typeof exams>
+    ) => {
+      const updates = getOrderUpdates(reordered);
+      if (updates.length === 0) return;
+
+      setReorderingExams(true);
+      try {
+        await Promise.all(
+          updates.map(({ item, order }) =>
+            updateExam({ examId: item._id, order })
+          )
+        );
+        toast.success("Exam order updated");
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Failed to reorder");
+      } finally {
+        setReorderingExams(false);
+      }
+    },
+    [updateExam]
+  );
+
+  const examDrag = useDragReorder({
+    items: exams ?? [],
+    onReorder: handleExamReorder,
+    disabled: reorderingExams || !exams?.length,
+  });
+
+  async function handleQuestionReorder(
+    examId: Id<"exams">,
+    questions: NonNullable<typeof editingExam>["questions"],
+    fromIndex: number,
+    toIndex: number
+  ) {
+    if (fromIndex === toIndex) return;
+
+    const reordered = [...questions];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+
+    const updates = getOrderUpdates(reordered);
+    if (updates.length === 0) return;
+
+    setReorderingQuestionsExamId(examId);
+    try {
+      await Promise.all(
+        updates.map(({ item, order }) =>
+          updateQuestion({ questionId: item._id, order })
+        )
+      );
+      toast.success("Question order updated");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to reorder");
+    } finally {
+      setReorderingQuestionsExamId(null);
+    }
+  }
+
+  function resetQuestionDrag() {
+    setQuestionDrag(null);
+    setQuestionDropIndex(null);
+  }
 
   async function handleCreateExam() {
     if (!selectedModuleId || !examTitle.trim()) {
@@ -333,8 +412,8 @@ export function ExamManager({
       <div className="rounded-lg border border-border bg-white p-5">
         <h3 className="font-medium text-slate-900">Create Module Exam</h3>
         <p className="mt-1 text-sm text-slate-500">
-          Add Coursera-style quizzes at the end of each module. Students get
-          instant feedback and can retry if attempts remain.
+          Add Coursera-style quizzes at the end of each module. Drag exams and
+          questions by the grip handle to reorder them.
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
@@ -376,24 +455,41 @@ export function ExamManager({
             No exams yet. Create one to let students test their knowledge.
           </p>
         ) : (
-          exams.map((exam) => (
+          exams.map((exam, examIndex) => (
             <div
               key={exam._id}
-              className="rounded-lg border border-border bg-white p-5"
+              className={cn(
+                "rounded-lg border border-border bg-white p-5 transition-shadow",
+                reorderDropClass(
+                  examDrag.isDropTarget(examIndex),
+                  examDrag.isDragging(examIndex)
+                )
+              )}
+              onDragOver={examDrag.onDragOver(examIndex)}
+              onDrop={examDrag.onDrop(examIndex)}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <ClipboardCheck className="h-4 w-4 text-brand-600" />
-                    <h4 className="font-medium text-slate-900">{exam.title}</h4>
+                <div className="flex min-w-0 flex-1 items-start gap-2">
+                  <DragHandle
+                    draggable={!reorderingExams}
+                    onDragStart={examDrag.onDragStart(examIndex)}
+                    onDragEnd={examDrag.onDragEnd}
+                    label="Drag to reorder exam"
+                    className="mt-0.5"
+                  />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <ClipboardCheck className="h-4 w-4 text-brand-600" />
+                      <h4 className="font-medium text-slate-900">{exam.title}</h4>
+                    </div>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {exam.questions.length} questions · Pass{" "}
+                      {exam.passingScore}% ·{" "}
+                      {exam.maxAttempts === 0
+                        ? "Unlimited attempts"
+                        : `${exam.maxAttempts} attempts`}
+                    </p>
                   </div>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {exam.questions.length} questions · Pass{" "}
-                    {exam.passingScore}% ·{" "}
-                    {exam.maxAttempts === 0
-                      ? "Unlimited attempts"
-                      : `${exam.maxAttempts} attempts`}
-                  </p>
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -503,17 +599,78 @@ export function ExamManager({
                         </li>
                       ) : (
                         exam.questions.map((q, index) => (
-                          <li key={q._id} className="space-y-3">
+                          <li
+                            key={q._id}
+                            className={cn(
+                              "space-y-3",
+                              reorderDropClass(
+                                questionDrag?.examId === exam._id &&
+                                  questionDropIndex === index &&
+                                  questionDrag.fromIndex !== index,
+                                questionDrag?.examId === exam._id &&
+                                  questionDrag.fromIndex === index
+                              )
+                            )}
+                            onDragOver={(event) => {
+                              if (
+                                questionDrag?.examId !== exam._id ||
+                                reorderingQuestionsExamId === exam._id
+                              ) {
+                                return;
+                              }
+                              event.preventDefault();
+                              event.dataTransfer.dropEffect = "move";
+                              setQuestionDropIndex(index);
+                            }}
+                            onDrop={(event) => {
+                              event.preventDefault();
+                              if (
+                                !questionDrag ||
+                                questionDrag.examId !== exam._id ||
+                                reorderingQuestionsExamId === exam._id
+                              ) {
+                                resetQuestionDrag();
+                                return;
+                              }
+                              void handleQuestionReorder(
+                                exam._id,
+                                exam.questions,
+                                questionDrag.fromIndex,
+                                index
+                              );
+                              resetQuestionDrag();
+                            }}
+                          >
                             <div
-                              className={`flex flex-wrap items-center justify-between gap-2 rounded-md px-3 py-2 text-sm ${
+                              className={cn(
+                                "flex flex-wrap items-center justify-between gap-2 rounded-md px-3 py-2 text-sm",
                                 editingQuestionId === q._id
                                   ? "border border-brand-300 bg-brand-50/30"
                                   : "bg-slate-50"
-                              }`}
+                              )}
                             >
-                              <span>
-                                {index + 1}. {q.questionText}
-                              </span>
+                              <div className="flex min-w-0 flex-1 items-center gap-2">
+                                <DragHandle
+                                  draggable={
+                                    !questionDrag &&
+                                    reorderingQuestionsExamId !== exam._id &&
+                                    !editingQuestionId
+                                  }
+                                  onDragStart={(event) => {
+                                    setQuestionDrag({
+                                      examId: exam._id,
+                                      fromIndex: index,
+                                    });
+                                    setQuestionDropIndex(index);
+                                    event.dataTransfer.effectAllowed = "move";
+                                  }}
+                                  onDragEnd={resetQuestionDrag}
+                                  label="Drag to reorder question"
+                                />
+                                <span className="min-w-0">
+                                  {index + 1}. {q.questionText}
+                                </span>
+                              </div>
                               <div className="flex gap-2">
                                 <Button
                                   variant={

@@ -1,0 +1,24 @@
+export function reorderByIndex<T>(items: T[], fromIndex: number, toIndex: number) {
+  if (
+    fromIndex === toIndex ||
+    fromIndex < 0 ||
+    toIndex < 0 ||
+    fromIndex >= items.length ||
+    toIndex >= items.length
+  ) {
+    return items;
+  }
+
+  const next = [...items];
+  const [moved] = next.splice(fromIndex, 1);
+  next.splice(toIndex, 0, moved);
+  return next;
+}
+
+export function getOrderUpdates<T extends { _id: string; order: number }>(
+  reordered: T[]
+) {
+  return reordered
+    .map((item, index) => ({ item, order: index + 1 }))
+    .filter(({ item, order }) => item.order !== order);
+}

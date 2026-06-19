@@ -10,17 +10,20 @@ import {
   Trash2,
   Video,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { DragHandle, reorderDropClass } from "@/components/ui/drag-handle";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SectionTitle } from "@/components/ui/typography";
+import { useDragReorder } from "@/hooks/use-drag-reorder";
+import { getOrderUpdates } from "@/lib/reorder";
 import { cn } from "@/lib/utils";
 
 type Lesson = {
@@ -194,6 +197,14 @@ export function CourseCurriculumEditor({
     null
   );
   const [deleteLessonLoading, setDeleteLessonLoading] = useState(false);
+  const [reorderingModules, setReorderingModules] = useState(false);
+  const [reorderingLessonsModuleId, setReorderingLessonsModuleId] =
+    useState<Id<"modules"> | null>(null);
+  const [lessonDrag, setLessonDrag] = useState<{
+    moduleId: Id<"modules">;
+    fromIndex: number;
+  } | null>(null);
+  const [lessonDropIndex, setLessonDropIndex] = useState<number | null>(null);
 
   function toggleModuleCollapsed(moduleId: Id<"modules">) {
     setCollapsedModules((prev) => {
@@ -380,6 +391,72 @@ export function CourseCurriculumEditor({
     }
   }
 
+  const handleModuleReorder = useCallback(
+    async (reordered: Module[]) => {
+      const updates = getOrderUpdates(reordered);
+      if (updates.length === 0) return;
+
+      setReorderingModules(true);
+      try {
+        await Promise.all(
+          updates.map(({ item, order }) =>
+            updateModule({ moduleId: item._id, order })
+          )
+        );
+        toast.success("Module order updated");
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Failed to reorder");
+      } finally {
+        setReorderingModules(false);
+      }
+    },
+    [updateModule]
+  );
+
+  const moduleDrag = useDragReorder({
+    items: sortedModules,
+    onReorder: handleModuleReorder,
+    disabled:
+      reorderingModules ||
+      editingModuleId !== null ||
+      lessonFormTarget !== null,
+  });
+
+  async function handleLessonReorder(
+    moduleId: Id<"modules">,
+    lessons: Lesson[],
+    fromIndex: number,
+    toIndex: number
+  ) {
+    if (fromIndex === toIndex) return;
+
+    const reordered = [...lessons];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+
+    const updates = getOrderUpdates(reordered);
+    if (updates.length === 0) return;
+
+    setReorderingLessonsModuleId(moduleId);
+    try {
+      await Promise.all(
+        updates.map(({ item, order }) =>
+          updateLesson({ lessonId: item._id, order })
+        )
+      );
+      toast.success("Lesson order updated");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to reorder");
+    } finally {
+      setReorderingLessonsModuleId(null);
+    }
+  }
+
+  function resetLessonDrag() {
+    setLessonDrag(null);
+    setLessonDropIndex(null);
+  }
+
   const moduleToDeleteData = moduleToDelete
     ? sortedModules.find((m) => m._id === moduleToDelete)
     : null;
@@ -390,8 +467,8 @@ export function CourseCurriculumEditor({
         <div>
           <SectionTitle>Curriculum</SectionTitle>
           <p className="mt-1 text-sm text-slate-500">
-            Build your course in modules. Edit or delete anything inline — no
-            scrolling required.
+            Build your course in modules. Drag the grip handle to reorder modules
+            and lessons. Edit or delete anything inline.
           </p>
         </div>
         <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
@@ -444,10 +521,32 @@ export function CourseCurriculumEditor({
             const isEditingModule = editingModuleId === mod._id;
 
             return (
-              <Card key={mod._id} className="overflow-hidden">
+              <Card
+                key={mod._id}
+                className={cn(
+                  "overflow-hidden transition-shadow",
+                  reorderDropClass(
+                    moduleDrag.isDropTarget(moduleIndex),
+                    moduleDrag.isDragging(moduleIndex)
+                  )
+                )}
+                onDragOver={moduleDrag.onDragOver(moduleIndex)}
+                onDrop={moduleDrag.onDrop(moduleIndex)}
+              >
                 <div className="border-b border-border bg-slate-50/80 px-4 py-3 sm:px-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="flex min-w-0 flex-1 items-start gap-2">
+                      <DragHandle
+                        draggable={
+                          !reorderingModules &&
+                          !editingModuleId &&
+                          !lessonFormTarget
+                        }
+                        onDragStart={moduleDrag.onDragStart(moduleIndex)}
+                        onDragEnd={moduleDrag.onDragEnd}
+                        label="Drag to reorder module"
+                        className="mt-0.5"
+                      />
                       <button
                         type="button"
                         onClick={() => toggleModuleCollapsed(mod._id)}
@@ -563,7 +662,48 @@ export function CourseCurriculumEditor({
                       )}
 
                     {lessons.map((lesson, lessonIndex) => (
-                      <div key={lesson._id} className="space-y-3">
+                      <div
+                        key={lesson._id}
+                        className={cn(
+                          "space-y-3",
+                          reorderDropClass(
+                            lessonDrag?.moduleId === mod._id &&
+                              lessonDropIndex === lessonIndex &&
+                              lessonDrag.fromIndex !== lessonIndex,
+                            lessonDrag?.moduleId === mod._id &&
+                              lessonDrag.fromIndex === lessonIndex
+                          )
+                        )}
+                        onDragOver={(event) => {
+                          if (
+                            lessonDrag?.moduleId !== mod._id ||
+                            reorderingLessonsModuleId === mod._id
+                          ) {
+                            return;
+                          }
+                          event.preventDefault();
+                          event.dataTransfer.dropEffect = "move";
+                          setLessonDropIndex(lessonIndex);
+                        }}
+                        onDrop={(event) => {
+                          event.preventDefault();
+                          if (
+                            !lessonDrag ||
+                            lessonDrag.moduleId !== mod._id ||
+                            reorderingLessonsModuleId === mod._id
+                          ) {
+                            resetLessonDrag();
+                            return;
+                          }
+                          void handleLessonReorder(
+                            mod._id,
+                            lessons,
+                            lessonDrag.fromIndex,
+                            lessonIndex
+                          );
+                          resetLessonDrag();
+                        }}
+                      >
                         <div
                           className={cn(
                             "flex flex-wrap items-center justify-between gap-3 rounded-lg border px-3 py-2.5 sm:px-4",
@@ -573,6 +713,23 @@ export function CourseCurriculumEditor({
                           )}
                         >
                           <div className="flex min-w-0 items-center gap-3">
+                            <DragHandle
+                              draggable={
+                                !lessonDrag &&
+                                reorderingLessonsModuleId !== mod._id &&
+                                !lessonFormTarget
+                              }
+                              onDragStart={(event) => {
+                                setLessonDrag({
+                                  moduleId: mod._id,
+                                  fromIndex: lessonIndex,
+                                });
+                                setLessonDropIndex(lessonIndex);
+                                event.dataTransfer.effectAllowed = "move";
+                              }}
+                              onDragEnd={resetLessonDrag}
+                              label="Drag to reorder lesson"
+                            />
                             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
                               {lessonIndex + 1}
                             </span>
