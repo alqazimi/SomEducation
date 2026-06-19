@@ -16,8 +16,10 @@ export const listByCourse = query({
       .withIndex("by_courseId", (q) => q.eq("courseId", args.courseId))
       .collect();
 
+    const sortedModules = modules.sort((a, b) => a.order - b.order);
+
     return await Promise.all(
-      modules.map(async (mod) => {
+      sortedModules.map(async (mod) => {
         const [lessons, exams] = await Promise.all([
           ctx.db
             .query("lessons")
@@ -28,7 +30,11 @@ export const listByCourse = query({
             .withIndex("by_moduleId", (q) => q.eq("moduleId", mod._id))
             .collect(),
         ]);
-        return { ...mod, lessons, exams };
+        return {
+          ...mod,
+          lessons: lessons.sort((a, b) => a.order - b.order),
+          exams: exams.sort((a, b) => a.order - b.order),
+        };
       })
     );
   },

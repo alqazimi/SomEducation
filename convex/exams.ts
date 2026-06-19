@@ -126,13 +126,15 @@ export const listByCourse = query({
       .collect();
 
     return await Promise.all(
-      exams.map(async (exam) => {
-        const questions = await getExamQuestions(ctx, exam._id);
-        return {
-          ...exam,
-          questions: questions.sort((a, b) => a.order - b.order),
-        };
-      })
+      exams
+        .sort((a, b) => a.order - b.order)
+        .map(async (exam) => {
+          const questions = await getExamQuestions(ctx, exam._id);
+          return {
+            ...exam,
+            questions: questions.sort((a, b) => a.order - b.order),
+          };
+        })
     );
   },
 });

@@ -204,8 +204,9 @@ export function CreateCourseForm() {
         <section>
           <h2 className="text-base font-semibold text-slate-900">Curriculum</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Add your first module and lesson. You can expand the curriculum after
-            creation.
+            Start with one module and optional first lesson. After creating the
+            course, use the course builder to add, edit, or delete modules and
+            lessons inline.
           </p>
 
           <div className="mt-6 space-y-5">

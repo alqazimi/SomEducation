@@ -47,6 +47,91 @@ function emptyQuestionDraft(): QuestionDraft {
   };
 }
 
+function QuestionFormPanel({
+  draft,
+  onChange,
+  onSave,
+  onCancel,
+  saveLabel,
+}: {
+  draft: QuestionDraft;
+  onChange: (draft: QuestionDraft) => void;
+  onSave: () => void;
+  onCancel?: () => void;
+  saveLabel: string;
+}) {
+  return (
+    <div className="rounded-lg border border-brand-200 bg-brand-50/40 p-4">
+      <div className="space-y-4">
+        <div>
+          <Label>Question</Label>
+          <Textarea
+            value={draft.questionText}
+            onChange={(e) =>
+              onChange({ ...draft, questionText: e.target.value })
+            }
+            rows={2}
+            className="mt-2 bg-white"
+            autoFocus
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Answer Options</Label>
+          {draft.options.map((option, index) => (
+            <div key={option.id} className="flex items-center gap-2">
+              <input
+                type="radio"
+                name={`correctOption-${option.id}`}
+                checked={draft.correctOptionId === option.id}
+                onChange={() =>
+                  onChange({ ...draft, correctOptionId: option.id })
+                }
+              />
+              <Input
+                value={option.text}
+                onChange={(e) =>
+                  onChange({
+                    ...draft,
+                    options: draft.options.map((o, i) =>
+                      i === index ? { ...o, text: e.target.value } : o
+                    ),
+                  })
+                }
+                placeholder={`Option ${index + 1}`}
+                className="bg-white"
+              />
+            </div>
+          ))}
+          <p className="text-xs text-slate-500">
+            Select the radio button for the correct answer.
+          </p>
+        </div>
+        <div>
+          <Label>Explanation (shown after submit)</Label>
+          <Textarea
+            value={draft.explanation}
+            onChange={(e) =>
+              onChange({ ...draft, explanation: e.target.value })
+            }
+            rows={2}
+            className="mt-2 bg-white"
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" onClick={onSave}>
+            {saveLabel}
+          </Button>
+          {onCancel && (
+            <Button size="sm" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ExamManager({
   courseId,
   modules,
@@ -77,6 +162,8 @@ export function ExamManager({
     ""
   );
   const [examTitle, setExamTitle] = useState("");
+  const [editingExamTitle, setEditingExamTitle] = useState("");
+  const [editingExamDescription, setEditingExamDescription] = useState("");
   const [passingScore, setPassingScore] = useState("70");
   const [maxAttempts, setMaxAttempts] = useState("3");
   const [timeLimit, setTimeLimit] = useState("");
@@ -112,15 +199,20 @@ export function ExamManager({
   }
 
   async function handleSaveExamSettings() {
-    if (!editingExamId) return;
+    if (!editingExamId || !editingExamTitle.trim()) {
+      toast.error("Exam title is required");
+      return;
+    }
     try {
       await updateExam({
         examId: editingExamId,
+        title: editingExamTitle.trim(),
+        description: editingExamDescription.trim() || undefined,
         passingScore: Number(passingScore),
         maxAttempts: Number(maxAttempts),
         timeLimitMinutes: timeLimit.trim() ? Number(timeLimit) : undefined,
       });
-      toast.success("Exam settings saved");
+      toast.success("Exam saved");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed");
     }
@@ -224,6 +316,8 @@ export function ExamManager({
 
   function selectExam(exam: NonNullable<typeof exams>[number]) {
     setEditingExamId(exam._id);
+    setEditingExamTitle(exam.title);
+    setEditingExamDescription(exam.description ?? "");
     setPassingScore(String(exam.passingScore));
     setMaxAttempts(String(exam.maxAttempts));
     setTimeLimit(exam.timeLimitMinutes ? String(exam.timeLimitMinutes) : "");
@@ -323,6 +417,28 @@ export function ExamManager({
 
               {editingExamId === exam._id && (
                 <div className="mt-5 space-y-5 border-t border-border pt-5">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <Label>Exam Title</Label>
+                      <Input
+                        value={editingExamTitle}
+                        onChange={(e) => setEditingExamTitle(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Description (optional)</Label>
+                      <Textarea
+                        value={editingExamDescription}
+                        onChange={(e) =>
+                          setEditingExamDescription(e.target.value)
+                        }
+                        rows={2}
+                        placeholder="Brief instructions for students before they start"
+                        className="mt-2"
+                      />
+                    </div>
+                  </div>
                   <div className="grid gap-4 sm:grid-cols-3">
                     <div>
                       <Label>Passing Score (%)</Label>
@@ -358,133 +474,98 @@ export function ExamManager({
                     </div>
                   </div>
                   <Button variant="outline" size="sm" onClick={handleSaveExamSettings}>
-                    Save Exam Settings
+                    Save Exam
                   </Button>
 
                   <div>
-                    <h5 className="text-sm font-semibold text-slate-800">
-                      Questions
-                    </h5>
-                    <ul className="mt-3 space-y-2">
-                      {exam.questions.length === 0 ? (
-                        <li className="text-sm text-slate-500">
-                          No questions yet
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h5 className="text-sm font-semibold text-slate-800">
+                        Questions
+                      </h5>
+                      {!editingQuestionId && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5"
+                          onClick={() => {
+                            resetQuestionForm();
+                          }}
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                          Add Question
+                        </Button>
+                      )}
+                    </div>
+                    <ul className="mt-3 space-y-3">
+                      {exam.questions.length === 0 && !editingQuestionId ? (
+                        <li className="rounded-md border border-dashed border-border px-4 py-6 text-center text-sm text-slate-500">
+                          No questions yet. Click Add Question to create one.
                         </li>
                       ) : (
                         exam.questions.map((q, index) => (
-                          <li
-                            key={q._id}
-                            className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-slate-50 px-3 py-2 text-sm"
-                          >
-                            <span>
-                              {index + 1}. {q.questionText}
-                            </span>
-                            <div className="flex gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => startEditQuestion(q)}
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteQuestion(q._id)}
-                              >
-                                Delete
-                              </Button>
+                          <li key={q._id} className="space-y-3">
+                            <div
+                              className={`flex flex-wrap items-center justify-between gap-2 rounded-md px-3 py-2 text-sm ${
+                                editingQuestionId === q._id
+                                  ? "border border-brand-300 bg-brand-50/30"
+                                  : "bg-slate-50"
+                              }`}
+                            >
+                              <span>
+                                {index + 1}. {q.questionText}
+                              </span>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant={
+                                    editingQuestionId === q._id
+                                      ? "secondary"
+                                      : "ghost"
+                                  }
+                                  size="sm"
+                                  onClick={() =>
+                                    editingQuestionId === q._id
+                                      ? resetQuestionForm()
+                                      : startEditQuestion(q)
+                                  }
+                                >
+                                  {editingQuestionId === q._id ? "Close" : "Edit"}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteQuestion(q._id)}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
                             </div>
+                            {editingQuestionId === q._id && (
+                              <QuestionFormPanel
+                                draft={questionDraft}
+                                onChange={setQuestionDraft}
+                                onSave={() => void handleSaveQuestion()}
+                                onCancel={resetQuestionForm}
+                                saveLabel="Save Question"
+                              />
+                            )}
                           </li>
                         ))
                       )}
                     </ul>
-                  </div>
 
-                  <div className="rounded-lg border border-border bg-slate-50/80 p-4">
-                    <h5 className="font-medium text-slate-900">
-                      {editingQuestionId ? "Edit Question" : "Add Question"}
-                    </h5>
-                    <div className="mt-4 space-y-4">
-                      <div>
-                        <Label>Question</Label>
-                        <Textarea
-                          value={questionDraft.questionText}
-                          onChange={(e) =>
-                            setQuestionDraft((d) => ({
-                              ...d,
-                              questionText: e.target.value,
-                            }))
-                          }
-                          rows={2}
-                          className="mt-2"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Answer Options</Label>
-                        {questionDraft.options.map((option, index) => (
-                          <div
-                            key={option.id}
-                            className="flex items-center gap-2"
-                          >
-                            <input
-                              type="radio"
-                              name="correctOption"
-                              checked={
-                                questionDraft.correctOptionId === option.id
-                              }
-                              onChange={() =>
-                                setQuestionDraft((d) => ({
-                                  ...d,
-                                  correctOptionId: option.id,
-                                }))
-                              }
-                            />
-                            <Input
-                              value={option.text}
-                              onChange={(e) =>
-                                setQuestionDraft((d) => ({
-                                  ...d,
-                                  options: d.options.map((o, i) =>
-                                    i === index
-                                      ? { ...o, text: e.target.value }
-                                      : o
-                                  ),
-                                }))
-                              }
-                              placeholder={`Option ${index + 1}`}
-                            />
-                          </div>
-                        ))}
-                        <p className="text-xs text-slate-500">
-                          Select the radio button for the correct answer.
+                    {!editingQuestionId && (
+                      <div className="mt-4">
+                        <p className="mb-2 text-sm font-medium text-slate-800">
+                          New question
                         </p>
-                      </div>
-                      <div>
-                        <Label>Explanation (shown after submit)</Label>
-                        <Textarea
-                          value={questionDraft.explanation}
-                          onChange={(e) =>
-                            setQuestionDraft((d) => ({
-                              ...d,
-                              explanation: e.target.value,
-                            }))
-                          }
-                          rows={2}
-                          className="mt-2"
+                        <QuestionFormPanel
+                          draft={questionDraft}
+                          onChange={setQuestionDraft}
+                          onSave={() => void handleSaveQuestion()}
+                          saveLabel="Add Question"
                         />
                       </div>
-                      <div className="flex gap-2">
-                        <Button onClick={handleSaveQuestion}>
-                          {editingQuestionId ? "Save Question" : "Add Question"}
-                        </Button>
-                        {editingQuestionId && (
-                          <Button variant="outline" onClick={resetQuestionForm}>
-                            Cancel
-                          </Button>
-                        )}
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               )}

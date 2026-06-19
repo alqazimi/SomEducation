@@ -1,45 +1,52 @@
 "use client";
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
+import {
+  BookOpen,
+  ClipboardCheck,
+  Rocket,
+  Settings2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import Link from "next/link";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
-import { ImageUploadField } from "@/components/ui/image-upload-field";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CourseCurriculumEditor } from "@/features/teacher/course-curriculum-editor";
+import { CourseSettingsForm } from "@/features/teacher/course-settings-form";
 import { ExamManager } from "@/features/teacher/exam-manager";
-import { PageTitle, SectionTitle } from "@/components/ui/typography";
+import { PageTitle } from "@/components/ui/typography";
 import { formatEnrollmentCount } from "@/lib/enrollment";
 import { type } from "@/lib/typography";
+import { cn } from "@/lib/utils";
 
-type LessonDraft = {
-  title: string;
-  youtubeUrl: string;
-  content: string;
-  durationMinutes: string;
-  isFreePreview: boolean;
+const statusVariant: Record<
+  string,
+  "default" | "secondary" | "success" | "warning" | "destructive"
+> = {
+  draft: "secondary",
+  pending: "warning",
+  published: "success",
+  rejected: "destructive",
 };
 
-const emptyLessonDraft = (): LessonDraft => ({
-  title: "",
-  youtubeUrl: "",
-  content: "",
-  durationMinutes: "",
-  isFreePreview: false,
-});
+const statusLabel: Record<string, string> = {
+  draft: "Draft",
+  pending: "In Review",
+  published: "Published",
+  rejected: "Rejected",
+};
 
 export default function EditCoursePage() {
   const params = useParams<{ id: string }>();
   const courseId = params.id as Id<"courses">;
 
+  const me = useQuery(api.users.getMe);
   const course = useQuery(api.courses.getMyCourseById, { courseId });
   const categories = useQuery(api.categories.list, { activeOnly: true });
   const modules = useQuery(
@@ -47,174 +54,43 @@ export default function EditCoursePage() {
     course ? { courseId } : "skip"
   );
   const submitForReview = useMutation(api.courses.submitForReview);
-  const updateCourse = useMutation(api.courses.update);
-  const createModule = useMutation(api.modules.create);
-  const createLesson = useMutation(api.lessons.create);
-  const updateLesson = useMutation(api.lessons.update);
-  const removeLesson = useMutation(api.lessons.remove);
 
-  const [moduleTitle, setModuleTitle] = useState("");
-  const [selectedModule, setSelectedModule] = useState<Id<"modules"> | null>(
-    null
-  );
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("curriculum");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [editingLessonId, setEditingLessonId] = useState<Id<"lessons"> | null>(
-    null
-  );
-  const [lessonDraft, setLessonDraft] = useState<LessonDraft>(emptyLessonDraft);
-  const [lessonToDelete, setLessonToDelete] = useState<Id<"lessons"> | null>(
-    null
-  );
-  const [deleteLessonLoading, setDeleteLessonLoading] = useState(false);
-  const [loadedCourseId, setLoadedCourseId] = useState<Id<"courses"> | null>(null);
+  const [difficulty, setDifficulty] = useState<
+    "beginner" | "intermediate" | "advanced"
+  >("beginner");
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
-  if (course && course._id !== loadedCourseId) {
-    setLoadedCourseId(course._id);
+  useEffect(() => {
+    if (!course) return;
     setTitle(course.title);
     setDescription(course.description);
     setPrice(String(course.price));
     setCategoryId(course.categoryId);
+    setDifficulty(course.difficulty);
     setThumbnailPreview(course.thumbnailUrl ?? null);
-  }
+  }, [course?._id]);
 
-  async function handleThumbnailUploaded(
-    storageId: Id<"_storage">,
-    previewUrl: string
-  ) {
-    setThumbnailPreview(previewUrl);
-    try {
-      await updateCourse({ courseId, thumbnailStorageId: storageId });
-      toast.success("Cover image saved");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to save image");
-    }
-  }
+  const isManagingAsStaff =
+    me &&
+    course &&
+    me._id !== course.teacherId &&
+    (me.role === "admin" || me.role === "owner");
 
-  async function handleSaveDetails() {
-    if (!title.trim() || description.trim().length < 10) {
-      toast.error("Title and description (10+ chars) are required");
-      return;
-    }
-    try {
-      await updateCourse({
-        courseId,
-        title: title.trim(),
-        description: description.trim(),
-        price: Number(price),
-        categoryId: categoryId as Id<"categories">,
-      });
-      toast.success("Course details updated");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed");
-    }
-  }
-
-  async function handleAddModule() {
-    if (!moduleTitle.trim()) {
-      toast.error("Enter a module title first");
-      return;
-    }
-    try {
-      await createModule({
-        courseId,
-        title: moduleTitle,
-        order: (modules?.length ?? 0) + 1,
-      });
-      setModuleTitle("");
-      toast.success("Module added");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed");
-    }
-  }
-
-  function startEditLesson(
-    lesson: {
-      _id: Id<"lessons">;
-      title: string;
-      youtubeUrl?: string;
-      content?: string;
-      durationMinutes?: number;
-      isFreePreview: boolean;
-    },
-    moduleId: Id<"modules">
-  ) {
-    setEditingLessonId(lesson._id);
-    setSelectedModule(moduleId);
-    setLessonDraft({
-      title: lesson.title,
-      youtubeUrl: lesson.youtubeUrl ?? "",
-      content: lesson.content ?? "",
-      durationMinutes: lesson.durationMinutes?.toString() ?? "",
-      isFreePreview: lesson.isFreePreview,
-    });
-  }
-
-  function resetLessonForm() {
-    setEditingLessonId(null);
-    setLessonDraft(emptyLessonDraft());
-  }
-
-  async function handleSaveLesson() {
-    if (!selectedModule || !lessonDraft.title.trim()) {
-      toast.error("Module and lesson title are required");
-      return;
-    }
-
-    const duration = lessonDraft.durationMinutes.trim()
-      ? Number(lessonDraft.durationMinutes)
-      : undefined;
-
-    try {
-      if (editingLessonId) {
-        await updateLesson({
-          lessonId: editingLessonId,
-          title: lessonDraft.title,
-          youtubeUrl: lessonDraft.youtubeUrl,
-          content: lessonDraft.content,
-          durationMinutes: duration,
-          isFreePreview: lessonDraft.isFreePreview,
-        });
-        toast.success("Lesson updated");
-      } else {
-        const mod = modules?.find((m) => m._id === selectedModule);
-        await createLesson({
-          moduleId: selectedModule,
-          title: lessonDraft.title,
-          youtubeUrl: lessonDraft.youtubeUrl || undefined,
-          content: lessonDraft.content || undefined,
-          durationMinutes: duration,
-          order: (mod?.lessons.length ?? 0) + 1,
-          isFreePreview: lessonDraft.isFreePreview,
-        });
-        toast.success("Lesson added");
-      }
-      resetLessonForm();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed");
-    }
-  }
-
-  async function handleDeleteLessonConfirm() {
-    if (!lessonToDelete) return;
-    setDeleteLessonLoading(true);
-    try {
-      await removeLesson({ lessonId: lessonToDelete });
-      if (editingLessonId === lessonToDelete) resetLessonForm();
-      toast.success("Lesson deleted");
-      setLessonToDelete(null);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed");
-    } finally {
-      setDeleteLessonLoading(false);
-    }
-  }
+  const canSubmitForReview =
+    course?.status === "draft" || course?.status === "rejected";
+  const hasModules = (modules?.length ?? 0) > 0;
 
   if (course === undefined || modules === undefined) {
-    return <p>Loading...</p>;
+    return (
+      <div className="mx-auto max-w-5xl py-12">
+        <p className={type.muted}>Loading course builder...</p>
+      </div>
+    );
   }
 
   if (!course) {
@@ -222,7 +98,8 @@ export default function EditCoursePage() {
       <div className="mx-auto max-w-lg py-16 text-center">
         <h1 className="text-xl font-semibold text-slate-900">Access Denied</h1>
         <p className="mt-2 text-sm text-slate-600">
-          You can only manage courses that belong to you.
+          You can only manage courses that belong to you, or courses you have
+          admin access to.
         </p>
         <Link href="/dashboard/teacher/courses" className="mt-6 inline-block">
           <Button variant="outline">Back to My Courses</Button>
@@ -232,9 +109,9 @@ export default function EditCoursePage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-5xl">
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border pb-6">
-        <div>
+        <div className="min-w-0 flex-1">
           <Link
             href="/dashboard/teacher/courses"
             className={`${type.muted} hover:text-stone-800`}
@@ -242,251 +119,157 @@ export default function EditCoursePage() {
             ← Back to courses
           </Link>
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <PageTitle>{course.title}</PageTitle>
-            <Badge variant="secondary" className="capitalize">
-              {course.status}
+            <PageTitle className="truncate">{course.title}</PageTitle>
+            <Badge
+              variant={statusVariant[course.status] ?? "secondary"}
+              className="capitalize"
+            >
+              {statusLabel[course.status] ?? course.status}
             </Badge>
-          </div>
-          <p className={`mt-2 ${type.muted}`}>
-            Manage curriculum, settings, and publishing ·{" "}
-            {formatEnrollmentCount(course.enrollmentCount)}
-          </p>
-        </div>
-        {(course.status === "draft" || course.status === "rejected") && (
-          <Button
-            onClick={() =>
-              submitForReview({ courseId })
-                .then(() => toast.success("Submitted for admin review"))
-                .catch((error) =>
-                  toast.error(
-                    error instanceof Error ? error.message : "Submit failed"
-                  )
-                )
-            }
-          >
-            Submit for Review
-          </Button>
-        )}
-      </div>
-
-      <section className="mt-10">
-        <SectionTitle>Curriculum</SectionTitle>
-        <p className="mt-1 text-sm text-slate-500">
-          Organize your course into modules and video lessons.
-        </p>
-
-        <div className="mt-6 flex gap-2">
-          <Input
-            value={moduleTitle}
-            onChange={(e) => setModuleTitle(e.target.value)}
-            placeholder="New module title"
-            className="max-w-md"
-          />
-          <Button variant="outline" onClick={handleAddModule}>
-            Add Module
-          </Button>
-        </div>
-
-        <div className="mt-6 space-y-4">
-          {modules.length === 0 ? (
-            <p className="rounded-lg border border-border bg-slate-50 px-4 py-6 text-sm text-slate-600">
-              No modules yet. Add at least one module before submitting for review.
-            </p>
-          ) : (
-            modules.map((mod) => (
-              <div
-                key={mod._id}
-                className="rounded-lg border border-border bg-white p-5"
-              >
-                <h3 className="font-medium text-slate-900">{mod.title}</h3>
-                <ul className="mt-4 space-y-2">
-                  {mod.lessons.length === 0 ? (
-                    <li className="text-sm text-slate-500">No lessons yet</li>
-                  ) : (
-                    mod.lessons.map((lesson) => (
-                      <li
-                        key={lesson._id}
-                        className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-slate-50 px-3 py-2 text-sm"
-                      >
-                        <span className="font-medium text-slate-800">
-                          {lesson.title}
-                        </span>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => startEditLesson(lesson, mod._id)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setLessonToDelete(lesson._id)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </li>
-                    ))
-                  )}
-                </ul>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="mt-8 rounded-lg border border-border bg-white p-5">
-          <h3 className="font-medium text-slate-900">
-            {editingLessonId ? "Edit Lesson" : "Add Lesson"}
-          </h3>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <Label>Module</Label>
-              <select
-                className="mt-2 w-full rounded-md border border-border px-3 py-2 text-sm"
-                value={selectedModule ?? ""}
-                onChange={(e) =>
-                  setSelectedModule(e.target.value as Id<"modules">)
-                }
-              >
-                <option value="">Select module</option>
-                {modules.map((mod) => (
-                  <option key={mod._id} value={mod._id}>
-                    {mod.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label>Lesson Title</Label>
-              <Input
-                value={lessonDraft.title}
-                onChange={(e) =>
-                  setLessonDraft((d) => ({ ...d, title: e.target.value }))
-                }
-                className="mt-2"
-              />
-            </div>
-            <div>
-              <Label>YouTube URL</Label>
-              <Input
-                value={lessonDraft.youtubeUrl}
-                onChange={(e) =>
-                  setLessonDraft((d) => ({ ...d, youtubeUrl: e.target.value }))
-                }
-                placeholder="https://www.youtube.com/watch?v=..."
-                className="mt-2"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Label>Lesson Notes</Label>
-              <Textarea
-                value={lessonDraft.content}
-                onChange={(e) =>
-                  setLessonDraft((d) => ({ ...d, content: e.target.value }))
-                }
-                rows={3}
-                className="mt-2"
-              />
-            </div>
-          </div>
-          <div className="mt-4 flex gap-2">
-            <Button onClick={handleSaveLesson}>
-              {editingLessonId ? "Save Lesson" : "Add Lesson"}
-            </Button>
-            {editingLessonId && (
-              <Button variant="outline" onClick={resetLessonForm}>
-                Cancel
-              </Button>
+            {isManagingAsStaff && (
+              <Badge variant="outline" className="capitalize">
+                Managing as {me.role}
+              </Badge>
             )}
           </div>
+          <p className={`mt-2 ${type.muted}`}>
+            Course builder · {formatEnrollmentCount(course.enrollmentCount)}
+          </p>
         </div>
-      </section>
+      </div>
 
-      <Separator className="my-10" />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
+        <TabsList className="h-auto w-full flex-wrap sm:flex-nowrap">
+          <TabsTrigger value="curriculum" className="gap-1.5">
+            <BookOpen className="h-4 w-4" />
+            Curriculum
+          </TabsTrigger>
+          <TabsTrigger value="exams" className="gap-1.5">
+            <ClipboardCheck className="h-4 w-4" />
+            Exams
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="gap-1.5">
+            <Settings2 className="h-4 w-4" />
+            Settings
+          </TabsTrigger>
+          {canSubmitForReview && (
+            <TabsTrigger value="publish" className="gap-1.5">
+              <Rocket className="h-4 w-4" />
+              Publish
+            </TabsTrigger>
+          )}
+        </TabsList>
 
-      <section>
-        <SectionTitle>Module Exams</SectionTitle>
-        <p className="mt-1 text-sm text-slate-500">
-          Create practice quizzes and graded exams for each module, like Coursera.
-        </p>
-        <div className="mt-6">
-          <ExamManager courseId={courseId} modules={modules} />
-        </div>
-      </section>
+        <TabsContent value="curriculum">
+          <CourseCurriculumEditor courseId={courseId} modules={modules} />
+        </TabsContent>
 
-      <Separator className="my-10" />
+        <TabsContent value="exams">
+          <section>
+            <h2 className="text-lg font-semibold text-slate-900">Module exams</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Add practice quizzes and graded exams at the end of each module.
+            </p>
+            <div className="mt-6">
+              {modules.length === 0 ? (
+                <Card>
+                  <CardContent className="py-10 text-center text-sm text-slate-500">
+                    Add at least one module in the Curriculum tab before creating
+                    exams.
+                  </CardContent>
+                </Card>
+              ) : (
+                <ExamManager courseId={courseId} modules={modules} />
+              )}
+            </div>
+          </section>
+        </TabsContent>
 
-      <section>
-        <SectionTitle>Course settings</SectionTitle>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <Label>Title</Label>
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="mt-2"
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <Label>Description</Label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              className="mt-2"
-            />
-          </div>
-          <div>
-            <Label>Category</Label>
-            <select
-              className="mt-2 w-full rounded-md border border-border px-3 py-2 text-sm"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-            >
-              <option value="">Select category</option>
-              {categories?.map((cat) => (
-                <option key={cat._id} value={cat._id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <Label>Price (USD)</Label>
-            <Input
-              type="number"
-              step="0.01"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="mt-2"
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <ImageUploadField
-              previewUrl={thumbnailPreview}
-              onUploaded={handleThumbnailUploaded}
-              onClear={() => setThumbnailPreview(null)}
-              showUploadSuccessToast={false}
-            />
-          </div>
-        </div>
-        <Button variant="outline" className="mt-6" onClick={handleSaveDetails}>
-          Save Settings
-        </Button>
-      </section>
+        <TabsContent value="settings">
+          <CourseSettingsForm
+            courseId={courseId}
+            categories={categories}
+            title={title}
+            description={description}
+            price={price}
+            categoryId={categoryId}
+            difficulty={difficulty}
+            thumbnailPreview={thumbnailPreview}
+            onTitleChange={setTitle}
+            onDescriptionChange={setDescription}
+            onPriceChange={setPrice}
+            onCategoryIdChange={setCategoryId}
+            onDifficultyChange={setDifficulty}
+            onThumbnailPreviewChange={setThumbnailPreview}
+          />
+        </TabsContent>
 
-      <ConfirmDialog
-        open={lessonToDelete !== null}
-        onOpenChange={(open) => !open && setLessonToDelete(null)}
-        title="Delete lesson?"
-        description="This lesson will be permanently removed from the course."
-        confirmLabel="Delete Lesson"
-        variant="destructive"
-        loading={deleteLessonLoading}
-        onConfirm={() => void handleDeleteLessonConfirm()}
-      />
+        {canSubmitForReview && (
+          <TabsContent value="publish">
+            <Card>
+              <CardContent className="p-6 sm:p-8">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-50">
+                    <Rocket className="h-6 w-6 text-brand-600" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-lg font-semibold text-slate-900">
+                      Ready to publish?
+                    </h2>
+                    <p className="mt-2 text-sm text-slate-600">
+                      Submit your course for admin review. Once approved, it will
+                      appear in the public catalog for students to enroll.
+                    </p>
+
+                    <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                      <li
+                        className={cn(
+                          "flex items-center gap-2",
+                          hasModules ? "text-emerald-700" : "text-amber-700"
+                        )}
+                      >
+                        {hasModules ? "✓" : "○"} At least one module with lessons
+                      </li>
+                      <li className="flex items-center gap-2 text-slate-600">
+                        ✓ Course title and description filled in
+                      </li>
+                    </ul>
+
+                    {course.status === "rejected" && course.rejectionReason && (
+                      <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+                        Previously rejected: {course.rejectionReason}
+                      </p>
+                    )}
+
+                    <Button
+                      className="mt-6"
+                      disabled={!hasModules}
+                      onClick={() =>
+                        submitForReview({ courseId })
+                          .then(() => toast.success("Submitted for admin review"))
+                          .catch((error) =>
+                            toast.error(
+                              error instanceof Error
+                                ? error.message
+                                : "Submit failed"
+                            )
+                          )
+                      }
+                    >
+                      Submit for Review
+                    </Button>
+                    {!hasModules && (
+                      <p className="mt-3 text-sm text-amber-700">
+                        Add modules and lessons in the Curriculum tab first.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+      </Tabs>
     </div>
   );
 }
