@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PageTitle } from "@/components/ui/typography";
 import {
   AccountSetupState,
+  SuspendedAccountState,
   useEnsureConvexUser,
 } from "@/hooks/use-ensure-convex-user";
 
@@ -16,7 +17,8 @@ export function DashboardLayoutClient({
   children: React.ReactNode;
   allowedRoles?: Array<"owner" | "admin" | "teacher" | "student">;
 }) {
-  const { user, isLoading, syncError, retrySync } = useEnsureConvexUser();
+  const { user, isLoading, isSuspended, syncError, retrySync } =
+    useEnsureConvexUser();
 
   if (isLoading) {
     return (
@@ -37,6 +39,15 @@ export function DashboardLayoutClient({
         <div className="flex min-h-[60vh] items-center justify-center p-8">
           <AccountSetupState syncError={syncError} onRetry={() => void retrySync()} />
         </div>
+      </div>
+    );
+  }
+
+  if (isSuspended) {
+    return (
+      <div className="min-h-screen bg-muted">
+        <Header />
+        <SuspendedAccountState />
       </div>
     );
   }

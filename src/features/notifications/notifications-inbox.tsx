@@ -22,11 +22,17 @@ const typeLabels: Record<string, string> = {
 
 export function NotificationBell() {
   const { isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.getMe, isAuthenticated ? {} : "skip");
+  const canLoadNotifications = isAuthenticated && me?.status === "active";
   const unreadCount = useQuery(
     api.notifications.unreadCount,
-    isAuthenticated ? {} : "skip"
+    canLoadNotifications ? {} : "skip"
   );
   const count = unreadCount ?? 0;
+
+  if (!canLoadNotifications) {
+    return null;
+  }
 
   return (
     <Link

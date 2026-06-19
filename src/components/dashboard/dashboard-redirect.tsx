@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
   AccountSetupState,
+  SuspendedAccountState,
   useEnsureConvexUser,
 } from "@/hooks/use-ensure-convex-user";
 import { getDashboardHref } from "@/lib/dashboard-nav";
@@ -13,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function DashboardRedirect() {
   const router = useRouter();
   const { isLoaded: clerkLoaded } = useAuth();
-  const { user, isLoading, syncError, retrySync, clerkSignedIn } =
+  const { user, isLoading, isSuspended, syncError, retrySync, clerkSignedIn } =
     useEnsureConvexUser();
 
   useEffect(() => {
@@ -24,16 +25,20 @@ export function DashboardRedirect() {
       return;
     }
 
-    if (!user) return;
+    if (!user || isSuspended) return;
 
     const target = getDashboardHref(user.role);
     if (window.location.pathname !== target) {
       router.replace(target);
     }
-  }, [clerkLoaded, isLoading, clerkSignedIn, user, router]);
+  }, [clerkLoaded, isLoading, clerkSignedIn, user, isSuspended, router]);
 
   if (!clerkLoaded || isLoading) {
     return <DashboardRedirectSkeleton />;
+  }
+
+  if (clerkSignedIn && isSuspended) {
+    return <SuspendedAccountState />;
   }
 
   if (clerkSignedIn && !user) {

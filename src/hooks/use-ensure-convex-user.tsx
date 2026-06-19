@@ -1,6 +1,7 @@
 "use client";
 
-import { useAuth, useUser } from "@clerk/nextjs";
+import { SignOutButton, useAuth, useUser } from "@clerk/nextjs";
+import Link from "next/link";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "convex/_generated/api";
@@ -70,11 +71,16 @@ export function useEnsureConvexUser() {
       });
   }, [clerkSignedIn, authLoading, isAuthenticated, getToken]);
 
+  // UserSync runs sync on mount; fallback once if profile still missing.
   useEffect(() => {
     if (!needsSync) return;
-    queueMicrotask(() => {
+
+    const id = window.setTimeout(() => {
+      if (syncingRef.current) return;
       void runSync();
-    });
+    }, 2000);
+
+    return () => window.clearTimeout(id);
   }, [needsSync, runSync]);
 
   const waitingForConvexAuth =
@@ -123,8 +129,11 @@ export function useEnsureConvexUser() {
     await runSync();
   }, [getToken, runSync]);
 
+  const isSuspended = convexUser?.status === "suspended";
+
   return {
     user: convexUser ?? null,
+    isSuspended,
     isLoading,
     syncError:
       authError ??
@@ -217,6 +226,26 @@ export function AccountSetupState({
           </p>
         </>
       )}
+    </div>
+  );
+}
+
+export function SuspendedAccountState() {
+  return (
+    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-8 text-center">
+      <h1 className="text-xl font-semibold text-slate-900">Account suspended</h1>
+      <p className="max-w-md text-sm text-slate-600">
+        Your account has been suspended and you cannot use the dashboard right now.
+        If you believe this is a mistake, contact platform support.
+      </p>
+      <div className="flex flex-wrap justify-center gap-3">
+        <SignOutButton>
+          <Button variant="outline">Sign out</Button>
+        </SignOutButton>
+        <Link href="/courses">
+          <Button variant="ghost">Browse courses</Button>
+        </Link>
+      </div>
     </div>
   );
 }

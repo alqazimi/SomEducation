@@ -409,6 +409,11 @@ export const requestResubmit = mutation({
     const admin = await requireAdmin(ctx);
     const payment = await ctx.db.get(args.paymentId);
     if (!payment) throw new Error("Payment not found");
+    if (payment.status === "approved") {
+      throw new Error(
+        "Revoke approval first before requesting a new screenshot for an approved payment"
+      );
+    }
 
     await ctx.db.patch(args.paymentId, {
       status: "resubmit_requested",
@@ -444,6 +449,9 @@ export const suspendAccess = mutation({
     const admin = await requireAdmin(ctx);
     const payment = await ctx.db.get(args.paymentId);
     if (!payment) throw new Error("Payment not found");
+    if (payment.status !== "approved") {
+      throw new Error("Only approved payments can be suspended");
+    }
 
     const now = Date.now();
     await ctx.db.patch(args.paymentId, {
@@ -468,11 +476,83 @@ export const suspendAccess = mutation({
       });
     }
 
+    const course = await ctx.db.get(payment.courseId);
+    await createNotification(ctx, {
+      userId: payment.studentId,
+      type: "payment_rejected",
+      title: "Course access suspended",
+      body:
+        args.note?.trim() ??
+        `Your access to "${course?.title ?? "this course"}" has been suspended. Contact support if you have questions.`,
+      link: "/dashboard/student/payments",
+    });
+
     await logAudit(ctx, {
       actorId: admin._id,
       action: "payment.suspended",
       entityType: "payments",
       entityId: args.paymentId,
+    });
+  },
+});
+
+export const revokeApproval = mutation({
+  args: {
+    paymentId: v.id("payments"),
+    note: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const admin = await requireAdmin(ctx);
+    const payment = await ctx.db.get(args.paymentId);
+    if (!payment) throw new Error("Payment not found");
+    if (payment.status !== "approved") {
+      throw new Error("Only approved payments can be revoked");
+    }
+
+    const note = sanitizeText(args.note, 500);
+    const now = Date.now();
+
+    await ctx.db.patch(args.paymentId, {
+      status: "rejected",
+      adminNote: note,
+      reviewedBy: admin._id,
+      reviewedAt: now,
+      updatedAt: now,
+    });
+
+    const enrollment = await ctx.db
+      .query("enrollments")
+      .withIndex("by_student_course", (q) =>
+        q.eq("studentId", payment.studentId).eq("courseId", payment.courseId)
+      )
+      .first();
+
+    if (enrollment) {
+      await ctx.db.patch(enrollment._id, {
+        status: "revoked",
+        updatedAt: now,
+      });
+    }
+
+    const course = await ctx.db.get(payment.courseId);
+    await createNotification(ctx, {
+      userId: payment.studentId,
+      type: "payment_rejected",
+      title: "Payment approval revoked",
+      body: note,
+      link: "/dashboard/student/payments",
+    });
+
+    await logAudit(ctx, {
+      actorId: admin._id,
+      action: "payment.approval_revoked",
+      entityType: "payments",
+      entityId: args.paymentId,
+      details: JSON.stringify({
+        courseId: payment.courseId,
+        studentId: payment.studentId,
+        courseTitle: course?.title,
+      }),
     });
   },
 });
