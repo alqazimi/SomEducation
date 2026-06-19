@@ -11,15 +11,18 @@ export function useEnsureConvexUser() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   const { isSignedIn, getToken } = useAuth();
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
-  const convexUser = useQuery(api.users.getMe);
+  const clerkSignedIn = clerkLoaded && !!clerkUser && isSignedIn;
+  const shouldFetchUser = clerkSignedIn && !authLoading && isAuthenticated;
+  const convexUser = useQuery(
+    api.users.getMe,
+    shouldFetchUser ? {} : "skip"
+  );
   const syncUser = useMutation(api.users.syncUser);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authTimedOut, setAuthTimedOut] = useState(false);
   const syncingRef = useRef(false);
   const diagnosedRef = useRef(false);
-
-  const clerkSignedIn = clerkLoaded && !!clerkUser && isSignedIn;
 
   const runSync = useCallback(async () => {
     if (!clerkUser || syncingRef.current) return;
@@ -43,8 +46,7 @@ export function useEnsureConvexUser() {
     }
   }, [clerkUser, syncUser]);
 
-  const needsSync =
-    clerkSignedIn && !authLoading && isAuthenticated && convexUser === null;
+  const needsSync = shouldFetchUser && convexUser === null;
 
   // Clerk signed in but Convex never authenticated → usually missing JWT template
   useEffect(() => {
@@ -99,7 +101,10 @@ export function useEnsureConvexUser() {
   const isLoading =
     authLoading ||
     !clerkLoaded ||
-    (convexUser === undefined && !authTimedOut && !authError) ||
+    (shouldFetchUser &&
+      convexUser === undefined &&
+      !authTimedOut &&
+      !authError) ||
     (waitingForConvexAuth && !authError && !authTimedOut) ||
     (needsSync && !syncError && !authError && !authTimedOut);
 

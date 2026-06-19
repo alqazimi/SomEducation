@@ -40,13 +40,11 @@ export function Header() {
   const signUpUrl = getSignUpUrl(pathname || "/dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  const [lastPathname, setLastPathname] = useState(pathname);
 
-  if (pathname !== lastPathname) {
-    setLastPathname(pathname);
-    if (mobileOpen) setMobileOpen(false);
-    if (mobileSearchOpen) setMobileSearchOpen(false);
-  }
+  useEffect(() => {
+    setMobileOpen(false);
+    setMobileSearchOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     if (!mobileOpen && !mobileSearchOpen) return;

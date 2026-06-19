@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import {
+  getCurrentUser,
   requireAdmin,
   requireCurrentUser,
   isAdminOrOwner,
@@ -110,7 +111,9 @@ export const listMessageRecipients = query({
     search: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await requireCurrentUser(ctx);
+    const user = await getCurrentUser(ctx);
+    if (!user || user.status === "suspended") return [];
+
     const search = args.search?.trim().toLowerCase();
 
     const users = await ctx.db.query("users").collect();
@@ -150,7 +153,8 @@ export const listMessageRecipients = query({
 export const inbox = query({
   args: {},
   handler: async (ctx) => {
-    const user = await requireCurrentUser(ctx);
+    const user = await getCurrentUser(ctx);
+    if (!user || user.status === "suspended") return [];
     const messages = await ctx.db
       .query("messages")
       .withIndex("by_recipient", (q) => q.eq("recipientId", user._id))
@@ -169,7 +173,8 @@ export const inbox = query({
 export const sent = query({
   args: {},
   handler: async (ctx) => {
-    const user = await requireCurrentUser(ctx);
+    const user = await getCurrentUser(ctx);
+    if (!user || user.status === "suspended") return [];
     const messages = await ctx.db
       .query("messages")
       .withIndex("by_sender", (q) => q.eq("senderId", user._id))
@@ -206,7 +211,9 @@ export const markRead = mutation({
 export const unreadCount = query({
   args: {},
   handler: async (ctx) => {
-    const user = await requireCurrentUser(ctx);
+    const user = await getCurrentUser(ctx);
+    if (!user || user.status === "suspended") return 0;
+
     const unread = await ctx.db
       .query("messages")
       .withIndex("by_recipient", (q) =>

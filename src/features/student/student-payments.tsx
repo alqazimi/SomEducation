@@ -80,9 +80,12 @@ export function StudentPayments() {
                     when it is approved.
                   </p>
                 )}
-                {payment.adminNote && payment.status === "suspended" && (
-                  <p className="mt-2 text-sm text-slate-600">
-                    Admin note: {payment.adminNote}
+                {payment.status === "suspended" && (
+                  <p className="mt-3 text-sm text-slate-600">
+                    Your course access for this payment has been suspended.
+                    {payment.adminNote
+                      ? ` Admin note: ${payment.adminNote}`
+                      : " Contact support if you have questions."}
                   </p>
                 )}
                 <PaymentFixFormFromRecord payment={payment} />

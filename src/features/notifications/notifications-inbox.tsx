@@ -51,11 +51,33 @@ export function NotificationBell() {
 }
 
 export function NotificationsInbox() {
-  const notifications = useQuery(api.notifications.list, {});
+  const { isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.getMe, isAuthenticated ? {} : "skip");
+  const canLoad = isAuthenticated && me?.status === "active";
+
+  const notifications = useQuery(
+    api.notifications.list,
+    canLoad ? {} : "skip"
+  );
   const markRead = useMutation(api.notifications.markRead);
   const markAllRead = useMutation(api.notifications.markAllRead);
 
   const unread = notifications?.filter((n) => !n.isRead).length ?? 0;
+
+  if (me !== undefined && !canLoad) {
+    return (
+      <div>
+        <DashboardPageHeader
+          eyebrow="Updates"
+          title="Notifications"
+          description="Payment updates, course approvals, and messages."
+        />
+        <p className="mt-8 text-sm text-slate-500">
+          Notifications are unavailable for your account right now.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>

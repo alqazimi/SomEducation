@@ -23,6 +23,18 @@ export function UserSync() {
       imageUrl: user.imageUrl ?? undefined,
     }).catch(() => {
       syncedRef.current = null;
+      window.setTimeout(() => {
+        if (syncedRef.current === user.id) return;
+        syncedRef.current = user.id;
+        void syncUser({
+          email: user.primaryEmailAddress?.emailAddress ?? "",
+          firstName: user.firstName ?? undefined,
+          lastName: user.lastName ?? undefined,
+          imageUrl: user.imageUrl ?? undefined,
+        }).catch(() => {
+          syncedRef.current = null;
+        });
+      }, 3000);
     });
   }, [isLoaded, convexAuthLoading, isAuthenticated, user, syncUser]);
 

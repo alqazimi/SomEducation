@@ -29,7 +29,9 @@ export const list = query({
 export const markRead = mutation({
   args: { notificationId: v.id("notifications") },
   handler: async (ctx, args) => {
-    const user = await requireCurrentUser(ctx);
+    const user = await getCurrentUser(ctx);
+    if (!user || user.status === "suspended") return;
+
     const notification = await ctx.db.get(args.notificationId);
     if (!notification || notification.userId !== user._id) {
       throw new Error("Notification not found");
@@ -41,7 +43,9 @@ export const markRead = mutation({
 export const markAllRead = mutation({
   args: {},
   handler: async (ctx) => {
-    const user = await requireCurrentUser(ctx);
+    const user = await getCurrentUser(ctx);
+    if (!user || user.status === "suspended") return;
+
     const unread = await ctx.db
       .query("notifications")
       .withIndex("by_userId", (q) =>
