@@ -201,7 +201,7 @@ export function AdminPayments() {
       <div className="mt-8 space-y-6">
         {authLoading || (isAuthenticated && payments === undefined) ? (
           <p className="text-sm text-slate-500">Loading payments...</p>
-        ) : payments === null ? (
+        ) : payments == null ? (
           <p className="text-sm text-slate-500">
             Could not load payments. Check your admin access and Convex connection.
           </p>
