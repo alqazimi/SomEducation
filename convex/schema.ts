@@ -219,18 +219,37 @@ export default defineSchema({
     .index("by_courseId", ["courseId", "status"])
     .index("by_student_course", ["studentId", "courseId"]),
 
+  supportThreads: defineTable({
+    studentId: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    lastMessageAt: v.number(),
+  })
+    .index("by_studentId", ["studentId"])
+    .index("by_lastMessageAt", ["lastMessageAt"]),
+
   messages: defineTable({
     senderId: v.id("users"),
     recipientId: v.id("users"),
+    threadId: v.optional(v.id("supportThreads")),
+    audience: v.optional(
+      v.union(
+        v.literal("student_to_support"),
+        v.literal("support_to_student")
+      )
+    ),
     subject: v.string(),
     body: v.string(),
     isRead: v.boolean(),
     readAt: v.optional(v.number()),
+    editedAt: v.optional(v.number()),
+    isDeleted: v.optional(v.boolean()),
     createdAt: v.number(),
   })
     .index("by_recipient", ["recipientId", "isRead", "createdAt"])
     .index("by_sender", ["senderId", "createdAt"])
-    .index("by_conversation", ["senderId", "recipientId", "createdAt"]),
+    .index("by_conversation", ["senderId", "recipientId", "createdAt"])
+    .index("by_thread", ["threadId", "createdAt"]),
 
   settings: defineTable({
     key: v.string(),

@@ -20,6 +20,47 @@ const EXTENSION_TO_MIME: Record<string, (typeof PAYMENT_PROOF_MIME_TYPES)[number
   };
 
 const MAX_PAYMENT_PROOF_SIZE = 5 * 1024 * 1024;
+const UPLOAD_TIMEOUT_MS = 60_000;
+const UPLOAD_URL_TIMEOUT_MS = 30_000;
+
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  timeoutMessage: string
+): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeoutId !== undefined) clearTimeout(timeoutId);
+  }
+}
+
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeoutMs: number
+) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error(
+        "Upload timed out. Check your internet connection and try again."
+      );
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 export function resolvePaymentProofMimeType(file: File) {
   if (
@@ -54,12 +95,21 @@ export async function uploadPaymentProofToConvex(
   validatePaymentProofFile(file);
   const contentType = resolvePaymentProofMimeType(file);
 
-  const uploadUrl = await generateUploadUrl();
-  const result = await fetch(uploadUrl, {
-    method: "POST",
-    headers: { "Content-Type": contentType },
-    body: file,
-  });
+  const uploadUrl = await withTimeout(
+    generateUploadUrl(),
+    UPLOAD_URL_TIMEOUT_MS,
+    "Could not start upload. Check your connection and sign-in, then try again."
+  );
+
+  const result = await fetchWithTimeout(
+    uploadUrl,
+    {
+      method: "POST",
+      headers: { "Content-Type": contentType },
+      body: file,
+    },
+    UPLOAD_TIMEOUT_MS
+  );
 
   if (!result.ok) {
     const detail = await result.text().catch(() => "");

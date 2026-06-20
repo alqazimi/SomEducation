@@ -81,12 +81,22 @@ export function StudentPayments() {
                   </p>
                 )}
                 {payment.status === "suspended" && (
-                  <p className="mt-3 text-sm text-slate-600">
-                    Your course access for this payment has been suspended.
-                    {payment.adminNote
-                      ? ` Admin note: ${payment.adminNote}`
-                      : " Contact support if you have questions."}
-                  </p>
+                  <div className="mt-3 space-y-2 text-sm text-slate-600">
+                    <p>
+                      Your course access for this payment has been suspended. You
+                      cannot submit a new purchase request for this course.
+                    </p>
+                    <p>
+                      Wait for an administrator to restore access, or contact
+                      support if you have questions.
+                    </p>
+                    {payment.adminNote && (
+                      <p>Admin note: {payment.adminNote}</p>
+                    )}
+                    <Button size="sm" variant="outline" asChild>
+                      <Link href="/dashboard/messages">Contact support</Link>
+                    </Button>
+                  </div>
                 )}
                 <PaymentFixFormFromRecord payment={payment} />
               </CardContent>

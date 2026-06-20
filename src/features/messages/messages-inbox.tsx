@@ -8,10 +8,12 @@ import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { MessageComposeForm } from "@/features/messages/message-compose-form";
+import { StudentSupportThread } from "@/features/messages/student-support-thread";
+import { AdminSupportInbox } from "@/features/messages/admin-support-inbox";
 
 type MessagesView = "inbox" | "sent" | "compose";
 
-export function MessagesInbox() {
+function TeacherMessagesInbox() {
   const [view, setView] = useState<MessagesView>("inbox");
   const inbox = useQuery(api.messages.inbox);
   const sent = useQuery(api.messages.sent);
@@ -20,19 +22,7 @@ export function MessagesInbox() {
   const messages = view === "sent" ? sent : inbox;
 
   return (
-    <div>
-      <DashboardPageHeader
-        eyebrow="Inbox"
-        title="Messages"
-        description="Send questions to support or read replies from administrators."
-      >
-        {view !== "compose" && (
-          <Button size="sm" onClick={() => setView("compose")}>
-            New message
-          </Button>
-        )}
-      </DashboardPageHeader>
-
+    <>
       <div className="mt-6 flex flex-wrap gap-2">
         <Button
           size="sm"
@@ -48,6 +38,11 @@ export function MessagesInbox() {
         >
           Sent
         </Button>
+        {view !== "compose" && (
+          <Button size="sm" variant="outline" onClick={() => setView("compose")}>
+            New message
+          </Button>
+        )}
       </div>
 
       <div className="mt-8 space-y-4">
@@ -111,6 +106,43 @@ export function MessagesInbox() {
           ))
         )}
       </div>
+    </>
+  );
+}
+
+export function MessagesInbox() {
+  const me = useQuery(api.users.getMe);
+
+  const isStudent = me?.role === "student";
+  const isAdmin = me?.role === "admin" || me?.role === "owner";
+
+  return (
+    <div>
+      <DashboardPageHeader
+        eyebrow="Inbox"
+        title="Messages"
+        description={
+          isStudent
+            ? "Contact platform support anytime. All administrators share this inbox."
+            : isAdmin
+              ? "Shared support inbox for all student conversations."
+              : "Message students or administrators."
+        }
+      />
+
+      {me === undefined ? (
+        <p className="mt-8 text-sm text-slate-500">Loading...</p>
+      ) : isStudent ? (
+        <div className="mt-8">
+          <StudentSupportThread />
+        </div>
+      ) : isAdmin ? (
+        <div className="mt-8">
+          <AdminSupportInbox />
+        </div>
+      ) : (
+        <TeacherMessagesInbox />
+      )}
     </div>
   );
 }

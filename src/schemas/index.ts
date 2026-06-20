@@ -67,6 +67,19 @@ export const messageFormSchema = z.object({
 
 export type MessageFormValues = z.infer<typeof messageFormSchema>;
 
+export const supportMessageFormSchema = z.object({
+  subject: z.string().min(3).max(200),
+  body: z.string().min(10).max(5000),
+});
+
+export type SupportMessageFormValues = z.infer<typeof supportMessageFormSchema>;
+
+export const supportReplySchema = z.object({
+  body: z.string().min(1).max(5000),
+});
+
+export type SupportReplyValues = z.infer<typeof supportReplySchema>;
+
 export const settingsFormSchema = z.object({
   paymentInstructions: z.string().max(2000).optional().or(z.literal("")),
   supportEmail: z.string().email().optional(),

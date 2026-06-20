@@ -27,6 +27,7 @@ type DialogState =
   | { type: "resubmit"; paymentId: Id<"payments"> }
   | { type: "revoke"; paymentId: Id<"payments">; title: string; student: string }
   | { type: "suspend"; paymentId: Id<"payments">; title: string; student: string }
+  | { type: "restore"; paymentId: Id<"payments">; title: string; student: string }
   | null;
 
 type PaymentRow = NonNullable<
@@ -126,6 +127,7 @@ export function AdminPayments() {
   const requestResubmit = useMutation(api.payments.requestResubmit);
   const revokeApproval = useMutation(api.payments.revokeApproval);
   const suspendAccess = useMutation(api.payments.suspendAccess);
+  const restoreAccess = useMutation(api.payments.restoreAccess);
 
   async function handleDialogConfirm(note?: string) {
     if (!dialog) return;
@@ -156,6 +158,12 @@ export function AdminPayments() {
           note: note?.trim() || undefined,
         });
         toast.success("Access suspended");
+      } else if (dialog.type === "restore") {
+        await restoreAccess({
+          paymentId: dialog.paymentId,
+          note: note?.trim() || undefined,
+        });
+        toast.success("Access restored");
       }
       setDialog(null);
     } catch (error) {
@@ -310,6 +318,22 @@ export function AdminPayments() {
                       </>
                     )}
 
+                    {payment.status === "suspended" && (
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          setDialog({
+                            type: "restore",
+                            paymentId: payment._id,
+                            title: courseTitle,
+                            student: studentName,
+                          })
+                        }
+                      >
+                        Restore Access
+                      </Button>
+                    )}
+
                     {(payment.status === "rejected" ||
                       payment.status === "resubmit_requested") && (
                       <Button
@@ -411,6 +435,23 @@ export function AdminPayments() {
         inputMode="textarea"
         inputLabel="Message to student (optional)"
         inputPlaceholder="Optional note explaining why access was suspended"
+        loading={actionLoading}
+        onConfirm={handleDialogConfirm}
+      />
+
+      <ConfirmDialog
+        open={dialog?.type === "restore"}
+        onOpenChange={(open) => !open && setDialog(null)}
+        title="Restore course access?"
+        description={
+          dialog?.type === "restore"
+            ? `Restore ${dialog.student}'s access to "${dialog.title}". The payment will be marked approved again.`
+            : ""
+        }
+        confirmLabel="Restore access"
+        inputMode="textarea"
+        inputLabel="Message to student (optional)"
+        inputPlaceholder="Optional note for the student"
         loading={actionLoading}
         onConfirm={handleDialogConfirm}
       />

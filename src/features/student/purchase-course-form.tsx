@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2, Smartphone } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { paymentFormSchema, type PaymentFormValues } from "@/schemas";
 import { PaymentFixFormFromRecord } from "@/features/student/payment-fix-form";
 import {
+  clearPaymentDraft,
+  readPaymentDraft,
+  writePaymentDraft,
+} from "@/lib/payment-form-draft";
+import { useConvexUploadReady } from "@/hooks/use-convex-upload-ready";
+import {
   PAYMENT_PROOF_ACCEPT,
   uploadPaymentProofToConvex,
 } from "@/lib/payment-upload";
@@ -25,6 +31,18 @@ import { type } from "@/lib/typography";
 import { cn, formatPrice } from "@/lib/utils";
 
 type PaymentType = "mobile_money" | "bank_transfer";
+
+type PurchaseDraft = {
+  step?: number;
+  paymentType?: PaymentType | null;
+  selectedProviderId?: string | null;
+  screenshotId?: string | null;
+  fullName?: string;
+  phone?: string;
+  transactionReference?: string;
+  notes?: string;
+  paymentProviderId?: string;
+};
 
 const typeOptions: Array<{
   value: PaymentType;
@@ -38,8 +56,12 @@ const typeOptions: Array<{
 export function PurchaseCourseForm() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const draftKey = `purchase-draft:${params.slug}`;
+  const { canUpload, statusMessage } = useConvexUploadReady();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const draftRestoredRef = useRef(false);
+  const courseReadyRef = useRef(false);
+  const openPaymentReadyRef = useRef(false);
   const [step, setStep] = useState(1);
   const [uploading, setUploading] = useState(false);
   const [screenshotId, setScreenshotId] = useState<Id<"_storage"> | null>(null);
@@ -50,6 +72,10 @@ export function PurchaseCourseForm() {
   const course = useQuery(api.courses.getBySlug, { slug: params.slug });
   const openPayment = useQuery(
     api.payments.getOpenForCourse,
+    course ? { courseId: course._id } : "skip"
+  );
+  const suspendedAccess = useQuery(
+    api.payments.getSuspendedForCourse,
     course ? { courseId: course._id } : "skip"
   );
   const providers = useQuery(
@@ -71,6 +97,58 @@ export function PurchaseCourseForm() {
     },
   });
 
+  const formValues = form.watch();
+
+  useEffect(() => {
+    if (draftRestoredRef.current) return;
+    const draft = readPaymentDraft<PurchaseDraft>(draftKey);
+    draftRestoredRef.current = true;
+    if (!draft) return;
+
+    if (draft.step && draft.step >= 1 && draft.step <= 4) {
+      setStep(draft.step);
+    }
+    if (draft.paymentType) setPaymentType(draft.paymentType);
+    if (draft.selectedProviderId) {
+      setSelectedProviderId(draft.selectedProviderId as Id<"paymentProviders">);
+    }
+    if (draft.screenshotId) {
+      setScreenshotId(draft.screenshotId as Id<"_storage">);
+    }
+    form.reset({
+      fullName: draft.fullName ?? "",
+      phone: draft.phone ?? "",
+      transactionReference: draft.transactionReference ?? "",
+      notes: draft.notes ?? "",
+      paymentProviderId: draft.paymentProviderId ?? "",
+    });
+  }, [draftKey, form]);
+
+  useEffect(() => {
+    if (!draftRestoredRef.current) return;
+    writePaymentDraft(draftKey, {
+      step,
+      paymentType,
+      selectedProviderId,
+      screenshotId,
+      ...formValues,
+    });
+  }, [
+    draftKey,
+    step,
+    paymentType,
+    selectedProviderId,
+    screenshotId,
+    formValues,
+  ]);
+
+  if (course !== undefined) {
+    courseReadyRef.current = true;
+  }
+  if (openPayment !== undefined) {
+    openPaymentReadyRef.current = true;
+  }
+
   function handleTypeChange(nextType: PaymentType) {
     setPaymentType(nextType);
     setSelectedProviderId(null);
@@ -83,8 +161,8 @@ export function PurchaseCourseForm() {
   }
 
   async function handleFileUpload(file: File) {
-    if (!isAuthenticated) {
-      toast.error("Please wait until you are signed in, then try again.");
+    if (!canUpload) {
+      toast.error("Please wait until your account is connected, then try again.");
       return;
     }
 
@@ -126,13 +204,14 @@ export function PurchaseCourseForm() {
         screenshotStorageId: screenshotId,
       });
       toast.success("Payment submitted for review");
+      clearPaymentDraft(draftKey);
       router.push("/dashboard/student/payments");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Submission failed");
     }
   }
 
-  if (course === undefined) {
+  if (course === undefined && !courseReadyRef.current) {
     return <p className="text-sm text-slate-500">Loading course...</p>;
   }
 
@@ -158,7 +237,32 @@ export function PurchaseCourseForm() {
     );
   }
 
-  if (openPayment === undefined) {
+  if (suspendedAccess) {
+    return (
+      <div className="text-center">
+        <p className="text-slate-600">
+          Your access to this course is suspended. You cannot submit a new payment
+          request until an administrator restores access or updates your payment
+          status.
+        </p>
+        {suspendedAccess.adminNote && (
+          <p className="mt-2 text-sm text-slate-500">
+            Admin note: {suspendedAccess.adminNote}
+          </p>
+        )}
+        <div className="mt-4 flex flex-wrap justify-center gap-3">
+          <Link href="/dashboard/student/payments">
+            <Button variant="outline">View payment history</Button>
+          </Link>
+          <Link href="/dashboard/messages">
+            <Button>Contact support</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (openPayment === undefined && !openPaymentReadyRef.current) {
     return <p className="text-sm text-slate-500">Loading payment status...</p>;
   }
 
@@ -380,16 +484,18 @@ export function PurchaseCourseForm() {
               ref={fileInputRef}
               type="file"
               accept={PAYMENT_PROOF_ACCEPT}
-              disabled={uploading || authLoading || !isAuthenticated}
+              disabled={uploading || !canUpload}
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) void handleFileUpload(file);
               }}
             />
-            {authLoading && (
-              <p className="text-sm text-slate-500">Connecting your account...</p>
+            {statusMessage && (
+              <p className="text-sm text-slate-500">{statusMessage}</p>
             )}
-            {uploading && <p className="text-sm text-slate-500">Uploading...</p>}
+            {uploading && (
+              <p className="text-sm text-slate-500">Uploading… this may take a moment.</p>
+            )}
             {screenshotId && (
               <p className="text-sm text-green-600">Screenshot uploaded successfully</p>
             )}

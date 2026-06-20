@@ -11,6 +11,7 @@
 import type * as bootstrap from "../bootstrap.js";
 import type * as categories from "../categories.js";
 import type * as courses from "../courses.js";
+import type * as crons from "../crons.js";
 import type * as enrollments from "../enrollments.js";
 import type * as exams from "../exams.js";
 import type * as files from "../files.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   bootstrap: typeof bootstrap;
   categories: typeof categories;
   courses: typeof courses;
+  crons: typeof crons;
   enrollments: typeof enrollments;
   exams: typeof exams;
   files: typeof files;

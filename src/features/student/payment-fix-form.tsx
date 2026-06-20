@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2, Smartphone } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -19,6 +19,12 @@ import {
   PAYMENT_PROOF_ACCEPT,
   uploadPaymentProofToConvex,
 } from "@/lib/payment-upload";
+import {
+  clearPaymentDraft,
+  readPaymentDraft,
+  writePaymentDraft,
+} from "@/lib/payment-form-draft";
+import { useConvexUploadReady } from "@/hooks/use-convex-upload-ready";
 import { cn } from "@/lib/utils";
 
 type PaymentType = "mobile_money" | "bank_transfer";
@@ -49,13 +55,25 @@ type PaymentFixFormProps = {
   showSupportLink?: boolean;
 };
 
+type PaymentFixDraft = {
+  step?: number;
+  paymentType?: PaymentType;
+  selectedProviderId?: string | null;
+  screenshotId?: string | null;
+  paymentProviderId?: string;
+  transactionReference?: string;
+  notes?: string;
+};
+
 export function PaymentFixForm({
   payment,
   onSuccess,
   showSupportLink = true,
 }: PaymentFixFormProps) {
-  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const draftKey = `payment-fix-draft:${payment._id}`;
+  const { canUpload, statusMessage } = useConvexUploadReady();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const draftRestoredRef = useRef(false);
 
   const [step, setStep] = useState(1);
   const [paymentType, setPaymentType] = useState<PaymentType>(payment.method);
@@ -85,6 +103,41 @@ export function PaymentFixForm({
     () => providers?.find((provider) => provider._id === selectedProviderId),
     [providers, selectedProviderId]
   );
+
+  const formValues = form.watch();
+
+  useEffect(() => {
+    if (draftRestoredRef.current) return;
+    const draft = readPaymentDraft<PaymentFixDraft>(draftKey);
+    draftRestoredRef.current = true;
+    if (!draft) return;
+
+    if (draft.step === 1 || draft.step === 2) setStep(draft.step);
+    if (draft.paymentType) setPaymentType(draft.paymentType);
+    if (draft.selectedProviderId) {
+      setSelectedProviderId(draft.selectedProviderId as Id<"paymentProviders">);
+    }
+    if (draft.screenshotId) {
+      setScreenshotId(draft.screenshotId as Id<"_storage">);
+    }
+    form.reset({
+      paymentProviderId: draft.paymentProviderId ?? payment.paymentProviderId ?? "",
+      transactionReference:
+        draft.transactionReference ?? payment.transactionReference,
+      notes: draft.notes ?? payment.notes ?? "",
+    });
+  }, [draftKey, form, payment]);
+
+  useEffect(() => {
+    if (!draftRestoredRef.current) return;
+    writePaymentDraft(draftKey, {
+      step,
+      paymentType,
+      selectedProviderId,
+      screenshotId,
+      ...formValues,
+    });
+  }, [draftKey, step, paymentType, selectedProviderId, screenshotId, formValues]);
 
   useEffect(() => {
     if (!providers || !selectedProviderId) return;
@@ -141,8 +194,8 @@ export function PaymentFixForm({
   }
 
   async function handleFileUpload(file: File) {
-    if (!isAuthenticated) {
-      toast.error("Please wait until you are signed in, then try again.");
+    if (!canUpload) {
+      toast.error("Please wait until your account is connected, then try again.");
       return;
     }
 
@@ -187,6 +240,7 @@ export function PaymentFixForm({
         notes: data.notes?.trim() ? data.notes : undefined,
       });
       toast.success("Payment updated and sent back for review");
+      clearPaymentDraft(draftKey);
       setScreenshotId(null);
       onSuccess?.();
     } catch (error) {
@@ -399,19 +453,19 @@ export function PaymentFixForm({
               type="file"
               accept={PAYMENT_PROOF_ACCEPT}
               className="mt-1 bg-white"
-              disabled={uploading || submitting || authLoading || !isAuthenticated}
+              disabled={uploading || submitting || !canUpload}
               onChange={(event) => {
                 const file = event.target.files?.[0];
                 if (file) void handleFileUpload(file);
               }}
             />
-            {authLoading && (
-              <p className="mt-1 text-sm text-amber-800">
-                Connecting your account...
-              </p>
+            {statusMessage && (
+              <p className="mt-1 text-sm text-amber-800">{statusMessage}</p>
             )}
             {uploading && (
-              <p className="mt-1 text-sm text-amber-800">Uploading...</p>
+              <p className="mt-1 text-sm text-amber-800">
+                Uploading… this may take a moment.
+              </p>
             )}
             {screenshotId && (
               <p className="mt-1 text-sm text-green-700">
@@ -437,7 +491,7 @@ export function PaymentFixForm({
                 !selectedProviderId ||
                 uploading ||
                 submitting ||
-                !isAuthenticated
+                !canUpload
               }
             >
               {submitting ? "Submitting..." : "Submit for review"}

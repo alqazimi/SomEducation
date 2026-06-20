@@ -57,6 +57,25 @@ export const submit = mutation({
       throw new Error("You are already enrolled in this course");
     }
 
+    if (existingEnrollment?.status === "suspended") {
+      throw new Error(
+        "Your access to this course is suspended. Contact support or wait for an admin to restore access."
+      );
+    }
+
+    const suspendedPayment = await ctx.db
+      .query("payments")
+      .withIndex("by_student_course", (q) =>
+        q.eq("studentId", user._id).eq("courseId", args.courseId)
+      )
+      .filter((q) => q.eq(q.field("status"), "suspended"))
+      .first();
+    if (suspendedPayment) {
+      throw new Error(
+        "Your access to this course is suspended. Contact support or wait for an admin to restore access."
+      );
+    }
+
     const openPayment = await findOpenPaymentForCourse(
       ctx,
       user._id,
@@ -553,6 +572,113 @@ export const revokeApproval = mutation({
         studentId: payment.studentId,
         courseTitle: course?.title,
       }),
+    });
+  },
+});
+
+export const getSuspendedForCourse = query({
+  args: { courseId: v.id("courses") },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) return null;
+
+    const enrollment = await ctx.db
+      .query("enrollments")
+      .withIndex("by_student_course", (q) =>
+        q.eq("studentId", user._id).eq("courseId", args.courseId)
+      )
+      .first();
+
+    const suspendedPayment = await ctx.db
+      .query("payments")
+      .withIndex("by_student_course", (q) =>
+        q.eq("studentId", user._id).eq("courseId", args.courseId)
+      )
+      .filter((q) => q.eq(q.field("status"), "suspended"))
+      .first();
+
+    if (enrollment?.status !== "suspended" && !suspendedPayment) {
+      return null;
+    }
+
+    const course = await ctx.db.get(args.courseId);
+    const payment = suspendedPayment
+      ? {
+          ...suspendedPayment,
+          adminNote: suspendedPayment.adminNote,
+        }
+      : null;
+
+    return {
+      enrollmentStatus: enrollment?.status,
+      adminNote: payment?.adminNote,
+      courseTitle: course?.title,
+    };
+  },
+});
+
+export const restoreAccess = mutation({
+  args: {
+    paymentId: v.id("payments"),
+    note: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const admin = await requireAdmin(ctx);
+    const payment = await ctx.db.get(args.paymentId);
+    if (!payment) throw new Error("Payment not found");
+    if (payment.status !== "suspended") {
+      throw new Error("Only suspended payments can be restored");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(args.paymentId, {
+      status: "approved",
+      adminNote: args.note ? sanitizeText(args.note, 500) : payment.adminNote,
+      reviewedBy: admin._id,
+      reviewedAt: now,
+      updatedAt: now,
+    });
+
+    const enrollment = await ctx.db
+      .query("enrollments")
+      .withIndex("by_student_course", (q) =>
+        q.eq("studentId", payment.studentId).eq("courseId", payment.courseId)
+      )
+      .first();
+
+    if (enrollment) {
+      await ctx.db.patch(enrollment._id, {
+        status: "active",
+        paymentId: args.paymentId,
+        updatedAt: now,
+      });
+    } else {
+      await ctx.db.insert("enrollments", {
+        studentId: payment.studentId,
+        courseId: payment.courseId,
+        paymentId: args.paymentId,
+        status: "active",
+        enrolledAt: now,
+        updatedAt: now,
+      });
+    }
+
+    const course = await ctx.db.get(payment.courseId);
+    await createNotification(ctx, {
+      userId: payment.studentId,
+      type: "payment_approved",
+      title: "Course access restored",
+      body:
+        args.note?.trim() ??
+        `Your access to "${course?.title ?? "your course"}" has been restored.`,
+      link: course ? `/learn/${course.slug}` : "/dashboard/student/courses",
+    });
+
+    await logAudit(ctx, {
+      actorId: admin._id,
+      action: "payment.access_restored",
+      entityType: "payments",
+      entityId: args.paymentId,
     });
   },
 });
