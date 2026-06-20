@@ -29,6 +29,8 @@ type ThreadMessage = {
   editedAt?: number;
   createdAt: number;
   senderId: Id<"users">;
+  recipientId: Id<"users">;
+  audience?: "student_to_support" | "support_to_student";
   sender?: {
     firstName?: string;
     lastName?: string;
@@ -36,32 +38,52 @@ type ThreadMessage = {
   } | null;
 };
 
+function isFromSupport(
+  message: ThreadMessage,
+  studentId?: Id<"users">
+) {
+  if (message.audience === "support_to_student") return true;
+  if (message.audience === "student_to_support") return false;
+  return (
+    studentId !== undefined &&
+    message.recipientId === studentId &&
+    message.senderId !== studentId
+  );
+}
+
 function MessageBubble({
   message,
   isOwn,
+  fromSupport,
   onEdit,
   onDelete,
 }: {
   message: ThreadMessage;
   isOwn: boolean;
+  fromSupport: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
 }) {
-  const senderName = message.sender
-    ? `${message.sender.firstName ?? ""} ${message.sender.lastName ?? ""}`.trim()
-    : "Support";
+  const senderName = fromSupport
+    ? "SomEducation Support"
+    : message.sender
+      ? `${message.sender.firstName ?? ""} ${message.sender.lastName ?? ""}`.trim()
+      : "You";
 
   return (
     <div
       className={`rounded-lg border p-4 ${
-        isOwn ? "border-slate-200 bg-slate-50" : "border-brand-200 bg-brand-50/40"
+        fromSupport
+          ? "border-brand-300 bg-brand-50"
+          : "border-slate-200 bg-slate-50"
       }`}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <p className="font-medium text-slate-900">{message.subject}</p>
           <p className="text-xs text-slate-500">
-            {isOwn ? "You" : senderName || "Support"} · {formatDate(message.createdAt)}
+            {isOwn ? "You" : senderName} · {formatDate(message.createdAt)}
+            {fromSupport && !isOwn && " · Reply from support"}
             {message.editedAt && " · edited"}
           </p>
         </div>
@@ -117,9 +139,7 @@ export function StudentSupportThread() {
   const messages = data?.messages ?? [];
 
   useEffect(() => {
-    if (thread) {
-      void markThreadRead({ threadId: thread._id });
-    }
+    void markThreadRead(thread ? { threadId: thread._id } : {});
   }, [thread?._id, markThreadRead]);
 
   async function handleNewMessage(values: SupportMessageFormValues) {
@@ -152,8 +172,19 @@ export function StudentSupportThread() {
     }
   }
 
-  if (data === undefined) {
+  if (data === undefined || me === undefined) {
     return <p className="text-sm text-slate-500">Loading messages...</p>;
+  }
+
+  if (data === null) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center text-sm text-slate-600">
+          Messages are unavailable for suspended accounts. Contact us by email if
+          you need help.
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -215,6 +246,7 @@ export function StudentSupportThread() {
           <div className="space-y-4">
             {messages.map((message) => {
               const isOwn = message.senderId === me?._id;
+              const fromSupport = isFromSupport(message, me?._id);
               if (editingId === message._id) {
                 return (
                   <Card key={message._id}>
@@ -249,6 +281,7 @@ export function StudentSupportThread() {
                   key={message._id}
                   message={message}
                   isOwn={isOwn}
+                  fromSupport={fromSupport}
                   onEdit={() => {
                     editForm.setValue("body", message.body);
                     setEditingId(message._id);

@@ -23,10 +23,7 @@ async function getOrCreateSupportThread(
   ctx: MutationCtx,
   studentId: Id<"users">
 ) {
-  const existing = await ctx.db
-    .query("supportThreads")
-    .withIndex("by_studentId", (q) => q.eq("studentId", studentId))
-    .first();
+  const existing = await getPrimaryThreadForStudent(ctx, studentId);
 
   if (existing) return existing;
 
@@ -43,14 +40,88 @@ async function getOrCreateSupportThread(
   return thread;
 }
 
+async function getAllThreadsForStudent(
+  ctx: QueryCtx,
+  studentId: Id<"users">
+) {
+  return await ctx.db
+    .query("supportThreads")
+    .withIndex("by_studentId", (q) => q.eq("studentId", studentId))
+    .collect();
+}
+
+async function getPrimaryThreadForStudent(
+  ctx: QueryCtx,
+  studentId: Id<"users">
+) {
+  const threads = await getAllThreadsForStudent(ctx, studentId);
+  if (threads.length === 0) return null;
+  return threads.sort((a, b) => b.lastMessageAt - a.lastMessageAt)[0];
+}
+
 async function getThreadMessages(ctx: QueryCtx, threadId: Id<"supportThreads">) {
   const messages = await ctx.db
     .query("messages")
     .withIndex("by_thread", (q) => q.eq("threadId", threadId))
-    .order("asc")
     .collect();
 
-  return messages.filter((msg) => !msg.isDeleted);
+  return messages
+    .filter((msg) => !msg.isDeleted)
+    .sort((a, b) => a.createdAt - b.createdAt);
+}
+
+async function getAllSupportMessagesForStudent(
+  ctx: QueryCtx,
+  studentId: Id<"users">
+) {
+  const seen = new Set<string>();
+  const messages: Awaited<ReturnType<typeof getThreadMessagesWithSenders>> = [];
+
+  const threads = await getAllThreadsForStudent(ctx, studentId);
+  for (const thread of threads) {
+    const threadMessages = await getThreadMessagesWithSenders(ctx, thread._id);
+    for (const msg of threadMessages) {
+      if (!seen.has(msg._id)) {
+        seen.add(msg._id);
+        messages.push(msg);
+      }
+    }
+  }
+
+  const directToStudent = await ctx.db
+    .query("messages")
+    .withIndex("by_recipient", (q) => q.eq("recipientId", studentId))
+    .collect();
+
+  for (const msg of directToStudent) {
+    if (msg.threadId || msg.isDeleted || seen.has(msg._id)) continue;
+    const sender = await ctx.db.get(msg.senderId);
+    seen.add(msg._id);
+    messages.push({ ...msg, sender });
+  }
+
+  const directFromStudent = await ctx.db
+    .query("messages")
+    .withIndex("by_sender", (q) => q.eq("senderId", studentId))
+    .collect();
+
+  for (const msg of directFromStudent) {
+    if (msg.threadId || msg.isDeleted || seen.has(msg._id)) continue;
+    const sender = await ctx.db.get(msg.senderId);
+    seen.add(msg._id);
+    messages.push({ ...msg, sender });
+  }
+
+  return messages.sort((a, b) => a.createdAt - b.createdAt);
+}
+
+function isSupportReplyToStudent(
+  message: { audience?: string; senderId: Id<"users">; recipientId: Id<"users"> },
+  studentId: Id<"users">
+) {
+  if (message.audience === "support_to_student") return true;
+  if (message.audience === "student_to_support") return false;
+  return message.recipientId === studentId && message.senderId !== studentId;
 }
 
 async function getThreadMessagesWithSenders(
@@ -241,25 +312,38 @@ export const listSupportThreads = query({
       .query("supportThreads")
       .withIndex("by_lastMessageAt")
       .order("desc")
-      .take(100);
+      .take(200);
 
-    return await Promise.all(
-      threads.map(async (thread) => {
-        const student = await ctx.db.get(thread.studentId);
-        const messages = await getThreadMessages(ctx, thread._id);
-        const lastMessage = messages[messages.length - 1] ?? null;
-        const unreadCount = messages.filter(
-          (msg) => msg.audience === "student_to_support" && !msg.isRead
-        ).length;
+    const seenStudents = new Set<string>();
+    const results = [];
 
-        return {
-          ...thread,
-          student,
-          lastMessage,
-          unreadCount,
-        };
-      })
-    );
+    for (const thread of threads) {
+      if (seenStudents.has(thread.studentId)) continue;
+      seenStudents.add(thread.studentId);
+
+      const student = await ctx.db.get(thread.studentId);
+      const messages = await getAllSupportMessagesForStudent(
+        ctx,
+        thread.studentId
+      );
+      const lastMessage = messages[messages.length - 1] ?? null;
+      const unreadCount = messages.filter(
+        (msg) =>
+          msg.audience === "student_to_support" && !msg.isRead
+      ).length;
+
+      const primaryThread =
+        (await getPrimaryThreadForStudent(ctx, thread.studentId)) ?? thread;
+
+      results.push({
+        ...primaryThread,
+        student,
+        lastMessage,
+        unreadCount,
+      });
+    }
+
+    return results.sort((a, b) => b.lastMessageAt - a.lastMessageAt);
   },
 });
 
@@ -267,20 +351,16 @@ export const getMySupportThread = query({
   args: {},
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
-    if (!user || user.status === "suspended" || user.role !== "student") {
+    if (!user || user.status === "suspended") {
       return null;
     }
-
-    const thread = await ctx.db
-      .query("supportThreads")
-      .withIndex("by_studentId", (q) => q.eq("studentId", user._id))
-      .first();
-
-    if (!thread) {
+    if (user.role !== "student") {
       return { thread: null, messages: [] };
     }
 
-    const messages = await getThreadMessagesWithSenders(ctx, thread._id);
+    const thread = await getPrimaryThreadForStudent(ctx, user._id);
+    const messages = await getAllSupportMessagesForStudent(ctx, user._id);
+
     return { thread, messages };
   },
 });
@@ -295,34 +375,77 @@ export const getSupportThread = query({
     if (!thread) return null;
 
     const student = await ctx.db.get(thread.studentId);
-    const messages = await getThreadMessagesWithSenders(ctx, thread._id);
+    const messages = await getAllSupportMessagesForStudent(
+      ctx,
+      thread.studentId
+    );
 
     return { thread, student, messages };
   },
 });
 
 export const markThreadRead = mutation({
-  args: { threadId: v.id("supportThreads") },
+  args: { threadId: v.optional(v.id("supportThreads")) },
   handler: async (ctx, args) => {
     const user = await requireCurrentUser(ctx);
-    const thread = await ctx.db.get(args.threadId);
-    if (!thread) throw new Error("Conversation not found");
-
     const isAdmin = isAdminOrOwner(user.role);
-    if (!isAdmin && user._id !== thread.studentId) {
-      throw new Error("Access denied");
+
+    let studentId: Id<"users"> | null = null;
+    if (args.threadId) {
+      const thread = await ctx.db.get(args.threadId);
+      if (!thread) throw new Error("Conversation not found");
+      studentId = thread.studentId;
+      if (!isAdmin && user._id !== thread.studentId) {
+        throw new Error("Access denied");
+      }
+    } else if (!isAdmin && user.role === "student") {
+      studentId = user._id;
+    } else {
+      throw new Error("Conversation not found");
     }
 
     const now = Date.now();
-    const messages = await getThreadMessages(ctx, thread._id);
+    const threads =
+      studentId !== null
+        ? await getAllThreadsForStudent(ctx, studentId)
+        : args.threadId
+          ? [await ctx.db.get(args.threadId)!]
+          : [];
 
-    for (const msg of messages) {
-      if (msg.isRead) continue;
+    const threadIds = threads.filter(Boolean).map((t) => t!._id);
+    const seen = new Set<string>();
 
-      if (isAdmin && msg.audience === "student_to_support") {
-        await ctx.db.patch(msg._id, { isRead: true, readAt: now });
-      } else if (!isAdmin && msg.audience === "support_to_student") {
-        await ctx.db.patch(msg._id, { isRead: true, readAt: now });
+    for (const threadId of threadIds) {
+      const messages = await getThreadMessages(ctx, threadId);
+      for (const msg of messages) {
+        if (msg.isRead || seen.has(msg._id)) continue;
+        seen.add(msg._id);
+
+        if (isAdmin && msg.audience === "student_to_support") {
+          await ctx.db.patch(msg._id, { isRead: true, readAt: now });
+        } else if (
+          !isAdmin &&
+          isSupportReplyToStudent(msg, user._id)
+        ) {
+          await ctx.db.patch(msg._id, { isRead: true, readAt: now });
+        }
+      }
+    }
+
+    if (!isAdmin && studentId) {
+      const legacy = await ctx.db
+        .query("messages")
+        .withIndex("by_recipient", (q) => q.eq("recipientId", studentId))
+        .collect();
+
+      for (const msg of legacy) {
+        if (msg.threadId || msg.isDeleted || msg.isRead || seen.has(msg._id)) {
+          continue;
+        }
+        if (isSupportReplyToStudent(msg, studentId)) {
+          seen.add(msg._id);
+          await ctx.db.patch(msg._id, { isRead: true, readAt: now });
+        }
       }
     }
   },
@@ -687,15 +810,9 @@ export const unreadCount = query({
     if (!user || user.status === "suspended") return 0;
 
     if (user.role === "student") {
-      const thread = await ctx.db
-        .query("supportThreads")
-        .withIndex("by_studentId", (q) => q.eq("studentId", user._id))
-        .first();
-      if (!thread) return 0;
-
-      const messages = await getThreadMessages(ctx, thread._id);
+      const messages = await getAllSupportMessagesForStudent(ctx, user._id);
       return messages.filter(
-        (msg) => msg.audience === "support_to_student" && !msg.isRead
+        (msg) => isSupportReplyToStudent(msg, user._id) && !msg.isRead
       ).length;
     }
 
