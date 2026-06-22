@@ -24,6 +24,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  isAdminListDenied,
+  isAdminListLoading,
+  isAdminListReady,
+} from "@/lib/admin-query-state";
+import {
   paymentProviderFormSchema,
   type PaymentProviderFormValues,
 } from "@/schemas";
@@ -224,7 +229,7 @@ export function AdminPaymentProviders() {
   }
 
   const editingProvider = providers?.find((provider) => provider._id === editingId);
-  const isLoading = authLoading || (isAuthenticated && providers === undefined);
+  const isLoading = isAdminListLoading(authLoading, isAuthenticated, providers);
 
   return (
     <div>
@@ -273,19 +278,19 @@ export function AdminPaymentProviders() {
               <Skeleton className="h-16 w-full" />
               <Skeleton className="h-16 w-full" />
             </div>
-          ) : providers === null ? (
+          ) : isAdminListDenied(providers) ? (
             <p className="text-sm text-slate-500">
               Could not load payment providers. Check your admin access and
               Convex connection.
             </p>
-          ) : !providers || providers.length === 0 ? (
+          ) : isAdminListReady(providers) && providers.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border py-12 text-center">
               <p className="text-sm text-slate-600">No payment providers yet.</p>
               <p className="mt-1 text-sm text-slate-500">
                 Add providers manually or load the Somalia starter list.
               </p>
             </div>
-          ) : (
+          ) : isAdminListReady(providers) ? (
             providers.map((provider) => (
               <div
                 key={provider._id}
@@ -381,7 +386,7 @@ export function AdminPaymentProviders() {
                 )}
               </div>
             ))
-          )}
+          ) : null}
         </CardContent>
       </Card>
     </div>

@@ -17,6 +17,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { categoryFormSchema, type CategoryFormValues } from "@/schemas";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  isAdminListDenied,
+  isAdminListLoading,
+  isAdminListReady,
+} from "@/lib/admin-query-state";
 
 function CategoryForm({
   defaultValues,
@@ -90,7 +95,7 @@ export function AdminCategories() {
   const [editingId, setEditingId] = useState<Id<"categories"> | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
-  const isLoading = authLoading || (isAuthenticated && categories === undefined);
+  const isLoading = isAdminListLoading(authLoading, isAuthenticated, categories);
 
   async function handleCreate(values: CategoryFormValues) {
     try {
@@ -188,19 +193,19 @@ export function AdminCategories() {
               <Skeleton className="h-16 w-full" />
               <Skeleton className="h-16 w-full" />
             </div>
-          ) : categories === null ? (
+          ) : isAdminListDenied(categories) ? (
             <p className="text-sm text-slate-500">
               Could not load categories. Check your admin access and Convex
               connection.
             </p>
-          ) : !categories || categories.length === 0 ? (
+          ) : isAdminListReady(categories) && categories.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border py-12 text-center">
               <p className="text-sm text-slate-600">No categories yet.</p>
               <p className="mt-1 text-sm text-slate-500">
                 Click Add category above to create your first one.
               </p>
             </div>
-          ) : (
+          ) : isAdminListReady(categories) ? (
             categories.map((category) => (
               <div
                 key={category._id}
@@ -278,7 +283,7 @@ export function AdminCategories() {
                 )}
               </div>
             ))
-          )}
+          ) : null}
         </CardContent>
       </Card>
     </div>

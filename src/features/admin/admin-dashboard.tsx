@@ -11,6 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type } from "@/lib/typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice } from "@/lib/utils";
+import {
+  isAdminListDenied,
+  isAdminListLoading,
+} from "@/lib/admin-query-state";
 
 export function AdminDashboard() {
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
@@ -47,9 +51,10 @@ export function AdminDashboard() {
   ];
 
   const completedCount = setupSteps.filter((step) => step.done).length;
-  const checklistLoading = isAuthenticated && setup === undefined;
+  const setupLoading = isAdminListLoading(authLoading, isAuthenticated, setup);
+  const setupDenied = isAdminListDenied(setup);
   const showChecklist =
-    setup && !setup.dismissed && !setup.allComplete;
+    !setupDenied && setup && !setup.dismissed && !setup.allComplete;
 
   async function handleDismissChecklist() {
     try {
@@ -94,18 +99,18 @@ export function AdminDashboard() {
         </Card>
       )}
 
-      {(checklistLoading || showChecklist) && (
+      {(setupLoading || showChecklist) && (
         <Card className="mt-8 border-brand-100 bg-brand-50/50">
           <CardHeader className="flex flex-row items-center justify-between gap-4">
             <CardTitle>Setup Checklist</CardTitle>
-            {!checklistLoading && setup && (
+            {!setupLoading && setup && (
               <span className="text-sm text-slate-500">
                 {completedCount}/{setupSteps.length} complete
               </span>
             )}
           </CardHeader>
           <CardContent className="space-y-4">
-            {checklistLoading ? (
+            {setupLoading ? (
               <div className="space-y-3">
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-5/6" />
@@ -171,7 +176,9 @@ export function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className={type.stat}>
-                {authLoading || analytics === undefined ? "…" : stat.value}
+                {authLoading || !isAuthenticated || analytics === undefined
+                  ? "…"
+                  : stat.value}
               </div>
             </CardContent>
           </Card>

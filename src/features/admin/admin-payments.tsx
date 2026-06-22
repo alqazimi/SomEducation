@@ -11,7 +11,13 @@ import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn, formatDate, formatPrice } from "@/lib/utils";
+import {
+  isAdminListDenied,
+  isAdminListLoading,
+  isAdminListReady,
+} from "@/lib/admin-query-state";
 
 type StatusFilter =
   | "pending"
@@ -180,6 +186,8 @@ export function AdminPayments() {
         ? "No approved payments"
         : "No payments found";
 
+  const isLoading = isAdminListLoading(authLoading, isAuthenticated, payments);
+
   return (
     <div>
       <DashboardPageHeader
@@ -207,19 +215,22 @@ export function AdminPayments() {
       </div>
 
       <div className="mt-8 space-y-6">
-        {authLoading || (isAuthenticated && payments === undefined) ? (
-          <p className="text-sm text-slate-500">Loading payments...</p>
-        ) : payments == null ? (
+        {isLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+        ) : isAdminListDenied(payments) ? (
           <p className="text-sm text-slate-500">
             Could not load payments. Check your admin access and Convex connection.
           </p>
-        ) : payments.length === 0 ? (
+        ) : isAdminListReady(payments) && payments.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center text-slate-500">
               {emptyLabel}
             </CardContent>
           </Card>
-        ) : (
+        ) : isAdminListReady(payments) ? (
           payments.map((payment) => {
             const studentName =
               `${payment.student?.firstName ?? ""} ${payment.student?.lastName ?? ""}`.trim() ||
@@ -354,7 +365,7 @@ export function AdminPayments() {
               </Card>
             );
           })
-        )}
+        ) : null}
       </div>
 
       <ConfirmDialog
