@@ -16,21 +16,26 @@ export function MarketingStatsBar({ className }: { className?: string }) {
   const { isNight } = useMarketingTheme();
 
   return (
-    <section className={cn("relative z-10 px-4 sm:px-6 lg:px-8", className)}>
+    <section
+      className={cn(
+        "relative z-10 px-4 pb-8 sm:px-6 sm:pb-10 lg:px-8 lg:pb-12",
+        className
+      )}
+    >
       <div
         className={cn(
-          "mx-auto max-w-7xl rounded-2xl border border-marketing-border bg-marketing-card px-4 py-6 sm:px-6 sm:py-7",
+          "mx-auto max-w-7xl rounded-2xl border border-marketing-border bg-marketing-card px-4 py-6 sm:px-6 sm:py-7 lg:px-8",
           isNight && "shadow-[0_8px_32px_rgba(0,82,255,0.12)]",
-          "-mt-5 sm:-mt-7"
+          "-mt-4 sm:-mt-6 lg:-mt-8"
         )}
       >
-        <div className="grid grid-cols-2 gap-5 sm:grid-cols-4 sm:gap-6">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-4 sm:gap-6">
           {MARKETING_STATS.map((stat) => {
             const Icon = ICONS[stat.icon];
             return (
               <div
                 key={stat.label}
-                className="flex flex-col items-center gap-2 text-center sm:flex-row sm:gap-3 sm:text-left"
+                className="flex flex-col items-center gap-2.5 text-center sm:flex-row sm:gap-3 sm:text-left"
               >
                 <div
                   className={cn(

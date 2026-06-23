@@ -52,3 +52,22 @@ export const marketingLinkClass =
 
 export const marketingLinkClassNight =
   "text-marketing-muted transition-colors hover:text-brand-400";
+
+/** Dashboard chrome — follows the same day/night tokens as marketing. */
+export const dashboardShellClass = "min-h-screen bg-muted text-foreground";
+
+export const dashboardSidebarClass =
+  "sticky top-20 max-h-[calc(100vh-6rem)] space-y-1 overflow-y-auto rounded-xl border border-border bg-card p-3 shadow-sm";
+
+export function dashboardNavLinkClass(active: boolean, isNight: boolean) {
+  if (active) {
+    return isNight
+      ? "bg-brand-600/15 text-brand-400"
+      : "bg-brand-50 text-brand-700";
+  }
+  return isNight
+    ? "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+    : "text-muted-foreground hover:bg-muted hover:text-foreground";
+}
+
+export const dashboardHeaderClass = marketingHeaderClass;

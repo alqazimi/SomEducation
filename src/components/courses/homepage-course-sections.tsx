@@ -85,7 +85,7 @@ function HomepageCourseSection({
   if (courses.length === 0) return null;
 
   return (
-    <section className="py-6 first:pt-8 sm:py-8 sm:first:pt-10 lg:py-10">
+    <section className="py-6 first:pt-2 sm:py-8 sm:first:pt-4 lg:py-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
           <div className="min-w-0 flex-1">

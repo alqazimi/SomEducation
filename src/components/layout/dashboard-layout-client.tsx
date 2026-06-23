@@ -9,6 +9,7 @@ import {
   SuspendedAccountState,
   useEnsureConvexUser,
 } from "@/hooks/use-ensure-convex-user";
+import { dashboardShellClass } from "@/lib/marketing-theme";
 
 export function DashboardLayoutClient({
   children,
@@ -22,7 +23,7 @@ export function DashboardLayoutClient({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-muted">
+      <div className={dashboardShellClass}>
         <Header />
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <Skeleton className="h-8 w-48" />
@@ -34,7 +35,7 @@ export function DashboardLayoutClient({
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-muted">
+      <div className={dashboardShellClass}>
         <Header />
         <div className="flex min-h-[60vh] items-center justify-center p-8">
           <AccountSetupState syncError={syncError} onRetry={() => void retrySync()} />
@@ -45,7 +46,7 @@ export function DashboardLayoutClient({
 
   if (isSuspended) {
     return (
-      <div className="min-h-screen bg-muted">
+      <div className={dashboardShellClass}>
         <Header />
         <SuspendedAccountState />
       </div>
@@ -54,12 +55,12 @@ export function DashboardLayoutClient({
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     return (
-      <div className="min-h-screen bg-muted">
+      <div className={dashboardShellClass}>
         <Header />
         <div className="flex min-h-[60vh] items-center justify-center px-4">
           <div className="text-center">
             <PageTitle className="mt-5">Access denied</PageTitle>
-            <p className="mt-2 text-slate-500">
+            <p className="mt-2 text-muted-foreground">
               You don&apos;t have permission to view this page.
             </p>
           </div>

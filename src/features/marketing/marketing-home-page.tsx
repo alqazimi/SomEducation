@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, GraduationCap } from "lucide-react";
 import { MarketingCoursesSurface } from "@/components/marketing/marketing-courses-surface";
+import { MarketingHeroZone } from "@/components/marketing/marketing-hero-zone";
 import { MarketingShell } from "@/components/layout/marketing-shell";
 import { HomepageCourseSections } from "@/components/courses/homepage-course-sections";
 import { MarketingHeroImage } from "@/components/marketing/marketing-hero-image";
@@ -20,14 +21,9 @@ function MarketingHero() {
   const hero = isDay ? MARKETING_HERO_DAY : MARKETING_HERO;
 
   return (
-    <section
-      className={cn(
-        "relative overflow-hidden border-b border-marketing-border",
-        isDay ? "bg-marketing-hero" : "bg-marketing-bg"
-      )}
-    >
-      <div className="mx-auto max-w-7xl px-4 pb-8 pt-2 sm:px-6 sm:pb-12 sm:pt-4 lg:px-8">
-        <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between md:gap-12 lg:gap-16">
+    <section className="relative">
+      <div className="mx-auto max-w-7xl px-4 pb-6 pt-4 sm:px-6 sm:pb-10 sm:pt-6 lg:px-8 lg:pb-12">
+        <div className="flex flex-col gap-10 sm:gap-12 md:flex-row md:items-center md:justify-between md:gap-12 lg:gap-16">
           <div className="relative w-full md:max-w-xl">
             <div className="relative z-10">
               <p
@@ -49,7 +45,7 @@ function MarketingHero() {
               </p>
             </div>
 
-            <div className="relative z-10 mt-6 sm:mt-7">
+            <div className="relative z-10 mt-7 sm:mt-8">
               <Link href="/courses" className="inline-block">
                 <Button
                   size="default"
@@ -142,8 +138,10 @@ function MarketingCtaBanner() {
 export function MarketingHomePage() {
   return (
     <MarketingShell className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <MarketingHero />
-      <MarketingStatsBar />
+      <MarketingHeroZone>
+        <MarketingHero />
+        <MarketingStatsBar />
+      </MarketingHeroZone>
       <MarketingCoursesSurface>
         <HomepageCourseSections />
       </MarketingCoursesSurface>

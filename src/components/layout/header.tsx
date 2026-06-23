@@ -68,6 +68,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [navPathname, setNavPathname] = useState(pathname);
   const { isDay, isNight } = useMarketingTheme();
+  const useDarkChrome = isNight && (isMarketing || isDashboard);
 
   if (pathname !== navPathname) {
     setNavPathname(pathname);
@@ -89,24 +90,22 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
         className={cn(
           "top-0 z-50 w-full backdrop-blur-md",
           isMarketing ? "fixed" : "sticky",
-          isMarketing
-            ? cn(
-                marketingHeaderClass,
-                isDay && "shadow-sm"
-              )
-            : "border-b border-border/80 bg-white/95 shadow-sm"
+          (isMarketing || isDashboard) && "pt-[env(safe-area-inset-top,0px)]",
+          useDarkChrome
+            ? cn(marketingHeaderClass, isDay && isMarketing && "shadow-sm")
+            : "border-b border-border/80 bg-background/95 shadow-sm"
         )}
       >
         <div
           className={cn(
             "mx-auto max-w-7xl",
-            isMarketing ? "px-3 sm:px-4 lg:px-8" : "px-3 sm:px-6 lg:px-8"
+            isMarketing ? "px-3 sm:px-4 lg:px-8" : "px-3 sm:px-4 sm:px-6 lg:px-8"
           )}
         >
           <div
             className={cn(
               "flex h-14 items-center sm:h-16",
-              isMarketing ? "gap-1 sm:gap-2 md:gap-6" : "gap-3"
+              isMarketing ? "gap-1 sm:gap-2 md:gap-6" : "gap-1 sm:gap-2 md:gap-3"
             )}
           >
             <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-2">
@@ -114,8 +113,8 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                 type="button"
                 className={cn(
                   "inline-flex h-9 w-9 items-center justify-center rounded-lg lg:hidden sm:h-10 sm:w-10",
-                  isMarketing
-                    ? isNight
+                  isMarketing || isDashboard
+                    ? useDarkChrome
                       ? "text-slate-300 hover:bg-white/10"
                       : "text-stone-600 hover:bg-stone-100"
                     : "text-stone-600 hover:bg-stone-100"
@@ -141,10 +140,10 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                 <SomEducationLogo size={30} className="sm:hidden" />
                 <SomEducationLogo size={34} className="hidden sm:block" />
                 <SomEducationWordmark
-                  inverted={isMarketing && isNight}
+                  inverted={useDarkChrome}
                   className={cn(
-                    isMarketing && isNight && "text-white",
-                    isMarketing && "text-sm sm:text-[0.9375rem]"
+                    useDarkChrome && "text-white",
+                    (isMarketing || isDashboard) && "text-sm sm:text-[0.9375rem]"
                   )}
                 />
               </Link>
@@ -180,24 +179,22 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
 
             {isDashboard && (
               <div className="hidden min-w-0 flex-1 px-2 md:block md:max-w-xl lg:max-w-2xl">
-                <Suspense fallback={<HeaderSearchFallback />}>
-                  <HeaderSearch />
+                <Suspense fallback={<HeaderSearchFallback dark={useDarkChrome} />}>
+                  <HeaderSearch dark={useDarkChrome} />
                 </Suspense>
               </div>
             )}
 
             <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1.5 md:gap-2">
-              {isMarketing && <MarketingThemeToggle />}
+              {(isMarketing || isDashboard) && <MarketingThemeToggle />}
 
               {!isDashboard && !isSignedIn && (
                 <Link
                   href="/courses"
                   className={cn(
                     "inline-flex h-9 w-9 items-center justify-center rounded-lg sm:h-10 sm:w-10",
-                    isMarketing
-                      ? isNight
-                        ? "text-slate-300 hover:bg-white/10"
-                        : "text-stone-600 hover:bg-stone-100"
+                    useDarkChrome
+                      ? "text-slate-300 hover:bg-white/10"
                       : "text-stone-600 hover:bg-stone-100"
                   )}
                   aria-label="Search courses"
@@ -209,7 +206,12 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
               {isDashboard && (
                 <button
                   type="button"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100 md:hidden"
+                  className={cn(
+                    "inline-flex h-9 w-9 items-center justify-center rounded-lg md:hidden sm:h-10 sm:w-10",
+                    useDarkChrome
+                      ? "text-slate-300 hover:bg-white/10"
+                      : "text-stone-600 hover:bg-stone-100"
+                  )}
                   aria-label={mobileSearchOpen ? "Close search" : "Search"}
                   onClick={() => {
                     setMobileOpen(false);
@@ -230,21 +232,17 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                   className={cn(
                     "hidden rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:inline-flex",
                     isDashboardOverview(pathname)
-                      ? isMarketing
-                        ? isDay
-                          ? "text-brand-600"
-                          : "text-brand-400"
+                      ? useDarkChrome
+                        ? "text-brand-400"
                         : "text-brand-600"
-                      : isMarketing
-                        ? isDay
-                          ? "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
-                          : "text-slate-300 hover:bg-white/5 hover:text-white"
+                      : useDarkChrome
+                        ? "text-slate-300 hover:bg-white/5 hover:text-white"
                         : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
                   )}
                 >
                   Dashboard
                 </Link>
-                <NotificationBell dark={isMarketing && isNight} />
+                <NotificationBell dark={useDarkChrome} />
               </Show>
 
               <Show when="signed-out">
@@ -294,8 +292,8 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
 
           {isDashboard && mobileSearchOpen && (
             <div className="border-t border-border pb-3 pt-2 md:hidden">
-              <Suspense fallback={<HeaderSearchFallback />}>
-                <HeaderSearch autoFocus />
+              <Suspense fallback={<HeaderSearchFallback dark={useDarkChrome} />}>
+                <HeaderSearch autoFocus dark={useDarkChrome} />
               </Suspense>
             </div>
           )}
@@ -306,7 +304,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
         role={user?.role}
-        variant={isMarketing ? "marketing" : "default"}
+        variant={isMarketing ? "marketing" : "dashboard"}
         onSearch={() => {
           setMobileOpen(false);
           if (isDashboard) setMobileSearchOpen(true);

@@ -10,11 +10,13 @@ export function HeaderSearch({
   inputClassName,
   placeholder = "Search e-learning courses, topics, skills…",
   autoFocus = false,
+  dark = false,
 }: {
   className?: string;
   inputClassName?: string;
   placeholder?: string;
   autoFocus?: boolean;
+  dark?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -44,7 +46,10 @@ export function HeaderSearch({
       role="search"
     >
       <Search
-        className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+        className={cn(
+          "pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2",
+          dark ? "text-slate-500" : "text-stone-400"
+        )}
         aria-hidden
       />
       <input
@@ -55,8 +60,11 @@ export function HeaderSearch({
         autoFocus={autoFocus}
         enterKeyHint="search"
         className={cn(
-          "h-10 w-full rounded-full border border-stone-200 bg-stone-50 pl-10 pr-4 text-sm text-stone-900 placeholder:text-stone-400 transition-colors",
-          "focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20",
+          "h-10 w-full rounded-full border pl-10 pr-4 text-sm transition-colors",
+          "focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20",
+          dark
+            ? "border-white/10 bg-white/5 text-white placeholder:text-slate-500 focus:bg-white/10"
+            : "border-stone-200 bg-stone-50 text-stone-900 placeholder:text-stone-400 focus:bg-white",
           inputClassName
         )}
       />

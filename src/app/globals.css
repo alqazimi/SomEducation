@@ -5,6 +5,9 @@
   --foreground: #1c1917;
   --muted: #f7f6f4;
   --border: #e8e6e3;
+  --card: #ffffff;
+  --card-foreground: #1c1917;
+  --muted-foreground: #64748b;
   --brand-50: #e8f1fd;
   --brand-100: #cce0fa;
   --brand-500: #1a66ff;
@@ -35,6 +38,9 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted-foreground: var(--muted-foreground);
   --color-brand-50: var(--brand-50);
   --color-brand-100: var(--brand-100);
   --color-brand-500: var(--brand-500);
@@ -120,6 +126,13 @@
 }
 
 [data-marketing-theme="day"] {
+  --background: #ffffff;
+  --foreground: #1c1917;
+  --muted: #f7f6f4;
+  --border: #e8e6e3;
+  --card: #ffffff;
+  --card-foreground: #1c1917;
+  --muted-foreground: #64748b;
   --marketing-bg: #ffffff;
   --marketing-bg-footer: #ffffff;
   --marketing-bg-card: #ffffff;
@@ -141,6 +154,36 @@
     rgba(100, 116, 139, 0.12) 1px,
     transparent 1px
   );
+}
+
+[data-marketing-theme="day"] h1,
+[data-marketing-theme="day"] h2,
+[data-marketing-theme="day"] h3,
+[data-marketing-theme="day"] h4 {
+  color: #0c0a09;
+}
+
+/* App-wide night mode (dashboard + marketing) */
+[data-marketing-theme="night"] {
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --muted: #0a0e1a;
+  --border: rgba(255, 255, 255, 0.1);
+  --card: #0f172a;
+  --card-foreground: #f1f5f9;
+  --muted-foreground: #94a3b8;
+}
+
+[data-marketing-theme="night"] h1,
+[data-marketing-theme="night"] h2,
+[data-marketing-theme="night"] h3,
+[data-marketing-theme="night"] h4 {
+  color: #f8fafc;
+}
+
+[data-marketing-theme="night"] ::selection {
+  background: rgba(0, 82, 255, 0.35);
+  color: #ffffff;
 }
 
 /* Night mockup: white courses band (sheerxirfad-style) */

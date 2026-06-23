@@ -114,11 +114,14 @@ export function MobileNavDrawer({
   onClose: () => void;
   role?: DashboardRole;
   onSearch?: () => void;
-  variant?: "default" | "marketing";
+  variant?: "default" | "marketing" | "dashboard";
 }) {
   const isMarketing = variant === "marketing";
+  const isDashboardVariant = variant === "dashboard";
   const { isNight } = useMarketingTheme();
   const marketingDark = isMarketing && isNight;
+  const dashboardDark = isDashboardVariant && isNight;
+  const drawerDark = marketingDark || dashboardDark;
   const pathname = usePathname();
   const dashboardItems = role ? getNavForRole(role) : [];
   const dashboardHref = getDashboardHref(role);
@@ -146,20 +149,24 @@ export function MobileNavDrawer({
       <div
         className={cn(
           "absolute left-0 top-0 flex h-full w-full max-w-sm flex-col shadow-xl",
-          isMarketing ? "bg-marketing-panel text-marketing-fg" : "bg-white"
+          isMarketing
+            ? "bg-marketing-panel text-marketing-fg"
+            : drawerDark
+              ? "bg-marketing-panel text-marketing-fg"
+              : "bg-background text-foreground"
         )}
       >
         <div
           className={cn(
             "flex items-center justify-between border-b px-4 py-4",
-            isMarketing ? "border-marketing-border" : "border-border"
+            isMarketing || drawerDark ? "border-marketing-border" : "border-border"
           )}
         >
           <div>
             <p
               className={cn(
                 "text-sm font-medium",
-                isMarketing ? "text-marketing-fg" : "text-stone-900"
+                isMarketing || drawerDark ? "text-marketing-fg" : "text-foreground"
               )}
             >
               Menu
@@ -167,7 +174,7 @@ export function MobileNavDrawer({
             <p
               className={cn(
                 "text-xs",
-                isMarketing ? "text-marketing-muted" : "text-stone-500"
+                isMarketing || drawerDark ? "text-marketing-muted" : "text-muted-foreground"
               )}
             >
               {PLATFORM_TAGLINE}
@@ -181,7 +188,9 @@ export function MobileNavDrawer({
                 ? marketingDark
                   ? "text-slate-300 hover:bg-white/10"
                   : "text-stone-600 hover:bg-stone-100"
-                : "text-stone-600 hover:bg-stone-100"
+                : drawerDark
+                  ? "text-slate-300 hover:bg-white/10"
+                  : "text-stone-600 hover:bg-stone-100"
             )}
             aria-label="Close menu"
             onClick={onClose}
@@ -200,9 +209,9 @@ export function MobileNavDrawer({
               }}
               className={cn(
                 "mb-2 flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left text-sm transition-colors",
-                isMarketing
+                isMarketing || drawerDark
                   ? "border-white/15 bg-white/5 text-slate-400 hover:bg-white/10"
-                  : "border-stone-200 bg-stone-50 text-stone-500 hover:bg-stone-100"
+                  : "border-border bg-muted text-muted-foreground hover:bg-muted"
               )}
             >
               <Search className="h-4 w-4 shrink-0" />
@@ -210,7 +219,7 @@ export function MobileNavDrawer({
             </button>
           )}
 
-          <SectionLabel dark={marketingDark}>E-Learning</SectionLabel>
+          <SectionLabel dark={drawerDark}>E-Learning</SectionLabel>
           {exploreLinks.map((link) => (
             <DrawerLink
               key={link.label}
@@ -219,14 +228,14 @@ export function MobileNavDrawer({
               icon={link.icon}
               active={isExploreActive(pathname, link.href)}
               onNavigate={onClose}
-              dark={marketingDark}
+              dark={drawerDark}
             />
           ))}
 
           <Show when="signed-in">
             {dashboardItems.length > 0 && (
               <>
-                <SectionLabel dark={marketingDark}>Dashboard</SectionLabel>
+                <SectionLabel dark={drawerDark}>Dashboard</SectionLabel>
                 <DrawerLink
                   href={dashboardHref}
                   label="Overview"
@@ -237,7 +246,7 @@ export function MobileNavDrawer({
                       : false
                   }
                   onNavigate={onClose}
-                  dark={marketingDark}
+                  dark={drawerDark}
                 />
                 {dashboardItems
                   .filter((item) => item.href !== dashboardHref)
@@ -253,7 +262,7 @@ export function MobileNavDrawer({
                           : false
                       }
                       onNavigate={onClose}
-                      dark={marketingDark}
+                      dark={drawerDark}
                     />
                   ))}
               </>
@@ -264,7 +273,7 @@ export function MobileNavDrawer({
         <div
           className={cn(
             "border-t p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]",
-            isMarketing ? "border-marketing-border" : "border-border"
+            isMarketing || drawerDark ? "border-marketing-border" : "border-border"
           )}
         >
           <Show when="signed-out">
