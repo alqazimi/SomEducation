@@ -18,9 +18,16 @@ export function InstallAppButton({
   variant = "outline",
   showIcon = true,
 }: InstallAppButtonProps) {
-  const { canInstall, installing, install } = usePwaInstall();
+  const { canInstall, installing, install, platform } = usePwaInstall();
 
   if (!canInstall) return null;
+
+  const isIos = platform === "ios";
+  const label = isIos
+    ? "Add to Home Screen"
+    : installing
+      ? "Installing…"
+      : "Install app";
 
   return (
     <Button
@@ -28,11 +35,11 @@ export function InstallAppButton({
       size={size}
       variant={variant}
       className={cn("rounded-lg", className)}
-      disabled={installing}
+      disabled={installing && !isIos}
       onClick={() => void install()}
     >
       {showIcon && <Download className="h-4 w-4" />}
-      {installing ? "Installing…" : "Install app"}
+      {label}
     </Button>
   );
 }

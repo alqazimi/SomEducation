@@ -49,6 +49,7 @@ export function InstallPrompt() {
 
   const isIos = platform === "ios";
   const isAndroidManual = platform === "android-manual";
+  const installLabel = isIos ? "How to add" : "Install app";
 
   return (
     <div
@@ -75,7 +76,7 @@ export function InstallPrompt() {
               isNight ? "text-white" : "text-foreground"
             )}
           >
-            Install {PLATFORM_NAME}
+            {isIos ? `Add ${PLATFORM_NAME} to Home Screen` : `Install ${PLATFORM_NAME}`}
           </p>
 
           {platform === "android-native" && (
@@ -98,7 +99,8 @@ export function InstallPrompt() {
                   : "border-amber-200 bg-amber-50 text-amber-900"
               )}
             >
-              Open this site in <strong>Safari</strong>, then tap Install app.
+              For the best experience, open this site in <strong>Safari</strong>{" "}
+              first. Tap the button below for instructions.
             </p>
           )}
 
@@ -109,11 +111,8 @@ export function InstallPrompt() {
                 isNight ? "text-slate-300" : "text-muted-foreground"
               )}
             >
-              Tap Install, then choose{" "}
-              <strong className={isNight ? "text-white" : "text-foreground"}>
-                Add to Home Screen
-              </strong>
-              .
+              iPhone requires a few manual taps. Tap the button below for
+              step-by-step instructions.
             </p>
           )}
 
@@ -140,7 +139,7 @@ export function InstallPrompt() {
               onClick={() => void handleInstall()}
               disabled={installing}
             >
-              {installing ? "Installing…" : "Install app"}
+              {installing ? "Installing…" : installLabel}
             </Button>
             <Button
               type="button"

@@ -10,15 +10,12 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { PLATFORM_NAME } from "@/lib/brand";
 import {
-  canUseWebShare,
   isAndroid,
   isInstallBannerDismissed,
   isIosInstallable,
   isIosSafari,
   isStandaloneDisplay,
-  openInstallShareSheet,
   registerServiceWorker,
 } from "@/lib/pwa";
 
@@ -35,8 +32,10 @@ type PwaInstallContextValue = {
   canInstall: boolean;
   canShowBanner: boolean;
   installing: boolean;
-  install: () => Promise<"installed" | "cancelled" | "manual">;
+  iosGuideOpen: boolean;
+  install: () => Promise<"installed" | "cancelled" | "manual" | "guide">;
   dismissBanner: () => void;
+  closeIosGuide: () => void;
   isIosSafari: boolean;
   isStandalone: boolean;
 };
@@ -66,6 +65,7 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
   const [hasNativePrompt, setHasNativePrompt] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [installing, setInstalling] = useState(false);
+  const [iosGuideOpen, setIosGuideOpen] = useState(false);
 
   useEffect(() => {
     registerServiceWorker();
@@ -105,8 +105,12 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
     setBannerDismissed(true);
   }, []);
 
+  const closeIosGuide = useCallback(() => {
+    setIosGuideOpen(false);
+  }, []);
+
   const install = useCallback(async (): Promise<
-    "installed" | "cancelled" | "manual"
+    "installed" | "cancelled" | "manual" | "guide"
   > => {
     if (deferredRef.current) {
       const promptEvent = deferredRef.current;
@@ -128,14 +132,9 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
       }
     }
 
-    if (platform === "ios" && canUseWebShare()) {
-      setInstalling(true);
-      try {
-        const result = await openInstallShareSheet(PLATFORM_NAME);
-        return result === "shared" ? "manual" : "cancelled";
-      } finally {
-        setInstalling(false);
-      }
+    if (platform === "ios") {
+      setIosGuideOpen(true);
+      return "guide";
     }
 
     return "manual";
@@ -148,8 +147,10 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
       canInstall,
       canShowBanner,
       installing,
+      iosGuideOpen,
       install,
       dismissBanner,
+      closeIosGuide,
       isIosSafari: isIosSafari(),
       isStandalone,
     }),
@@ -159,8 +160,10 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
       canInstall,
       canShowBanner,
       installing,
+      iosGuideOpen,
       install,
       dismissBanner,
+      closeIosGuide,
       isStandalone,
     ]
   );

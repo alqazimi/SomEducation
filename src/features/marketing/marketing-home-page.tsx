@@ -31,37 +31,37 @@ function MarketingHero() {
 
   return (
     <section className="relative">
-      <div className="mx-auto max-w-7xl px-4 pb-4 pt-5 sm:px-6 sm:pb-6 sm:pt-6 lg:px-8 lg:pb-8">
-        <div className="flex flex-col gap-8 sm:gap-10 md:flex-row md:items-center md:justify-between md:gap-12 lg:gap-16">
-          <div className="relative w-full md:max-w-xl">
-            <div className="relative z-10">
+      <div className="mx-auto max-w-7xl px-4 pb-10 pt-6 sm:px-6 sm:pt-8 lg:px-8">
+        <div className="flex flex-col items-center justify-between gap-12 md:flex-row md:items-center md:gap-3">
+          <div className="relative w-full md:max-w-[480px]">
+            <div className="relative z-10 mb-6">
               <p
                 className={cn(
-                  "mb-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] sm:mb-3",
+                  "mb-2 text-lg font-medium",
                   isDay ? "text-brand-600" : "text-brand-400"
                 )}
               >
                 {hero.eyebrow}
               </p>
-              <h1 className="text-[1.65rem] font-bold leading-[1.18] tracking-tight text-marketing-fg min-[400px]:text-3xl sm:text-4xl lg:text-[2.75rem] lg:leading-[1.12]">
+              <h1 className="text-3xl font-bold leading-tight tracking-tight text-marketing-fg md:text-4xl lg:text-[42px] lg:leading-[3.5rem]">
                 {hero.headlineBefore}
                 <span className={isDay ? "text-brand-600" : "text-brand-500"}>
                   {hero.headlineHighlight}
                 </span>
               </h1>
-              <p className="mt-4 max-w-md text-[15px] leading-relaxed text-marketing-muted sm:mt-5 sm:max-w-lg sm:text-base md:text-lg">
+              <p className="mt-4 text-lg leading-relaxed text-marketing-muted">
                 {hero.subheadline}
               </p>
             </div>
 
-            <div className="relative z-10 mt-7 sm:mt-8">
+            <div className="relative z-10">
               <Link href="/courses" className="inline-block">
                 <Button
-                  size="default"
-                  className="h-11 w-full rounded-lg bg-brand-600 px-6 text-sm font-semibold shadow-sm transition-colors hover:bg-brand-500 min-[400px]:w-auto"
+                  size="lg"
+                  className="h-auto rounded-lg bg-brand-600 px-5 py-2.5 text-lg font-medium shadow-sm transition-colors hover:bg-brand-500"
                 >
                   Browse Courses
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>
             </div>

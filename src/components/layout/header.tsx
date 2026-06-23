@@ -158,7 +158,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                     key={`${item.href}-${item.label}`}
                     href={item.href}
                     className={cn(
-                      "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                      "rounded-lg px-4 py-2 text-sm font-normal transition-colors",
                       isMarketingNavActive(pathname, item.href)
                         ? isMarketing
                           ? isDay
@@ -264,7 +264,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                           variant="ghost"
                           size="sm"
                           className={cn(
-                            "h-9 px-2 text-xs sm:px-2.5 sm:text-sm",
+                            "h-10 px-4 text-sm font-medium",
                             useDarkChrome
                               ? "text-slate-200 hover:bg-white/10 hover:text-white"
                               : "text-stone-700"
@@ -276,7 +276,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                       <Link href={signUpUrl} className="inline-flex">
                         <Button
                           size="sm"
-                          className="h-9 rounded-lg bg-brand-600 px-2.5 text-xs font-semibold hover:bg-brand-500 sm:px-5 sm:text-sm"
+                          className="h-10 rounded-lg bg-brand-600 px-5 text-sm font-medium hover:bg-brand-500"
                         >
                           Sign up
                         </Button>

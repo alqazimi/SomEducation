@@ -9,7 +9,7 @@ export function MarketingHeroImage({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "relative w-full max-w-[260px] min-[400px]:max-w-[300px] sm:max-w-[340px] md:max-w-[400px] lg:max-w-[480px]",
+        "relative w-full max-w-[300px] min-[400px]:max-w-[360px] sm:max-w-[420px] md:max-w-[480px] lg:max-w-[640px]",
         className
       )}
     >
