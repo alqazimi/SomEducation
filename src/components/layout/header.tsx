@@ -251,7 +251,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                 {isMarketing && (
                   <InstallAppButton
                     className={cn(
-                      "hidden h-9 border-white/20 bg-transparent text-white hover:bg-white/10 min-[400px]:inline-flex sm:h-10",
+                      "h-9 border-white/20 bg-transparent text-white hover:bg-white/10 sm:h-10",
                       !useDarkChrome &&
                         "border-border text-foreground hover:bg-muted"
                     )}

@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/components/providers";
 import { ClerkSetupRequired } from "@/components/auth/clerk-setup-required";
 import { PwaShell } from "@/components/pwa/pwa-shell";
+import { PwaInstallProvider } from "@/components/pwa/pwa-install-provider";
 import { MarketingThemeProvider } from "@/components/marketing/marketing-theme-provider";
 import { SiteJsonLd } from "@/components/seo/site-json-ld";
 import {
@@ -20,7 +21,7 @@ import "./globals.css";
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "600", "700"],
 });
 
 const googleVerification =
@@ -112,6 +113,8 @@ export default function RootLayout({
             href={process.env.NEXT_PUBLIC_CONVEX_URL}
           />
         ) : null}
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <link rel="apple-touch-icon" href="/apple-icon" />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem("someducation-marketing-theme");if(t==="day"||t==="night")document.documentElement.setAttribute("data-marketing-theme",t)}catch(e){}})();`,
@@ -120,9 +123,10 @@ export default function RootLayout({
       </head>
       <body className="flex min-h-full flex-col overflow-x-hidden antialiased">
         <MarketingThemeProvider>
-          <SiteJsonLd />
-          <PwaShell />
-          {clerkConfigured ? (
+          <PwaInstallProvider>
+            <SiteJsonLd />
+            <PwaShell />
+            {clerkConfigured ? (
             <ClerkProvider
               signInUrl="/sign-in"
               signUpUrl="/sign-up"
@@ -138,6 +142,7 @@ export default function RootLayout({
           ) : (
             <ClerkSetupRequired />
           )}
+          </PwaInstallProvider>
         </MarketingThemeProvider>
       </body>
     </html>

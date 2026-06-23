@@ -15,27 +15,37 @@ export function UserSync() {
     if (!isLoaded || convexAuthLoading || !isAuthenticated || !user) return;
     if (syncedRef.current === user.id) return;
 
-    syncedRef.current = user.id;
-    void syncUser({
-      email: user.primaryEmailAddress?.emailAddress ?? "",
-      firstName: user.firstName ?? undefined,
-      lastName: user.lastName ?? undefined,
-      imageUrl: user.imageUrl ?? undefined,
-    }).catch(() => {
-      syncedRef.current = null;
-      window.setTimeout(() => {
-        if (syncedRef.current === user.id) return;
-        syncedRef.current = user.id;
-        void syncUser({
-          email: user.primaryEmailAddress?.emailAddress ?? "",
-          firstName: user.firstName ?? undefined,
-          lastName: user.lastName ?? undefined,
-          imageUrl: user.imageUrl ?? undefined,
-        }).catch(() => {
-          syncedRef.current = null;
-        });
-      }, 3000);
-    });
+    const runSync = () => {
+      syncedRef.current = user.id;
+      void syncUser({
+        email: user.primaryEmailAddress?.emailAddress ?? "",
+        firstName: user.firstName ?? undefined,
+        lastName: user.lastName ?? undefined,
+        imageUrl: user.imageUrl ?? undefined,
+      }).catch(() => {
+        syncedRef.current = null;
+        window.setTimeout(() => {
+          if (syncedRef.current === user.id) return;
+          syncedRef.current = user.id;
+          void syncUser({
+            email: user.primaryEmailAddress?.emailAddress ?? "",
+            firstName: user.firstName ?? undefined,
+            lastName: user.lastName ?? undefined,
+            imageUrl: user.imageUrl ?? undefined,
+          }).catch(() => {
+            syncedRef.current = null;
+          });
+        }, 3000);
+      });
+    };
+
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(runSync, { timeout: 2000 });
+      return () => window.cancelIdleCallback(id);
+    }
+
+    const timer = globalThis.setTimeout(runSync, 0);
+    return () => globalThis.clearTimeout(timer);
   }, [isLoaded, convexAuthLoading, isAuthenticated, user, syncUser]);
 
   return null;

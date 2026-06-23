@@ -2,7 +2,7 @@
 
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { usePwaInstall } from "@/hooks/use-pwa-install";
+import { usePwaInstall } from "@/components/pwa/pwa-install-provider";
 import { cn } from "@/lib/utils";
 
 type InstallAppButtonProps = {
@@ -18,18 +18,9 @@ export function InstallAppButton({
   variant = "outline",
   showIcon = true,
 }: InstallAppButtonProps) {
-  const { canPrompt, installing, install, platform } = usePwaInstall();
+  const { canInstall, installing, install } = usePwaInstall();
 
-  if (!canPrompt) return null;
-
-  const label =
-    platform === "ios"
-      ? installing
-        ? "Installing…"
-        : "Install app"
-      : installing
-        ? "Installing…"
-        : "Install app";
+  if (!canInstall) return null;
 
   return (
     <Button
@@ -41,7 +32,7 @@ export function InstallAppButton({
       onClick={() => void install()}
     >
       {showIcon && <Download className="h-4 w-4" />}
-      {label}
+      {installing ? "Installing…" : "Install app"}
     </Button>
   );
 }

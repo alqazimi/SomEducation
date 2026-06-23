@@ -1,5 +1,4 @@
-export const PWA_DISMISS_KEY = "someducation-pwa-install-dismissed";
-const DISMISS_MS = 7 * 24 * 60 * 60 * 1000;
+export const PWA_BANNER_DISMISS_KEY = "someducation-pwa-banner-dismissed";
 
 export function isStandaloneDisplay(): boolean {
   if (typeof window === "undefined") return false;
@@ -20,7 +19,6 @@ export function isIosInstallable(): boolean {
   );
 }
 
-/** True when iOS Safari can add to home screen (not Chrome/Firefox on iOS). */
 export function isIosSafari(): boolean {
   if (typeof window === "undefined" || !isIosInstallable()) return false;
   const ua = window.navigator.userAgent;
@@ -50,7 +48,7 @@ export async function openInstallShareSheet(
   try {
     await navigator.share({
       title,
-      text: `Add ${title} to your home screen for quick access.`,
+      text: `Install ${title} on your home screen.`,
       url: getPwaShareUrl(),
     });
     return "shared";
@@ -63,40 +61,46 @@ export async function openInstallShareSheet(
   }
 }
 
-export function isInstallPromptDismissed(): boolean {
-  if (typeof window === "undefined") return true;
+/** Banner hidden for current browser tab/session only — resets on next visit. */
+export function isInstallBannerDismissed(): boolean {
+  if (typeof window === "undefined") return false;
   try {
-    const raw = window.localStorage.getItem(PWA_DISMISS_KEY);
-    if (!raw) return false;
-    const dismissedAt = Number(raw);
-    if (!Number.isFinite(dismissedAt)) return false;
-    return Date.now() - dismissedAt < DISMISS_MS;
+    return sessionStorage.getItem(PWA_BANNER_DISMISS_KEY) === "1";
   } catch {
     return false;
   }
 }
 
-export function dismissInstallPrompt(): void {
+export function dismissInstallBanner(): void {
   try {
-    window.localStorage.setItem(PWA_DISMISS_KEY, String(Date.now()));
+    sessionStorage.setItem(PWA_BANNER_DISMISS_KEY, "1");
   } catch {
     // ignore storage errors
   }
 }
 
-export async function registerServiceWorker(): Promise<void> {
-  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
-  if (process.env.NODE_ENV === "development") return;
+function shouldRegisterServiceWorker(): boolean {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
+    return false;
+  }
+  const host = window.location.hostname;
+  return host !== "localhost" && host !== "127.0.0.1";
+}
+
+export function registerServiceWorker(): void {
+  if (!shouldRegisterServiceWorker()) return;
 
   const register = () => {
-    void navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch((error) => {
-      console.warn("[SomEducation] Service worker registration failed:", error);
-    });
+    void navigator.serviceWorker
+      .register("/sw.js", { scope: "/", updateViaCache: "none" })
+      .catch((error) => {
+        console.warn("[SomEducation] Service worker registration failed:", error);
+      });
   };
 
-  if (document.readyState === "complete") {
-    register();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", register, { once: true });
   } else {
-    window.addEventListener("load", register, { once: true });
+    register();
   }
 }

@@ -4,37 +4,48 @@ import { Download, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { Button } from "@/components/ui/button";
-import { usePwaInstall } from "@/hooks/use-pwa-install";
-import { dismissInstallPrompt } from "@/lib/pwa";
+import { usePwaInstall } from "@/components/pwa/pwa-install-provider";
+import { dismissInstallBanner } from "@/lib/pwa";
 import { PLATFORM_NAME } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
-const SHOW_DELAY_MS = 2000;
+const SHOW_DELAY_MS = 800;
 
 export function InstallPrompt() {
   const { isNight } = useMarketingTheme();
-  const { canPrompt, platform, installing, install, isIosSafari } = usePwaInstall();
-  const [visible, setVisible] = useState(false);
+  const {
+    canShowBanner,
+    platform,
+    installing,
+    install,
+    dismissBanner,
+    isIosSafari,
+  } = usePwaInstall();
+  const [bannerReady, setBannerReady] = useState(false);
 
   useEffect(() => {
-    if (!canPrompt) return;
-    const timer = window.setTimeout(() => setVisible(true), SHOW_DELAY_MS);
-    return () => window.clearTimeout(timer);
-  }, [canPrompt]);
+    if (!canShowBanner) return;
+
+    const timer = window.setTimeout(() => setBannerReady(true), SHOW_DELAY_MS);
+    return () => {
+      window.clearTimeout(timer);
+      setBannerReady(false);
+    };
+  }, [canShowBanner]);
 
   const handleDismiss = () => {
-    dismissInstallPrompt();
-    setVisible(false);
+    dismissInstallBanner();
+    dismissBanner();
   };
 
   const handleInstall = async () => {
     const result = await install();
     if (result === "installed") {
-      setVisible(false);
+      dismissBanner();
     }
   };
 
-  if (!visible || !canPrompt) return null;
+  if (!canShowBanner || !bannerReady) return null;
 
   const isIos = platform === "ios";
   const isAndroidManual = platform === "android-manual";
@@ -74,7 +85,7 @@ export function InstallPrompt() {
                 isNight ? "text-slate-300" : "text-muted-foreground"
               )}
             >
-              One tap adds SomEducation to your home screen.
+              Tap Install — one step adds the app to your home screen.
             </p>
           )}
 
@@ -87,7 +98,7 @@ export function InstallPrompt() {
                   : "border-amber-200 bg-amber-50 text-amber-900"
               )}
             >
-              Open in <strong>Safari</strong>, then tap Install app.
+              Open this site in <strong>Safari</strong>, then tap Install app.
             </p>
           )}
 
@@ -113,30 +124,24 @@ export function InstallPrompt() {
                 isNight ? "text-slate-300" : "text-muted-foreground"
               )}
             >
-              Tap browser menu{" "}
+              Tap Install, or use browser menu{" "}
               <strong className={isNight ? "text-white" : "text-foreground"}>
-                (⋮)
-              </strong>{" "}
-              →{" "}
-              <strong className={isNight ? "text-white" : "text-foreground"}>
-                Install app
+                (⋮) → Install app
               </strong>
               .
             </p>
           )}
 
           <div className="mt-3 flex flex-wrap gap-2">
-            {platform !== "android-manual" && (
-              <Button
-                type="button"
-                size="sm"
-                className="h-9 rounded-lg"
-                onClick={() => void handleInstall()}
-                disabled={installing}
-              >
-                {installing ? "Installing…" : "Install app"}
-              </Button>
-            )}
+            <Button
+              type="button"
+              size="sm"
+              className="h-9 rounded-lg"
+              onClick={() => void handleInstall()}
+              disabled={installing}
+            >
+              {installing ? "Installing…" : "Install app"}
+            </Button>
             <Button
               type="button"
               size="sm"
