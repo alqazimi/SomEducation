@@ -11,14 +11,22 @@ const DEFAULT_PLATFORM_NAME = "SomEducation";
 async function isPaymentConfigured(ctx: {
   db: import("./_generated/server").QueryCtx["db"];
 }) {
-  const activeProviders = await ctx.db
-    .query("paymentProviders")
-    .filter((q) => q.eq(q.field("isActive"), true))
-    .collect();
+  const [activeProviders, settings] = await Promise.all([
+    ctx.db
+      .query("paymentProviders")
+      .filter((q) => q.eq(q.field("isActive"), true))
+      .collect(),
+    ctx.db
+      .query("settings")
+      .withIndex("by_key", (q) => q.eq("key", SETTINGS_KEY))
+      .unique(),
+  ]);
 
-  return activeProviders.some(
+  const manualConfigured = activeProviders.some(
     (provider) => provider.accountNumber.trim().length > 0
   );
+
+  return manualConfigured || settings?.stripeEnabled === true;
 }
 
 export const getSetupStatus = query({
@@ -105,6 +113,7 @@ export const get = query({
         platformName: DEFAULT_PLATFORM_NAME,
         supportEmail: "support@someducation.com",
         isPaymentConfigured: paymentConfigured,
+        stripeEnabled: false,
       };
     }
 
@@ -115,6 +124,7 @@ export const get = query({
       platformName: settings.platformName,
       supportEmail: settings.supportEmail ?? "support@someducation.com",
       isPaymentConfigured: paymentConfigured,
+      stripeEnabled: settings.stripeEnabled === true,
     };
   },
 });
@@ -123,6 +133,7 @@ export const update = mutation({
   args: {
     paymentInstructions: v.optional(v.string()),
     supportEmail: v.optional(v.string()),
+    stripeEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx);
@@ -140,6 +151,7 @@ export const update = mutation({
       supportEmail: args.supportEmail
         ? sanitizeText(args.supportEmail, 100)
         : undefined,
+      stripeEnabled: args.stripeEnabled,
       updatedBy: admin._id,
       updatedAt: now,
     };

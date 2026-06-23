@@ -96,6 +96,7 @@ export type SupportReplyValues = z.infer<typeof supportReplySchema>;
 export const settingsFormSchema = z.object({
   paymentInstructions: z.string().max(2000).optional().or(z.literal("")),
   supportEmail: z.string().email().optional(),
+  stripeEnabled: z.boolean().optional(),
 });
 
 export type SettingsFormValues = z.infer<typeof settingsFormSchema>;

@@ -29,6 +29,7 @@ export function AdminSettings() {
     values: {
       paymentInstructions: settings?.paymentInstructions ?? "",
       supportEmail: settings?.supportEmail,
+      stripeEnabled: settings?.stripeEnabled ?? false,
     },
   });
 
@@ -40,6 +41,9 @@ export function AdminSettings() {
       toast.error(error instanceof Error ? error.message : "Failed");
     }
   }
+
+  const stripePublishableKey =
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? "";
 
   const activeProviders =
     paymentProviders?.filter(
@@ -91,6 +95,51 @@ export function AdminSettings() {
           <Link href="/dashboard/admin/payment-providers">
             <Button variant="outline">Manage payment providers</Button>
           </Link>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Stripe card payments</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Accept debit and credit cards via Stripe Checkout. Students get
+            instant access after payment — no manual admin approval needed.
+          </p>
+          <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
+            <div>
+              <p className="font-medium text-foreground">Enable Stripe checkout</p>
+              <p className="text-sm text-muted-foreground">
+                Requires API keys in Convex and Vercel (see README).
+              </p>
+            </div>
+            <input
+              type="checkbox"
+              className="h-5 w-5 rounded border-border accent-brand-600"
+              checked={form.watch("stripeEnabled") ?? false}
+              onChange={(event) =>
+                form.setValue("stripeEnabled", event.target.checked, {
+                  shouldDirty: true,
+                })
+              }
+              aria-label="Enable Stripe checkout"
+            />
+          </div>
+          <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+            <li>
+              Convex: <code className="text-xs">STRIPE_SECRET_KEY</code>,{" "}
+              <code className="text-xs">STRIPE_WEBHOOK_SECRET</code>
+            </li>
+            <li>
+              Vercel: <code className="text-xs">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code>
+            </li>
+            <li>
+              Publishable key in this build:{" "}
+              {stripePublishableKey ? "configured" : "not set yet"}
+            </li>
+          </ul>
+          <Button onClick={form.handleSubmit(onSubmit)}>Save Stripe setting</Button>
         </CardContent>
       </Card>
 

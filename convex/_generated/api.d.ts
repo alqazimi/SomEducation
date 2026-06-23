@@ -15,6 +15,7 @@ import type * as crons from "../crons.js";
 import type * as enrollments from "../enrollments.js";
 import type * as exams from "../exams.js";
 import type * as files from "../files.js";
+import type * as http from "../http.js";
 import type * as lessons from "../lessons.js";
 import type * as lib_audit from "../lib/audit.js";
 import type * as lib_auth from "../lib/auth.js";
@@ -23,6 +24,7 @@ import type * as lib_defaultPaymentProviders from "../lib/defaultPaymentProvider
 import type * as lib_enrollmentStats from "../lib/enrollmentStats.js";
 import type * as lib_errors from "../lib/errors.js";
 import type * as lib_files from "../lib/files.js";
+import type * as lib_fulfillPayment from "../lib/fulfillPayment.js";
 import type * as lib_notifications from "../lib/notifications.js";
 import type * as lib_payments from "../lib/payments.js";
 import type * as lib_roles from "../lib/roles.js";
@@ -38,6 +40,9 @@ import type * as platform from "../platform.js";
 import type * as progress from "../progress.js";
 import type * as seed from "../seed.js";
 import type * as settings from "../settings.js";
+import type * as stripe from "../stripe.js";
+import type * as stripeConfig from "../stripeConfig.js";
+import type * as stripeInternal from "../stripeInternal.js";
 import type * as teacherRequests from "../teacherRequests.js";
 import type * as users from "../users.js";
 
@@ -55,6 +60,7 @@ declare const fullApi: ApiFromModules<{
   enrollments: typeof enrollments;
   exams: typeof exams;
   files: typeof files;
+  http: typeof http;
   lessons: typeof lessons;
   "lib/audit": typeof lib_audit;
   "lib/auth": typeof lib_auth;
@@ -63,6 +69,7 @@ declare const fullApi: ApiFromModules<{
   "lib/enrollmentStats": typeof lib_enrollmentStats;
   "lib/errors": typeof lib_errors;
   "lib/files": typeof lib_files;
+  "lib/fulfillPayment": typeof lib_fulfillPayment;
   "lib/notifications": typeof lib_notifications;
   "lib/payments": typeof lib_payments;
   "lib/roles": typeof lib_roles;
@@ -78,6 +85,9 @@ declare const fullApi: ApiFromModules<{
   progress: typeof progress;
   seed: typeof seed;
   settings: typeof settings;
+  stripe: typeof stripe;
+  stripeConfig: typeof stripeConfig;
+  stripeInternal: typeof stripeInternal;
   teacherRequests: typeof teacherRequests;
   users: typeof users;
 }>;

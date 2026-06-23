@@ -8,6 +8,7 @@ import {
 } from "./lib/auth";
 import { logAudit } from "./lib/audit";
 import { createNotification } from "./lib/notifications";
+import { fulfillPayment } from "./lib/fulfillPayment";
 import { validateStorageFile } from "./lib/files";
 import {
   findOpenPaymentForCourse,
@@ -217,9 +218,9 @@ export const getOpenForCourse = query({
         ? ctx.db.get(payment.paymentProviderId)
         : null,
     ]);
-    const screenshotUrl = await ctx.storage.getUrl(
-      payment.screenshotStorageId
-    );
+    const screenshotUrl = payment.screenshotStorageId
+      ? await ctx.storage.getUrl(payment.screenshotStorageId)
+      : null;
 
     return { ...payment, course, provider, screenshotUrl };
   },
@@ -245,9 +246,9 @@ export const listMine = query({
             ? ctx.db.get(payment.paymentProviderId)
             : null,
         ]);
-        const screenshotUrl = await ctx.storage.getUrl(
-          payment.screenshotStorageId
-        );
+        const screenshotUrl = payment.screenshotStorageId
+          ? await ctx.storage.getUrl(payment.screenshotStorageId)
+          : null;
         return { ...payment, course, provider, screenshotUrl };
       })
     );
@@ -287,9 +288,9 @@ export const listForAdmin = query({
             ? ctx.db.get(payment.paymentProviderId)
             : null,
         ]);
-        const screenshotUrl = await ctx.storage.getUrl(
-          payment.screenshotStorageId
-        );
+        const screenshotUrl = payment.screenshotStorageId
+          ? await ctx.storage.getUrl(payment.screenshotStorageId)
+          : null;
         return { ...payment, student, course, provider, screenshotUrl };
       })
     );
@@ -311,9 +312,9 @@ export const getById = query({
       ctx.db.get(payment.studentId),
       ctx.db.get(payment.courseId),
     ]);
-    const screenshotUrl = await ctx.storage.getUrl(
-      payment.screenshotStorageId
-    );
+    const screenshotUrl = payment.screenshotStorageId
+      ? await ctx.storage.getUrl(payment.screenshotStorageId)
+      : null;
 
     return { ...payment, student, course, screenshotUrl };
   },
@@ -332,53 +333,10 @@ export const approve = mutation({
       throw new Error("Payment already approved");
     }
 
-    const now = Date.now();
-    await ctx.db.patch(args.paymentId, {
-      status: "approved",
-      adminNote: args.note ? sanitizeText(args.note, 500) : undefined,
+    await fulfillPayment(ctx, {
+      paymentId: args.paymentId,
       reviewedBy: admin._id,
-      reviewedAt: now,
-      updatedAt: now,
-    });
-
-    const existingEnrollment = await ctx.db
-      .query("enrollments")
-      .withIndex("by_student_course", (q) =>
-        q.eq("studentId", payment.studentId).eq("courseId", payment.courseId)
-      )
-      .first();
-
-    if (existingEnrollment) {
-      await ctx.db.patch(existingEnrollment._id, {
-        status: "active",
-        paymentId: args.paymentId,
-        updatedAt: now,
-      });
-    } else {
-      await ctx.db.insert("enrollments", {
-        studentId: payment.studentId,
-        courseId: payment.courseId,
-        paymentId: args.paymentId,
-        status: "active",
-        enrolledAt: now,
-        updatedAt: now,
-      });
-    }
-
-    const course = await ctx.db.get(payment.courseId);
-    await createNotification(ctx, {
-      userId: payment.studentId,
-      type: "payment_approved",
-      title: "Payment Approved",
-      body: `Your payment for "${course?.title ?? "course"}" has been approved. You now have access.`,
-      link: course ? `/learn/${course.slug}` : "/dashboard/student/courses",
-    });
-
-    await logAudit(ctx, {
-      actorId: admin._id,
-      action: "payment.approved",
-      entityType: "payments",
-      entityId: args.paymentId,
+      adminNote: args.note ? sanitizeText(args.note, 500) : undefined,
     });
   },
 });

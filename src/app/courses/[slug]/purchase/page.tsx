@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { MarketingShell } from "@/components/layout/marketing-shell";
@@ -10,7 +11,14 @@ import {
   useEnsureConvexUser,
 } from "@/hooks/use-ensure-convex-user";
 import { PurchaseCourseForm } from "@/features/student/purchase-course-form";
-import { useEffect, useState } from "react";
+
+function PurchaseCourseFormWrapper() {
+  return (
+    <Suspense fallback={<p className="text-sm text-muted-foreground">Loading checkout…</p>}>
+      <PurchaseCourseForm />
+    </Suspense>
+  );
+}
 
 export default function PurchasePage() {
   const router = useRouter();
@@ -60,7 +68,7 @@ export default function PurchasePage() {
                   Reconnecting to your account… You can keep filling the form.
                 </p>
               )}
-              <PurchaseCourseForm />
+              <PurchaseCourseFormWrapper />
             </div>
           )}
         </div>

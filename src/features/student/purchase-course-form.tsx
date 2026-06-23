@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Building2, Smartphone } from "lucide-react";
+import { Building2, CreditCard, Smartphone } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { paymentFormSchema, type PaymentFormValues } from "@/schemas";
 import { PaymentFixFormFromRecord } from "@/features/student/payment-fix-form";
+import { StripeCheckoutButton } from "@/features/student/stripe-checkout-button";
 import {
   clearPaymentDraft,
   readPaymentDraft,
@@ -32,7 +33,10 @@ import { cn, formatPrice } from "@/lib/utils";
 
 type PaymentType = "mobile_money" | "bank_transfer";
 
+type PaymentMode = "choose" | "stripe" | "manual";
+
 type PurchaseDraft = {
+  paymentMode?: PaymentMode;
   step?: number;
   paymentType?: PaymentType | null;
   selectedProviderId?: string | null;
@@ -56,12 +60,16 @@ const typeOptions: Array<{
 export function PurchaseCourseForm() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const draftKey = `purchase-draft:${params.slug}`;
+  const stripePublishableKey =
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? "";
   const { canUpload, statusMessage } = useConvexUploadReady();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const draftRestoredRef = useRef(false);
   const [courseReady, setCourseReady] = useState(false);
   const [openPaymentReady, setOpenPaymentReady] = useState(false);
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>("choose");
   const [step, setStep] = useState(1);
   const [uploading, setUploading] = useState(false);
   const [screenshotId, setScreenshotId] = useState<Id<"_storage"> | null>(null);
@@ -70,6 +78,7 @@ export function PurchaseCourseForm() {
     useState<Id<"paymentProviders"> | null>(null);
 
   const course = useQuery(api.courses.getBySlug, { slug: params.slug });
+  const stripeConfig = useQuery(api.stripeConfig.getPublicConfig);
   const openPayment = useQuery(
     api.payments.getOpenForCourse,
     course ? { courseId: course._id } : "skip"
@@ -99,6 +108,22 @@ export function PurchaseCourseForm() {
 
   const formValues = useWatch({ control: form.control });
 
+  const stripeAvailable =
+    Boolean(stripeConfig?.stripeEnabled) && stripePublishableKey.length > 0;
+
+  useEffect(() => {
+    if (stripeConfig === undefined) return;
+    if (!stripeAvailable && paymentMode === "choose") {
+      setPaymentMode("manual");
+    }
+  }, [stripeConfig, stripeAvailable, paymentMode]);
+
+  useEffect(() => {
+    if (searchParams.get("cancelled") === "1") {
+      toast.message("Checkout cancelled — you can try again when ready.");
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     if (draftRestoredRef.current) return;
     draftRestoredRef.current = true;
@@ -106,6 +131,7 @@ export function PurchaseCourseForm() {
     if (!draft) return;
 
     queueMicrotask(() => {
+      if (draft.paymentMode) setPaymentMode(draft.paymentMode);
       if (draft.step && draft.step >= 1 && draft.step <= 4) {
         setStep(draft.step);
       }
@@ -131,6 +157,7 @@ export function PurchaseCourseForm() {
   useEffect(() => {
     if (!draftRestoredRef.current) return;
     writePaymentDraft(draftKey, {
+      paymentMode,
       step,
       paymentType,
       selectedProviderId,
@@ -139,6 +166,7 @@ export function PurchaseCourseForm() {
     });
   }, [
     draftKey,
+    paymentMode,
     step,
     paymentType,
     selectedProviderId,
@@ -271,6 +299,26 @@ export function PurchaseCourseForm() {
   }
 
   if (openPayment?.status === "pending") {
+    if (openPayment.method === "stripe") {
+      return (
+        <div className="text-center">
+          <p className="text-muted-foreground">
+            You started a card checkout for this course. Complete payment or try
+            again below.
+          </p>
+          <div className="mt-6 flex flex-col items-center gap-3">
+            <StripeCheckoutButton
+              courseId={course._id}
+              className="w-full max-w-sm"
+            />
+            <Link href="/dashboard/student/payments" className="text-sm text-muted-foreground hover:text-foreground">
+              View payment history
+            </Link>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="text-center">
         <p className="text-muted-foreground">
@@ -326,6 +374,85 @@ export function PurchaseCourseForm() {
       <p className={`mt-1 ${type.muted}`}>
         Amount: {formatPrice(course.price, course.currency)}
       </p>
+
+      {paymentMode === "choose" && course.price > 0 && (
+        <Card className="mt-8 border-border bg-card shadow-sm">
+          <CardHeader>
+            <CardTitle>How would you like to pay?</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-3 sm:grid-cols-2">
+            {stripeAvailable && (
+              <button
+                type="button"
+                onClick={() => setPaymentMode("stripe")}
+                className="rounded-xl border border-border bg-background p-5 text-left transition-colors hover:border-brand-600 hover:bg-brand-50"
+              >
+                <CreditCard className="h-6 w-6 text-brand-600" />
+                <p className="mt-3 font-semibold text-foreground">Card (Stripe)</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Pay securely with debit or credit card. Instant access after
+                  payment.
+                </p>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setPaymentMode("manual")}
+              className="rounded-xl border border-border bg-background p-5 text-left transition-colors hover:border-brand-600 hover:bg-brand-50"
+            >
+              <Smartphone className="h-6 w-6 text-brand-600" />
+              <p className="mt-3 font-semibold text-foreground">
+                Mobile money / Bank
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Send payment manually and upload proof for admin review.
+              </p>
+            </button>
+          </CardContent>
+        </Card>
+      )}
+
+      {paymentMode === "stripe" && stripeAvailable && (
+        <Card className="mt-8 border-border bg-card shadow-sm">
+          <CardHeader>
+            <CardTitle>Pay with card</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              You&apos;ll be redirected to Stripe to complete payment. Access is
+              granted automatically once payment succeeds.
+            </p>
+            <StripeCheckoutButton courseId={course._id} className="w-full" />
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full"
+              onClick={() => setPaymentMode("choose")}
+            >
+              Choose another method
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {paymentMode === "manual" && (
+        <>
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">Manual payment steps</p>
+            {(stripeAvailable || paymentMode === "manual") && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setPaymentMode("choose");
+                  setStep(1);
+                }}
+              >
+                Change method
+              </Button>
+            )}
+          </div>
 
       <div className="mt-6 flex gap-2">
         {[1, 2, 3, 4].map((s) => (
@@ -547,6 +674,8 @@ export function PurchaseCourseForm() {
             </Button>
           </CardContent>
         </Card>
+      )}
+        </>
       )}
     </>
   );

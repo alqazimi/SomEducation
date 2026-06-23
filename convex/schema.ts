@@ -38,7 +38,8 @@ export const paymentStatus = v.union(
 export const paymentMethod = v.union(
   v.literal("bank_transfer"),
   v.literal("mobile_money"),
-  v.literal("cash_transfer")
+  v.literal("cash_transfer"),
+  v.literal("stripe")
 );
 
 export const paymentProviderType = v.union(
@@ -193,7 +194,9 @@ export default defineSchema({
     paymentProviderId: v.optional(v.id("paymentProviders")),
     transactionReference: v.string(),
     notes: v.optional(v.string()),
-    screenshotStorageId: v.id("_storage"),
+    screenshotStorageId: v.optional(v.id("_storage")),
+    stripeCheckoutSessionId: v.optional(v.string()),
+    stripePaymentIntentId: v.optional(v.string()),
     amount: v.number(),
     currency: v.string(),
     status: paymentStatus,
@@ -207,7 +210,8 @@ export default defineSchema({
     .index("by_courseId", ["courseId", "status"])
     .index("by_status", ["status", "createdAt"])
     .index("by_student_course", ["studentId", "courseId"])
-    .index("by_paymentProviderId", ["paymentProviderId"]),
+    .index("by_paymentProviderId", ["paymentProviderId"])
+    .index("by_stripeCheckoutSessionId", ["stripeCheckoutSessionId"]),
 
   enrollments: defineTable({
     studentId: v.id("users"),
@@ -259,6 +263,7 @@ export default defineSchema({
     paymentInstructions: v.optional(v.string()),
     platformName: v.string(),
     supportEmail: v.optional(v.string()),
+    stripeEnabled: v.optional(v.boolean()),
     setupChecklistDismissed: v.optional(v.boolean()),
     updatedBy: v.optional(v.id("users")),
     updatedAt: v.number(),

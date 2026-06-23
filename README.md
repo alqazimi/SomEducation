@@ -45,6 +45,8 @@ This creates your Convex deployment and generates `convex/_generated/`.
 Set in the Convex dashboard:
 - `CLERK_JWT_ISSUER_DOMAIN` — from Clerk JWT template
 - `ADMIN_EMAILS` — comma-separated admin emails
+- `STRIPE_SECRET_KEY` — Stripe secret key (`sk_test_…` or `sk_live_…`) — optional
+- `STRIPE_WEBHOOK_SECRET` — Stripe webhook signing secret (`whsec_…`) — optional
 
 ### 4. Start Next.js
 
@@ -76,6 +78,7 @@ In **Vercel → Project → Settings → Environment Variables**, add these for 
 | `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | `/sign-up` |
 | `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` | `/dashboard` |
 | `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` | `/dashboard` |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key (`pk_test_…` or `pk_live_…`) — optional, for card checkout |
 | `GOOGLE_SITE_VERIFICATION` | `ca20de5c3c61d824` (optional — already built into the site) |
 
 Redeploy after saving env vars. Use your **production** Convex URL (`precious-duck-100`), not the dev URL (`mild-seahorse-699`).
@@ -168,12 +171,36 @@ npm test
 
 ## Payment Flow
 
+### Manual (mobile money / bank)
 1. Student clicks **Buy Course**
-2. Fills payment form (name, phone, method, reference)
-3. Views admin-configured payment instructions
-4. Uploads payment screenshot (PNG/JPG/PDF only)
-5. Admin reviews and approves/rejects
-6. On approval → enrollment created → student gains access
+2. Chooses **Mobile money / Bank**
+3. Fills payment form (name, phone, method, reference)
+4. Views admin-configured payment instructions
+5. Uploads payment screenshot (PNG/JPG/PDF only)
+6. Admin reviews and approves/rejects
+7. On approval → enrollment created → student gains access
+
+### Stripe (card — optional)
+1. Admin enables **Stripe checkout** in **Dashboard → Admin → Settings**
+2. Add Stripe keys (see below)
+3. Student chooses **Card (Stripe)** on the purchase page
+4. Pays on Stripe Checkout → webhook confirms payment → instant enrollment
+
+#### Stripe setup (test mode)
+1. Create a [Stripe account](https://dashboard.stripe.com/register) and stay in **Test mode**
+2. **Convex** (`npx convex env set …` or Dashboard → Settings → Environment Variables):
+   - `STRIPE_SECRET_KEY` = `sk_test_…`
+   - `STRIPE_WEBHOOK_SECRET` = from step 4
+3. **Vercel** (or `.env.local` for local dev):
+   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` = `pk_test_…`
+4. **Stripe webhook** — Developers → Webhooks → Add endpoint:
+   - URL: `https://YOUR_DEPLOYMENT.convex.site/stripe/webhook`
+   - Events: `checkout.session.completed`, `checkout.session.expired`
+   - Copy the signing secret to `STRIPE_WEBHOOK_SECRET` in Convex
+5. **Admin → Settings** → turn on **Enable Stripe checkout** → Save
+6. Test a purchase with card `4242 4242 4242 4242`, any future expiry, any CVC
+
+When you have your test keys, send them and add via the steps above — no code changes needed.
 
 ## License
 
