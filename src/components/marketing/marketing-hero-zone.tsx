@@ -3,7 +3,7 @@
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { cn } from "@/lib/utils";
 
-/** Dark hero + stats block (mockup: one navy zone, stats anchors the bottom). */
+/** Dark hero block above the courses band. */
 export function MarketingHeroZone({
   children,
   className,

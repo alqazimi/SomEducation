@@ -8,7 +8,6 @@ import { MarketingHeroZone } from "@/components/marketing/marketing-hero-zone";
 import { MarketingShell } from "@/components/layout/marketing-shell";
 import { HomepageCourseSectionsFallback } from "@/components/courses/homepage-course-sections";
 import { MarketingHeroImage } from "@/components/marketing/marketing-hero-image";
-import { MarketingStatsBar } from "@/components/marketing/marketing-stats-bar";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -149,7 +148,6 @@ export function MarketingHomePage() {
     <MarketingShell className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <MarketingHeroZone>
         <MarketingHero />
-        <MarketingStatsBar />
       </MarketingHeroZone>
       <MarketingCoursesSurface>
         <HomepageCourseSections />
