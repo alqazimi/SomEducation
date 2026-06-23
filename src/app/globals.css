@@ -217,6 +217,15 @@
 
 /* Courses band — light surface for readable cards (day + night) */
 [data-surface="courses-light"] {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --input: #ffffff;
+  --ring: #0052ff;
   --marketing-bg: #f8fafc;
   --marketing-bg-card: #ffffff;
   --marketing-bg-card-hover: #f8fafc;
@@ -230,6 +239,37 @@
   --marketing-card-icon-bg: #eff6ff;
   background-color: var(--marketing-bg);
   color: var(--marketing-fg);
+}
+
+[data-surface="courses-light"] h1,
+[data-surface="courses-light"] h2,
+[data-surface="courses-light"] h3,
+[data-surface="courses-light"] h4 {
+  color: var(--marketing-fg);
+}
+
+[data-surface="courses-light"] .text-foreground {
+  color: var(--marketing-fg);
+}
+
+[data-surface="courses-light"] .text-muted-foreground {
+  color: var(--marketing-muted);
+}
+
+[data-surface="courses-light"] .bg-background {
+  background-color: var(--background);
+}
+
+[data-surface="courses-light"] .bg-card {
+  background-color: var(--card);
+}
+
+[data-surface="courses-light"] .bg-muted {
+  background-color: var(--muted);
+}
+
+[data-surface="courses-light"] .border-border {
+  border-color: var(--border);
 }
 
 [data-surface="courses-light"] .marketing-course-card {
@@ -250,9 +290,18 @@
 
 /* Night mockup: white courses band (sheerxirfad-style) */
 [data-marketing-theme="night"] [data-surface="courses-light"] {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --input: #ffffff;
   --marketing-bg: #ffffff;
   --marketing-bg-card: #ffffff;
   --marketing-bg-card-hover: #f8fafc;
+  --marketing-bg-elevated: #f1f5f9;
   --marketing-fg: #0f172a;
   --marketing-fg-subtle: #334155;
   --marketing-muted: #64748b;

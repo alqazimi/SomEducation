@@ -69,7 +69,7 @@ export function MarketingCourseCard({
         <div className="flex min-w-0 flex-1 flex-col p-5 sm:p-6">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             {difficulty && (
-              <Badge className="rounded-md border-0 bg-brand-600/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-300">
+              <Badge className="rounded-md border-0 bg-marketing-badge px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-marketing-badge-fg">
                 {difficulty}
               </Badge>
             )}
@@ -81,7 +81,7 @@ export function MarketingCourseCard({
           </div>
 
           <Link href={href}>
-            <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-marketing-fg transition-colors group-hover:text-brand-300">
+            <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-marketing-fg transition-colors group-hover:text-brand-600">
               {title}
             </h3>
           </Link>
@@ -95,18 +95,18 @@ export function MarketingCourseCard({
           <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-marketing-muted">
             {durationHours !== undefined && (
               <span className="inline-flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 text-brand-400" />
+                <Clock className="h-3.5 w-3.5 text-brand-600" />
                 {durationHours} Hours
               </span>
             )}
             {lessonCount !== undefined && (
               <span className="inline-flex items-center gap-1.5">
-                <BookOpen className="h-3.5 w-3.5 text-brand-400" />
+                <BookOpen className="h-3.5 w-3.5 text-brand-600" />
                 {lessonCount} Lessons
               </span>
             )}
             <span className="inline-flex items-center gap-1.5">
-              <Users className="h-3.5 w-3.5 text-brand-400" />
+              <Users className="h-3.5 w-3.5 text-brand-600" />
               {studentsLabel}
             </span>
           </div>

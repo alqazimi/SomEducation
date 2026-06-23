@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { Show } from "@clerk/nextjs";
 import {
-  Award,
-  BookOpen,
   CheckCircle2,
+  ChevronDown,
+  ClipboardCheck,
   Clock,
   Globe,
   GraduationCap,
-  Languages,
   PlayCircle,
   Users,
 } from "lucide-react";
@@ -21,27 +21,11 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConvexQueryGate } from "@/components/convex/convex-query-gate";
-import { formatCourseDuration } from "@/lib/course-duration";
-import { formatPrice } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 
 type CourseDetail = NonNullable<
   ReturnType<typeof useQuery<typeof api.courses.getBySlug>>
 >;
-
-function MetaItem({
-  icon: Icon,
-  children,
-}: {
-  icon: typeof Users;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-2 text-sm text-marketing-fg">
-      <Icon className="h-5 w-5 shrink-0 text-brand-600" aria-hidden />
-      <span>{children}</span>
-    </div>
-  );
-}
 
 function SidebarRow({
   icon: Icon,
@@ -82,7 +66,11 @@ function CourseEnrollActions({ course }: { course: CourseDetail }) {
       <Show when="signed-in">
         {course.activePayment?.status === "pending" ? (
           <Link href="/dashboard/student/payments" className="block">
-            <Button className="h-11 w-full" size="lg" variant="outline">
+            <Button
+              className="h-11 w-full border-marketing-border bg-marketing-card text-marketing-fg hover:bg-marketing-elevated"
+              size="lg"
+              variant="outline"
+            >
               Payment Pending Review
             </Button>
           </Link>
@@ -121,7 +109,6 @@ function CourseEnrollActions({ course }: { course: CourseDetail }) {
 }
 
 function CourseDetailSidebar({ course }: { course: CourseDetail }) {
-  const duration = formatCourseDuration(course.totalDurationMinutes);
   const teacherName = course.teacher
     ? `${course.teacher.firstName ?? ""} ${course.teacher.lastName ?? ""}`.trim()
     : "Instructor";
@@ -161,19 +148,11 @@ function CourseDetailSidebar({ course }: { course: CourseDetail }) {
 
         <div className="space-y-4 border-t border-marketing-border pt-5">
           <SidebarRow
-            icon={Users}
-            label="Students"
-            value={course.enrollmentCount}
-          />
-          <SidebarRow icon={Languages} label="Language" value="English" />
-          <SidebarRow icon={Clock} label="Duration" value={duration} />
-          <SidebarRow
             icon={GraduationCap}
             label="Level"
             value={course.difficulty}
           />
           <SidebarRow icon={Globe} label="Expiry Period" value="Lifetime" />
-          <SidebarRow icon={Award} label="Certificate Included" value="Yes" />
         </div>
 
         <ul className="space-y-2 border-t border-marketing-border pt-4 text-sm text-marketing-muted">
@@ -199,7 +178,6 @@ function CourseDetailHeader({ course }: { course: CourseDetail }) {
   const teacherName = course.teacher
     ? `${course.teacher.firstName ?? ""} ${course.teacher.lastName ?? ""}`.trim()
     : "Instructor";
-  const duration = formatCourseDuration(course.totalDurationMinutes);
 
   return (
     <div className="space-y-7">
@@ -210,47 +188,22 @@ function CourseDetailHeader({ course }: { course: CourseDetail }) {
         <p className="mt-4 line-clamp-4 text-base leading-relaxed text-marketing-muted md:text-lg">
           {course.description}
         </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {course.teacher && (
-          <MetaItem icon={Users}>
-            <span className="flex items-center gap-2">
-              {course.teacher.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={course.teacher.imageUrl}
-                  alt={teacherName}
-                  className="h-8 w-8 rounded-full object-cover"
-                />
-              ) : (
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700">
-                  {teacherName.charAt(0) || "?"}
-                </span>
-              )}
-              <span className="font-medium">{teacherName}</span>
-            </span>
-          </MetaItem>
-        )}
-        <MetaItem icon={Languages}>
-          <span>English</span>
-        </MetaItem>
-        <MetaItem icon={Award}>
-          <span>Course Certificate</span>
-        </MetaItem>
-        <MetaItem icon={Users}>
-          <span>
-            {course.enrollmentCount} Enrolled Student
-            {course.enrollmentCount === 1 ? "" : "s"}
-          </span>
-        </MetaItem>
-        <MetaItem icon={Clock}>
-          <span>{duration}</span>
-        </MetaItem>
-        {course.category && (
-          <MetaItem icon={BookOpen}>
-            <span>{course.category.name}</span>
-          </MetaItem>
+          <div className="mt-5 flex items-center gap-2 text-sm text-marketing-fg">
+            {course.teacher.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={course.teacher.imageUrl}
+                alt={teacherName}
+                className="h-8 w-8 rounded-full object-cover"
+              />
+            ) : (
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700">
+                {teacherName.charAt(0) || "?"}
+              </span>
+            )}
+            <span className="font-medium">{teacherName}</span>
+          </div>
         )}
       </div>
     </div>
@@ -258,57 +211,130 @@ function CourseDetailHeader({ course }: { course: CourseDetail }) {
 }
 
 function CourseCurriculum({ course }: { course: CourseDetail }) {
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(course.modules.map((mod) => [mod._id, true]))
+  );
+
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-marketing-muted">
-        {course.modules.length} modules · {course.lessonCount} lessons
-      </p>
-      {course.modules.map((mod, i) => (
-        <div
-          key={mod._id}
-          className="overflow-hidden rounded-xl border border-marketing-border bg-marketing-card"
-        >
-          <div className="border-b border-marketing-border bg-marketing-elevated px-4 py-3 sm:px-5">
-            <h3 className="font-semibold text-marketing-fg">
-              Module {i + 1}: {mod.title}
-            </h3>
-          </div>
-          <ul className="divide-y divide-marketing-border">
-            {mod.lessons.map((lesson) => (
-              <li
-                key={lesson._id}
-                className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5"
-              >
-                {lesson.isFreePreview ? (
-                  <Link
-                    href={`/learn/${course.slug}/lessons/${lesson._id}`}
-                    className="font-medium text-brand-600 hover:underline"
-                  >
-                    {lesson.title}
-                  </Link>
-                ) : (
-                  <span className="font-medium text-marketing-fg">
-                    {lesson.title}
-                  </span>
+    <div className="space-y-3">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <h3 className="text-lg font-semibold text-marketing-fg">
+          Course Curriculum
+        </h3>
+        <p className="text-sm text-marketing-muted">
+          {course.modules.length} modules · {course.lessonCount} lessons
+        </p>
+      </div>
+
+      {course.modules.map((mod, moduleIndex) => {
+        const isOpen = expanded[mod._id] ?? true;
+        const lessonCount = mod.lessons.length;
+        const moduleMinutes = mod.lessons.reduce(
+          (sum, lesson) => sum + (lesson.durationMinutes ?? 0),
+          0
+        );
+
+        return (
+          <div
+            key={mod._id}
+            className="overflow-hidden rounded-xl border border-marketing-border bg-marketing-card"
+          >
+            <button
+              type="button"
+              className="flex w-full items-start gap-3 px-4 py-4 text-left transition-colors hover:bg-marketing-elevated/60 sm:items-center sm:px-5"
+              onClick={() =>
+                setExpanded((prev) => ({ ...prev, [mod._id]: !isOpen }))
+              }
+              aria-expanded={isOpen}
+            >
+              <ChevronDown
+                className={cn(
+                  "mt-0.5 h-5 w-5 shrink-0 text-marketing-muted transition-transform sm:mt-0",
+                  !isOpen && "-rotate-90"
                 )}
-                <div className="flex items-center gap-2 text-sm text-marketing-muted">
-                  {lesson.isFreePreview && (
-                    <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
-                      Preview
-                    </span>
-                  )}
-                  {lesson.durationMinutes ? (
-                    <span className="inline-flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5" />
-                      {lesson.durationMinutes}m
-                    </span>
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+                aria-hidden
+              />
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold leading-snug text-marketing-fg">
+                  Module {moduleIndex + 1}: {mod.title}
+                </p>
+                <p className="mt-1 text-xs text-marketing-muted">
+                  {lessonCount} lesson{lessonCount === 1 ? "" : "s"}
+                  {moduleMinutes > 0 ? ` · ${moduleMinutes} min total` : ""}
+                  {(mod.exams?.length ?? 0) > 0
+                    ? ` · ${mod.exams?.length} exam${mod.exams?.length === 1 ? "" : "s"}`
+                    : ""}
+                </p>
+              </div>
+            </button>
+
+            {isOpen && (
+              <ul className="divide-y divide-marketing-border border-t border-marketing-border">
+                {mod.lessons.map((lesson, lessonIndex) => (
+                  <li
+                    key={lesson._id}
+                    className="flex items-start gap-3 px-4 py-3 sm:items-center sm:px-5"
+                  >
+                    <PlayCircle
+                      className="mt-0.5 h-4 w-4 shrink-0 text-brand-600 sm:mt-0"
+                      aria-hidden
+                    />
+                    <div className="min-w-0 flex-1">
+                      {lesson.isFreePreview ? (
+                        <Link
+                          href={`/learn/${course.slug}/lessons/${lesson._id}`}
+                          className="text-sm font-medium text-brand-600 hover:underline"
+                        >
+                          {lessonIndex + 1}. {lesson.title}
+                        </Link>
+                      ) : (
+                        <p className="text-sm font-medium text-marketing-fg">
+                          {lessonIndex + 1}. {lesson.title}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                      {lesson.isFreePreview && (
+                        <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                          Preview
+                        </span>
+                      )}
+                      {lesson.durationMinutes ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-marketing-muted">
+                          <Clock className="h-3.5 w-3.5" aria-hidden />
+                          {lesson.durationMinutes}m
+                        </span>
+                      ) : null}
+                    </div>
+                  </li>
+                ))}
+
+                {(mod.exams ?? []).map((exam, examIndex) => (
+                  <li
+                    key={exam._id}
+                    className="flex items-start gap-3 bg-marketing-elevated/40 px-4 py-3 sm:items-center sm:px-5"
+                  >
+                    <ClipboardCheck
+                      className="mt-0.5 h-4 w-4 shrink-0 text-brand-600 sm:mt-0"
+                      aria-hidden
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-marketing-fg">
+                        Exam {examIndex + 1}: {exam.title}
+                      </p>
+                      {exam.questionCount > 0 && (
+                        <p className="mt-0.5 text-xs text-marketing-muted">
+                          {exam.questionCount} questions · Pass {exam.passingScore}%
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -322,15 +348,18 @@ function CourseDetailTabs({ course }: { course: CourseDetail }) {
       className="overflow-hidden rounded-xl border border-marketing-border bg-marketing-card shadow-sm"
     >
       <div className="overflow-x-auto border-b border-marketing-border">
-        <TabsList className="h-auto w-full justify-start rounded-none border-0 bg-transparent p-2">
-          <TabsTrigger value="overview" className="rounded-lg">
+        <TabsList className="h-auto w-full justify-start rounded-none border-0 bg-transparent p-2 text-marketing-muted">
+          <TabsTrigger
+            value="overview"
+            className="rounded-lg text-marketing-muted data-[state=active]:bg-marketing-elevated data-[state=active]:text-marketing-fg data-[state=active]:shadow-sm"
+          >
             Overview
           </TabsTrigger>
-          <TabsTrigger value="curriculum" className="rounded-lg">
+          <TabsTrigger
+            value="curriculum"
+            className="rounded-lg text-marketing-muted data-[state=active]:bg-marketing-elevated data-[state=active]:text-marketing-fg data-[state=active]:shadow-sm"
+          >
             Curriculum
-          </TabsTrigger>
-          <TabsTrigger value="details" className="rounded-lg">
-            Details
           </TabsTrigger>
         </TabsList>
       </div>
@@ -362,67 +391,6 @@ function CourseDetailTabs({ course }: { course: CourseDetail }) {
 
       <TabsContent value="curriculum" className="mt-0 p-5 sm:p-6">
         <CourseCurriculum course={course} />
-      </TabsContent>
-
-      <TabsContent value="details" className="mt-0 p-5 sm:p-6">
-        <div className="grid gap-8 md:grid-cols-2">
-          <div>
-            <h3 className="text-xl font-semibold text-marketing-fg">
-              Course info
-            </h3>
-            <ul className="mt-4 space-y-3 text-sm text-marketing-muted">
-              <li className="flex justify-between gap-4 border-b border-marketing-border pb-3">
-                <span>Level</span>
-                <span className="font-medium capitalize text-marketing-fg">
-                  {course.difficulty}
-                </span>
-              </li>
-              <li className="flex justify-between gap-4 border-b border-marketing-border pb-3">
-                <span>Language</span>
-                <span className="font-medium text-marketing-fg">English</span>
-              </li>
-              <li className="flex justify-between gap-4 border-b border-marketing-border pb-3">
-                <span>Students</span>
-                <span className="font-medium text-marketing-fg">
-                  {course.enrollmentCount}
-                </span>
-              </li>
-              <li className="flex justify-between gap-4 border-b border-marketing-border pb-3">
-                <span>Duration</span>
-                <span className="font-medium text-marketing-fg">
-                  {formatCourseDuration(course.totalDurationMinutes)}
-                </span>
-              </li>
-              <li className="flex justify-between gap-4 border-b border-marketing-border pb-3">
-                <span>Certificate</span>
-                <span className="font-medium text-marketing-fg">Yes</span>
-              </li>
-              <li className="flex justify-between gap-4">
-                <span>Access</span>
-                <span className="font-medium text-marketing-fg">Lifetime</span>
-              </li>
-            </ul>
-          </div>
-
-          {outcomes.length > 0 && (
-            <div>
-              <h3 className="text-xl font-semibold text-marketing-fg">
-                Outcomes
-              </h3>
-              <ul className="mt-4 space-y-3">
-                {outcomes.map((outcome) => (
-                  <li
-                    key={outcome}
-                    className="flex gap-3 text-sm leading-relaxed text-marketing-muted"
-                  >
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
-                    <span>{outcome}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
       </TabsContent>
     </Tabs>
   );
@@ -461,7 +429,12 @@ export function CourseDetailView({ slug }: { slug: string }) {
                 Course not found
               </h1>
               <Link href="/courses" className="mt-4 inline-block">
-                <Button variant="outline">Back to Courses</Button>
+                <Button
+                  variant="outline"
+                  className="border-marketing-border bg-marketing-card text-marketing-fg hover:bg-marketing-elevated"
+                >
+                  Back to Courses
+                </Button>
               </Link>
             </div>
           </div>

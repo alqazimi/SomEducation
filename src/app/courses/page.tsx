@@ -34,10 +34,10 @@ export default function CoursesPage() {
       fallback={
         <MarketingShell>
           <div className="mx-auto max-w-7xl px-4 py-8">
-            <Skeleton className="h-8 w-64 bg-white/10" />
+            <Skeleton className="h-8 w-64 bg-marketing-border/40" />
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (
-                <Skeleton key={i} className="h-[300px] rounded-2xl bg-white/5" />
+                <Skeleton key={i} className="h-[300px] rounded-2xl bg-marketing-border/40" />
               ))}
             </div>
           </div>
@@ -115,10 +115,16 @@ function CoursesPageContent() {
               <SelectTrigger className="w-full border-marketing-border bg-marketing-card text-marketing-fg sm:w-[200px]">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All categories</SelectItem>
+              <SelectContent className="border-marketing-border bg-white text-[#0f172a]">
+                <SelectItem value="all" className="focus:bg-slate-100 focus:text-[#0f172a]">
+                  All categories
+                </SelectItem>
                 {categories?.map((cat) => (
-                  <SelectItem key={cat._id} value={cat._id}>
+                  <SelectItem
+                  key={cat._id}
+                  value={cat._id}
+                  className="focus:bg-slate-100 focus:text-[#0f172a]"
+                >
                     {cat.name}
                   </SelectItem>
                 ))}
@@ -129,9 +135,13 @@ function CoursesPageContent() {
               <SelectTrigger className="w-full border-marketing-border bg-marketing-card text-marketing-fg sm:w-[180px]">
                 <SelectValue placeholder="Difficulty" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="border-marketing-border bg-white text-[#0f172a]">
                 {difficulties.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
+                  <SelectItem
+                  key={item.value}
+                  value={item.value}
+                  className="focus:bg-slate-100 focus:text-[#0f172a]"
+                >
                     {item.label}
                   </SelectItem>
                 ))}

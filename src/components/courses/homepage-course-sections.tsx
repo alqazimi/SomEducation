@@ -153,8 +153,8 @@ function HomepageCourseSectionsContent() {
     return (
       <section className="py-8 sm:py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Skeleton className="h-7 w-48 bg-white/10" />
-          <Skeleton className="mt-2 h-4 w-64 bg-white/5" />
+          <Skeleton className="h-7 w-48 bg-marketing-border/40" />
+          <Skeleton className="mt-2 h-4 w-64 bg-marketing-border/30" />
           <div className="mt-6">
             <CourseGridSkeleton />
           </div>
@@ -184,7 +184,7 @@ export function HomepageCourseSectionsFallback() {
   return (
     <section className="py-8 sm:py-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Skeleton className="h-7 w-48 bg-white/10" />
+        <Skeleton className="h-7 w-48 bg-marketing-border/40" />
         <div className="mt-6">
           <CourseGridSkeleton />
         </div>

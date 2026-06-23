@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Mockup-aligned band: white background for course grids in night mode
- * (dark hero/stats above, blue CTA + dark footer below).
+ * (dark hero above, blue CTA + dark footer below).
  */
 export function MarketingCoursesSurface({
   children,
