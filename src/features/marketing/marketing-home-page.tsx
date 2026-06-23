@@ -94,22 +94,16 @@ export function MarketingHomePage() {
                   opacity="0.5"
                 />
               </svg>
-              <div
-                className="pointer-events-none absolute -bottom-8 -left-6 z-0 h-36 w-36 rounded-full bg-brand-600/25 blur-3xl"
-                aria-hidden
-              />
 
-              <div className="relative z-10 overflow-hidden rounded-3xl border border-white/10 bg-[#0d1324] shadow-2xl shadow-black/50 ring-1 ring-white/10">
-                <div className="relative aspect-[3/4] w-full">
-                  <Image
-                    src="/images/hero-student.png"
-                    alt="Smiling student with backpack ready to learn"
-                    fill
-                    sizes="(max-width: 768px) 85vw, (max-width: 1200px) 42vw, 460px"
-                    className="object-cover object-[center_18%]"
-                    priority
-                  />
-                </div>
+              <div className="relative z-10 aspect-[3/4] w-full">
+                <Image
+                  src="/images/hero-student.png"
+                  alt="Smiling student with backpack ready to learn"
+                  fill
+                  sizes="(max-width: 768px) 85vw, (max-width: 1200px) 42vw, 460px"
+                  className="object-contain object-bottom"
+                  priority
+                />
               </div>
             </div>
           </div>
