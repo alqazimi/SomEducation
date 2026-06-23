@@ -8,8 +8,10 @@ export default function manifest(): MetadataRoute.Manifest {
     description:
       "SomEducation — browse expert-led online courses and start learning today.",
     start_url: "/",
+    scope: "/",
     display: "standalone",
-    background_color: "#ffffff",
+    orientation: "portrait",
+    background_color: "#080c16",
     theme_color: "#0056D2",
     icons: [
       {
@@ -22,6 +24,19 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/icon",
         sizes: "512x512",
         type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icon",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icon",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
       },
       {
         src: "/apple-icon",

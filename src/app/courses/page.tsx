@@ -9,7 +9,6 @@ import { Id } from "convex/_generated/dataModel";
 import { CourseCard } from "@/components/courses/course-card";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
-import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -88,21 +87,30 @@ function CoursesPageContent() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-muted">
-        <PageHeader
-          title="Courses"
-          description="Learn new skills with expert-led courses — structured like professional programs."
-        >
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <Input
-              placeholder="Search courses, topics, skills..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="h-11 pl-10"
-            />
+      <main className="min-h-screen bg-white">
+        <section className="border-b border-border/60 bg-gradient-to-b from-white to-brand-50/20">
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-600">
+              Course Catalog
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
+              Explore our courses
+            </h1>
+            <p className="mt-3 max-w-2xl text-base text-stone-600">
+              Learn new skills with expert-led courses — structured programs you
+              can study at your own pace.
+            </p>
+            <div className="relative mt-8 max-w-xl">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Input
+                placeholder="Search courses, topics, skills..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="h-12 rounded-xl border-border bg-white pl-10 shadow-sm"
+              />
+            </div>
           </div>
-        </PageHeader>
+        </section>
 
         <div className="border-b border-border bg-white">
           <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:px-6 lg:px-8">

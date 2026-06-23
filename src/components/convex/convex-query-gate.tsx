@@ -2,7 +2,7 @@
 
 import { useConvexConnectionState } from "convex/react";
 import { RefreshCw } from "lucide-react";
-import { ReactNode } from "react";
+import { Component, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { isConvexConfigured } from "@/lib/convex-url";
 
@@ -70,4 +70,37 @@ export function ConvexQueryGate({
   }
 
   return <>{fallback}</>;
+}
+
+type ConvexSectionErrorBoundaryProps = {
+  children: ReactNode;
+  fallback: ReactNode;
+};
+
+type ConvexSectionErrorBoundaryState = {
+  hasError: boolean;
+};
+
+export class ConvexSectionErrorBoundary extends Component<
+  ConvexSectionErrorBoundaryProps,
+  ConvexSectionErrorBoundaryState
+> {
+  state: ConvexSectionErrorBoundaryState = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+
+    return this.props.children;
+  }
+}
+
+export function useConvexQueryReady() {
+  const connection = useConvexConnectionState();
+  return isConvexConfigured() && connection.hasEverConnected;
 }

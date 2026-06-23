@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Show, UserButton, useAuth } from "@clerk/nextjs";
 import { useConvexAuth, useQuery } from "convex/react";
-import { BookOpen, Home, Menu, Search, X } from "lucide-react";
+import { Menu, Search, X } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { api } from "convex/_generated/api";
 import {
@@ -23,14 +23,35 @@ import { NotificationBell } from "@/features/notifications/notifications-inbox";
 import { HeaderSearch } from "./header-search";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
 
-function HeaderSearchFallback() {
+const marketingNav = [
+  { href: "/courses", label: "Courses" },
+  { href: "/support", label: "How It Works" },
+  { href: "/privacy", label: "About Us" },
+  { href: "/support", label: "Contact" },
+] as const;
+
+function HeaderSearchFallback({ dark }: { dark?: boolean }) {
   return (
-    <div className="h-10 w-full animate-pulse rounded-full bg-stone-100" />
+    <div
+      className={cn(
+        "h-10 w-full animate-pulse rounded-full",
+        dark ? "bg-white/10" : "bg-stone-100"
+      )}
+    />
   );
 }
 
-export function Header() {
+function isMarketingNavActive(pathname: string, href: string, label: string) {
+  if (href === "/courses") return pathname.startsWith("/courses");
+  if (label === "Contact" || label === "How It Works") return pathname === "/support";
+  if (href === "/privacy") return pathname === "/privacy";
+  if (href === "/terms") return pathname === "/terms";
+  return pathname === href;
+}
+
+export function Header({ variant = "default" }: { variant?: "default" | "marketing" }) {
   const pathname = usePathname();
+  const isMarketing = variant === "marketing";
   const { isSignedIn, isLoaded: clerkLoaded } = useAuth();
   const { isAuthenticated } = useConvexAuth();
   const convexReady = clerkLoaded && isSignedIn && isAuthenticated;
@@ -40,6 +61,7 @@ export function Header() {
   const signUpUrl = getSignUpUrl(pathname || "/dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const isDashboard = pathname.startsWith("/dashboard");
 
   useEffect(() => {
     setMobileOpen(false);
@@ -56,14 +78,25 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-border bg-white shadow-sm">
+      <header
+        className={cn(
+          "sticky top-0 z-50 w-full border-b backdrop-blur-md",
+          isMarketing
+            ? "border-white/10 bg-[#080c16]/95"
+            : "border-border/80 bg-white/95 shadow-sm"
+        )}
+      >
         <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-          {/* Main row — Coursera-style: menu | logo + explore | search | auth */}
-          <div className="flex h-14 items-center gap-2 sm:h-16 sm:gap-3">
-            <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          <div className="flex h-16 items-center gap-3">
+            <div className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100 md:hidden"
+                className={cn(
+                  "inline-flex h-10 w-10 items-center justify-center rounded-lg lg:hidden",
+                  isMarketing
+                    ? "text-slate-300 hover:bg-white/10"
+                    : "text-stone-600 hover:bg-stone-100"
+                )}
                 aria-label={mobileOpen ? "Close menu" : "Open menu"}
                 onClick={() => {
                   setMobileSearchOpen(false);
@@ -79,70 +112,83 @@ export function Header() {
 
               <Link
                 href="/"
-                className="flex min-w-0 items-center gap-2 rounded-lg transition-opacity hover:opacity-90"
+                className="flex min-w-0 items-center gap-2.5 rounded-lg transition-opacity hover:opacity-90"
                 aria-label={`${PLATFORM_NAME} home`}
               >
-                <SomEducationLogo size={32} />
-                <div className="hidden min-w-0 flex-col min-[400px]:flex">
-                  <SomEducationWordmark className="text-sm sm:text-base" />
-                  <span className="hidden text-[10px] font-medium uppercase tracking-wide text-stone-400 sm:block">
-                    E-Learning
-                  </span>
-                </div>
-              </Link>
-
-              <nav className="ml-1 hidden items-center gap-0.5 md:flex">
-                <Link
-                  href="/"
+                <SomEducationLogo size={36} />
+                <SomEducationWordmark
                   className={cn(
-                    "inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    pathname === "/"
-                      ? "bg-brand-50 text-brand-700"
-                      : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+                    "text-base font-semibold sm:text-lg",
+                    isMarketing && "text-white"
                   )}
-                >
-                  <Home className="h-4 w-4 shrink-0" />
-                  Home
-                </Link>
+                />
+              </Link>
+            </div>
+
+            {!isDashboard && (
+              <nav className="mx-auto hidden items-center justify-center gap-1 lg:flex">
+                {marketingNav.map((item) => (
+                  <Link
+                    key={`${item.href}-${item.label}`}
+                    href={item.href}
+                    className={cn(
+                      "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                      isMarketingNavActive(pathname, item.href, item.label)
+                        ? isMarketing
+                          ? "text-brand-400"
+                          : "text-brand-600"
+                        : isMarketing
+                          ? "text-slate-300 hover:bg-white/5 hover:text-white"
+                          : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            )}
+
+            {isDashboard && (
+              <div className="hidden min-w-0 flex-1 px-2 md:block md:max-w-xl lg:max-w-2xl">
+                <Suspense fallback={<HeaderSearchFallback />}>
+                  <HeaderSearch />
+                </Suspense>
+              </div>
+            )}
+
+            <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+              {!isDashboard && (
                 <Link
                   href="/courses"
                   className={cn(
-                    "inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    pathname.startsWith("/courses")
-                      ? "bg-brand-50 text-brand-700"
-                      : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+                    "inline-flex h-10 w-10 items-center justify-center rounded-lg",
+                    isMarketing
+                      ? "text-slate-300 hover:bg-white/10"
+                      : "text-stone-600 hover:bg-stone-100"
                   )}
+                  aria-label="Search courses"
                 >
-                  <BookOpen className="h-4 w-4 shrink-0" />
-                  Courses
-                </Link>
-              </nav>
-            </div>
-
-            {/* Desktop search — center */}
-            <div className="hidden min-w-0 flex-1 px-2 md:block md:max-w-xl lg:max-w-2xl lg:px-4">
-              <Suspense fallback={<HeaderSearchFallback />}>
-                <HeaderSearch />
-              </Suspense>
-            </div>
-
-            {/* Right actions */}
-            <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
-              <button
-                type="button"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100 md:hidden"
-                aria-label={mobileSearchOpen ? "Close search" : "Search courses"}
-                onClick={() => {
-                  setMobileOpen(false);
-                  setMobileSearchOpen((open) => !open);
-                }}
-              >
-                {mobileSearchOpen ? (
-                  <X className="h-5 w-5" />
-                ) : (
                   <Search className="h-5 w-5" />
-                )}
-              </button>
+                </Link>
+              )}
+
+              {isDashboard && (
+                <button
+                  type="button"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100 md:hidden"
+                  aria-label={mobileSearchOpen ? "Close search" : "Search"}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setMobileSearchOpen((open) => !open);
+                  }}
+                >
+                  {mobileSearchOpen ? (
+                    <X className="h-5 w-5" />
+                  ) : (
+                    <Search className="h-5 w-5" />
+                  )}
+                </button>
+              )}
 
               <Show when="signed-in">
                 <Link
@@ -150,8 +196,12 @@ export function Header() {
                   className={cn(
                     "hidden rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:inline-flex",
                     isDashboardOverview(pathname)
-                      ? "bg-brand-50 text-brand-700"
-                      : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+                      ? isMarketing
+                        ? "text-brand-400"
+                        : "text-brand-600"
+                      : isMarketing
+                        ? "text-slate-300 hover:bg-white/5 hover:text-white"
+                        : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
                   )}
                 >
                   Dashboard
@@ -160,23 +210,36 @@ export function Header() {
               </Show>
 
               <Show when="signed-out">
-                <Link href={signInUrl} className="hidden sm:inline-flex">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-stone-700"
-                  >
-                    Log in
-                  </Button>
-                </Link>
-                <Link href={signUpUrl} className="hidden sm:inline-flex">
-                  <Button size="sm">Join for free</Button>
-                </Link>
-                <Link href={signUpUrl} className="sm:hidden">
-                  <Button size="sm" className="h-9 px-3 text-xs">
-                    Join
-                  </Button>
-                </Link>
+                {isMarketing ? (
+                  <Link href={signInUrl}>
+                    <Button
+                      size="sm"
+                      className="h-9 rounded-lg bg-brand-600 px-5 hover:bg-brand-500 sm:h-10 sm:px-6"
+                    >
+                      Login
+                    </Button>
+                  </Link>
+                ) : (
+                  <>
+                    <Link href={signInUrl} className="hidden sm:inline-flex">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-stone-700"
+                      >
+                        Log in
+                      </Button>
+                    </Link>
+                    <Link href={signUpUrl} className="hidden sm:inline-flex">
+                      <Button size="sm">Join for free</Button>
+                    </Link>
+                    <Link href={signUpUrl} className="sm:hidden">
+                      <Button size="sm" className="h-9 px-3 text-xs">
+                        Join
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </Show>
 
               <Show when="signed-in">
@@ -191,15 +254,11 @@ export function Header() {
             </div>
           </div>
 
-          {/* Mobile search row */}
-          {mobileSearchOpen && (
+          {isDashboard && mobileSearchOpen && (
             <div className="border-t border-border pb-3 pt-2 md:hidden">
               <Suspense fallback={<HeaderSearchFallback />}>
                 <HeaderSearch autoFocus />
               </Suspense>
-              <p className="mt-2 px-1 text-xs text-stone-500">
-                Find courses, topics, and skills across SomEducation.
-              </p>
             </div>
           )}
         </div>
@@ -209,9 +268,10 @@ export function Header() {
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
         role={user?.role}
+        variant={isMarketing ? "marketing" : "default"}
         onSearch={() => {
           setMobileOpen(false);
-          setMobileSearchOpen(true);
+          if (isDashboard) setMobileSearchOpen(true);
         }}
       />
     </>

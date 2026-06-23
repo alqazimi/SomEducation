@@ -128,6 +128,50 @@ export const listPublished = query({
   },
 });
 
+export const listFeatured = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const limit = Math.min(args.limit ?? 4, 8);
+    const courses = await ctx.db
+      .query("courses")
+      .withIndex("by_status", (q) => q.eq("status", "published"))
+      .order("desc")
+      .take(limit);
+
+    return await Promise.all(
+      courses.map(async (course) => {
+        const enriched = await enrichManagedCourse(ctx, course);
+        const [teacher, category, lessons] = await Promise.all([
+          ctx.db.get(course.teacherId),
+          ctx.db.get(course.categoryId),
+          ctx.db
+            .query("lessons")
+            .withIndex("by_courseId", (q) => q.eq("courseId", course._id))
+            .collect(),
+        ]);
+
+        const durationMinutes = lessons.reduce(
+          (sum, lesson) => sum + (lesson.durationMinutes ?? 0),
+          0
+        );
+        const durationHours = Math.max(
+          1,
+          durationMinutes > 0
+            ? Math.round(durationMinutes / 60)
+            : Math.max(1, Math.ceil(enriched.lessonCount / 2))
+        );
+
+        return {
+          ...enriched,
+          teacher,
+          category,
+          durationHours,
+        };
+      })
+    );
+  },
+});
+
 /** Public slug list for SEO sitemap generation (no auth, minimal payload). */
 export const listPublishedForSitemap = query({
   args: {},

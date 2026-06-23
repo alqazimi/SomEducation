@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/components/providers";
+import { ClerkSetupRequired } from "@/components/auth/clerk-setup-required";
+import { PwaShell } from "@/components/pwa/pwa-shell";
 import { SiteJsonLd } from "@/components/seo/site-json-ld";
 import {
   absoluteUrl,
@@ -10,6 +12,7 @@ import {
   siteSeo,
 } from "@/lib/seo";
 import { clerkAppearance } from "@/lib/clerk-appearance";
+import { isClerkConfigured } from "@/lib/clerk-config";
 import "@/lib/clerk-env";
 import "./globals.css";
 
@@ -78,6 +81,13 @@ export const metadata: Metadata = {
   },
   other: {
     "apple-mobile-web-app-title": siteSeo.name,
+    "apple-mobile-web-app-capable": "yes",
+    "mobile-web-app-capable": "yes",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: siteSeo.name,
   },
 };
 
@@ -86,22 +96,30 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const clerkConfigured = isClerkConfigured();
+
   return (
-    <ClerkProvider
-      signInUrl="/sign-in"
-      signUpUrl="/sign-up"
-      signInFallbackRedirectUrl="/dashboard"
-      signUpFallbackRedirectUrl="/dashboard"
-      appearance={clerkAppearance}
-    >
-      <html lang="en" className={`${dmSans.variable} h-full`} data-scroll-behavior="smooth">
-        <body className="flex min-h-full flex-col overflow-x-hidden antialiased">
-          <SiteJsonLd />
-          <Providers convexUrl={process.env.NEXT_PUBLIC_CONVEX_URL ?? ""}>
-            {children}
-          </Providers>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" className={`${dmSans.variable} h-full`} data-scroll-behavior="smooth">
+      <body className="flex min-h-full flex-col overflow-x-hidden antialiased">
+        <SiteJsonLd />
+        <PwaShell />
+        {clerkConfigured ? (
+          <ClerkProvider
+            signInUrl="/sign-in"
+            signUpUrl="/sign-up"
+            signInFallbackRedirectUrl="/dashboard"
+            signUpFallbackRedirectUrl="/dashboard"
+            appearance={clerkAppearance}
+            publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+          >
+            <Providers convexUrl={process.env.NEXT_PUBLIC_CONVEX_URL ?? ""}>
+              {children}
+            </Providers>
+          </ClerkProvider>
+        ) : (
+          <ClerkSetupRequired />
+        )}
+      </body>
+    </html>
   );
 }

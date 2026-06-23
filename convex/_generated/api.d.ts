@@ -34,6 +34,7 @@ import type * as modules from "../modules.js";
 import type * as notifications from "../notifications.js";
 import type * as paymentProviders from "../paymentProviders.js";
 import type * as payments from "../payments.js";
+import type * as platform from "../platform.js";
 import type * as progress from "../progress.js";
 import type * as seed from "../seed.js";
 import type * as settings from "../settings.js";
@@ -73,6 +74,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   paymentProviders: typeof paymentProviders;
   payments: typeof payments;
+  platform: typeof platform;
   progress: typeof progress;
   seed: typeof seed;
   settings: typeof settings;

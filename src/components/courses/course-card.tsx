@@ -53,7 +53,7 @@ export function CourseCard({
   return (
     <Card
       className={cn(
-        "group flex h-full flex-col overflow-hidden border-border bg-white shadow-sm transition-shadow hover:shadow-md",
+        "group flex h-full flex-col overflow-hidden rounded-2xl border-border bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg",
         className
       )}
     >
