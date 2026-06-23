@@ -32,31 +32,26 @@ export function MarketingHomePage() {
   return (
     <MarketingShell className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-7xl px-4 pb-10 pt-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center justify-between gap-12 md:flex-row md:items-center md:gap-3">
-            <div className="relative w-full text-center md:max-w-[480px] md:text-left">
-              <div
-                className="pointer-events-none absolute -right-20 top-0 h-[240px] w-[240px] rounded-full bg-[rgba(97,95,255,0.35)] blur-[120px]"
-                aria-hidden
-              />
-
-              <div className="relative z-10 mb-6">
-                <p className="mb-2 text-lg font-medium text-slate-300">
+        <div className="mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center justify-between gap-10 md:flex-row md:items-center md:gap-12 lg:gap-16">
+            <div className="relative w-full text-center md:max-w-xl md:text-left">
+              <div className="relative z-10 mb-6 md:mb-8">
+                <p className="mb-3 text-sm font-semibold uppercase tracking-[0.12em] text-brand-400">
                   {MARKETING_HERO.eyebrow}
                 </p>
-                <h1 className="text-3xl font-bold leading-tight tracking-tight text-white md:text-4xl lg:text-[42px] lg:leading-[3.5rem]">
+                <h1 className="text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl lg:text-[2.75rem] lg:leading-[1.12]">
                   {MARKETING_HERO.headline}
                 </h1>
-                <p className="mt-4 text-base leading-relaxed text-slate-400 md:text-lg">
+                <p className="mt-5 max-w-lg text-base leading-relaxed text-slate-400 md:text-lg">
                   {MARKETING_HERO.subheadline}
                 </p>
               </div>
 
-              <div className="relative z-10 mb-10 flex justify-center md:mb-14 md:justify-start">
+              <div className="relative z-10 mb-8 flex justify-center md:mb-10 md:justify-start">
                 <Link href="/courses">
                   <Button
                     size="default"
-                    className="h-10 rounded-lg bg-brand-600 px-5 text-sm font-medium shadow-none transition-colors hover:bg-brand-500"
+                    className="h-11 rounded-lg bg-brand-600 px-6 text-sm font-semibold shadow-none transition-colors hover:bg-brand-500"
                   >
                     Browse Courses
                     <ArrowRight className="h-4 w-4" />
@@ -81,19 +76,41 @@ export function MarketingHomePage() {
               </div>
             </div>
 
-            <div className="relative w-full max-w-[280px] sm:max-w-[360px] md:max-w-[640px]">
+            <div className="relative mx-auto w-full max-w-[300px] sm:max-w-[360px] md:mx-0 md:max-w-[420px] lg:max-w-[460px]">
+              <svg
+                className="pointer-events-none absolute -right-4 -top-4 z-0 h-[calc(100%+2rem)] w-[calc(100%+2rem)] text-brand-600 md:-right-6 md:-top-6"
+                viewBox="0 0 400 400"
+                fill="none"
+                aria-hidden
+              >
+                <circle
+                  cx="210"
+                  cy="220"
+                  r="170"
+                  stroke="currentColor"
+                  strokeWidth="18"
+                  strokeLinecap="round"
+                  strokeDasharray="520 520"
+                  opacity="0.5"
+                />
+              </svg>
               <div
-                className="pointer-events-none absolute bottom-20 right-0 h-[240px] w-[240px] rounded-full bg-[rgba(0,167,111,0.25)] blur-[120px]"
+                className="pointer-events-none absolute -bottom-8 -left-6 z-0 h-36 w-36 rounded-full bg-brand-600/25 blur-3xl"
                 aria-hidden
               />
-              <Image
-                src="/images/hero-student.png"
-                alt="Student learning online with a laptop"
-                width={349}
-                height={796}
-                className="relative z-10 mx-auto h-auto w-full object-contain"
-                priority
-              />
+
+              <div className="relative z-10 overflow-hidden rounded-3xl border border-white/10 bg-[#0d1324] shadow-2xl shadow-black/50 ring-1 ring-white/10">
+                <div className="relative aspect-[3/4] w-full">
+                  <Image
+                    src="/images/hero-student.png"
+                    alt="Smiling student with backpack ready to learn"
+                    fill
+                    sizes="(max-width: 768px) 85vw, (max-width: 1200px) 42vw, 460px"
+                    className="object-cover object-[center_18%]"
+                    priority
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
