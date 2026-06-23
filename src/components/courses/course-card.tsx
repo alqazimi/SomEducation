@@ -22,6 +22,7 @@ type CourseCardProps = {
   actionLabel?: string;
   actionHref?: string;
   variant?: "browse" | "enrolled";
+  theme?: "light" | "dark";
   progressPercent?: number;
   completedLessons?: number;
   totalLessons?: number;
@@ -43,17 +44,22 @@ export function CourseCard({
   actionLabel,
   actionHref,
   variant = "browse",
+  theme = "light",
   progressPercent,
   completedLessons,
   totalLessons,
   className,
 }: CourseCardProps) {
   const isEnrolled = variant === "enrolled";
+  const isDark = theme === "dark";
 
   return (
     <Card
       className={cn(
-        "group flex h-full flex-col overflow-hidden rounded-2xl border-border bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg",
+        "group flex h-full flex-col overflow-hidden rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-lg",
+        isDark
+          ? "border-white/10 bg-[#141c30] hover:border-brand-500/30"
+          : "border-border bg-white shadow-sm",
         className
       )}
     >
@@ -92,26 +98,48 @@ export function CourseCard({
         </div>
 
         <Link href={href} className="block">
-          <h3 className="line-clamp-2 text-[0.9375rem] font-medium leading-snug text-stone-900 transition-colors group-hover:text-brand-700 sm:text-base">
+          <h3
+            className={cn(
+              "line-clamp-2 text-[0.9375rem] font-medium leading-snug transition-colors sm:text-base",
+              isDark
+                ? "text-white group-hover:text-brand-300"
+                : "text-stone-900 group-hover:text-brand-700"
+            )}
+          >
             {title}
           </h3>
         </Link>
 
         {teacherName && (
-          <p className="mt-2 flex items-center gap-1.5 text-xs text-stone-500 sm:text-sm">
+          <p
+            className={cn(
+              "mt-2 flex items-center gap-1.5 text-xs sm:text-sm",
+              isDark ? "text-slate-400" : "text-stone-500"
+            )}
+          >
             <User className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">{teacherName}</span>
           </p>
         )}
 
         {description && (
-          <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-stone-600">
+          <p
+            className={cn(
+              "mt-2 line-clamp-2 flex-1 text-sm leading-relaxed",
+              isDark ? "text-slate-400" : "text-stone-600"
+            )}
+          >
             {description}
           </p>
         )}
 
         {(moduleCount !== undefined || lessonCount !== undefined) && (
-          <p className={`mt-3 ${type.caption}`}>
+          <p
+            className={cn(
+              "mt-3 text-xs leading-normal",
+              isDark ? "text-slate-500" : type.caption
+            )}
+          >
             {moduleCount ?? 0} modules · {lessonCount ?? 0} lessons
           </p>
         )}
@@ -126,9 +154,19 @@ export function CourseCard({
           </div>
         )}
 
-        <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
+        <div
+          className={cn(
+            "mt-4 flex items-center justify-between gap-3 border-t pt-4",
+            isDark ? "border-white/10" : "border-border"
+          )}
+        >
           {!isEnrolled && price !== undefined ? (
-            <span className="text-[0.9375rem] font-medium text-stone-900">
+            <span
+              className={cn(
+                "text-[0.9375rem] font-medium",
+                isDark ? "text-white" : "text-stone-900"
+              )}
+            >
               {formatPrice(price, currency)}
             </span>
           ) : (

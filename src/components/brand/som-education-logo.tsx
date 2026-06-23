@@ -30,21 +30,26 @@ export function SomEducationLogo({
 type SomEducationWordmarkProps = {
   className?: string;
   compact?: boolean;
+  /** White "Education" text for dark backgrounds */
+  inverted?: boolean;
 };
 
 export function SomEducationWordmark({
   className,
   compact = false,
+  inverted = false,
 }: SomEducationWordmarkProps) {
   return (
     <span
       className={cn(
-        "truncate text-[0.9375rem] font-medium tracking-[-0.02em] sm:text-base",
+        "whitespace-nowrap text-sm font-medium tracking-[-0.02em] sm:text-[0.9375rem]",
         className
       )}
     >
       <span style={{ color: BRAND_BLUE }}>Som</span>
-      <span className="text-stone-900">Education</span>
+      <span className={inverted ? "text-white" : "text-stone-900"}>
+        Education
+      </span>
       {!compact && <span className="sr-only">SomEducation</span>}
     </span>
   );

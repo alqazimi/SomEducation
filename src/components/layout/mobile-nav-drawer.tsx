@@ -24,6 +24,7 @@ import { getSignInUrl, getSignUpUrl } from "@/lib/auth-urls";
 import { cn } from "@/lib/utils";
 
 const exploreLinks = [
+  { href: "/", label: "Home", icon: Home },
   { href: "/courses", label: "Courses", icon: BookOpen },
   { href: "/support", label: "Help & Contact", icon: HelpCircle },
   { href: "/terms", label: "Terms", icon: Home },
@@ -31,6 +32,7 @@ const exploreLinks = [
 ] as const;
 
 function isExploreActive(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
   if (href === "/courses") return pathname.startsWith("/courses");
   if (href === "/support") return pathname === "/support";
   if (href === "/terms") return pathname === "/terms";
@@ -195,7 +197,12 @@ export function MobileNavDrawer({
                 onSearch();
                 onClose();
               }}
-              className="mb-2 flex w-full items-center gap-3 rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 text-left text-sm text-stone-500 transition-colors hover:bg-stone-100"
+              className={cn(
+                "mb-2 flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left text-sm transition-colors",
+                isMarketing
+                  ? "border-white/15 bg-white/5 text-slate-400 hover:bg-white/10"
+                  : "border-stone-200 bg-stone-50 text-stone-500 hover:bg-stone-100"
+              )}
             >
               <Search className="h-4 w-4 shrink-0" />
               Search e-learning courses…

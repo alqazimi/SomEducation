@@ -20,10 +20,12 @@ import {
   isDashboardOverview,
 } from "@/lib/dashboard-nav";
 import { NotificationBell } from "@/features/notifications/notifications-inbox";
+import { isMarketingSitePath } from "@/lib/marketing-theme";
 import { HeaderSearch } from "./header-search";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
 
 const marketingNav = [
+  { href: "/", label: "Home" },
   { href: "/courses", label: "Courses" },
   { href: "/support", label: "How It Works" },
   { href: "/privacy", label: "About Us" },
@@ -42,6 +44,7 @@ function HeaderSearchFallback({ dark }: { dark?: boolean }) {
 }
 
 function isMarketingNavActive(pathname: string, href: string, label: string) {
+  if (href === "/") return pathname === "/";
   if (href === "/courses") return pathname.startsWith("/courses");
   if (label === "Contact" || label === "How It Works") return pathname === "/support";
   if (href === "/privacy") return pathname === "/privacy";
@@ -49,9 +52,12 @@ function isMarketingNavActive(pathname: string, href: string, label: string) {
   return pathname === href;
 }
 
-export function Header({ variant = "default" }: { variant?: "default" | "marketing" }) {
+export function Header({ variant = "default" }: { variant?: "default" | "marketing" | "light" }) {
   const pathname = usePathname();
-  const isMarketing = variant === "marketing";
+  const isDashboard = pathname.startsWith("/dashboard");
+  const isMarketing =
+    variant === "marketing" ||
+    (variant === "default" && isMarketingSitePath(pathname));
   const { isSignedIn, isLoaded: clerkLoaded } = useAuth();
   const { isAuthenticated } = useConvexAuth();
   const convexReady = clerkLoaded && isSignedIn && isAuthenticated;
@@ -61,7 +67,6 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
   const signUpUrl = getSignUpUrl(pathname || "/dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  const isDashboard = pathname.startsWith("/dashboard");
 
   useEffect(() => {
     setMobileOpen(false);
@@ -88,7 +93,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
       >
         <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center gap-3">
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2">
               <button
                 type="button"
                 className={cn(
@@ -112,21 +117,24 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
 
               <Link
                 href="/"
-                className="flex min-w-0 items-center gap-2.5 rounded-lg transition-opacity hover:opacity-90"
+                className="flex min-w-0 items-center gap-2 rounded-lg transition-opacity hover:opacity-90 sm:gap-2.5"
                 aria-label={`${PLATFORM_NAME} home`}
               >
-                <SomEducationLogo size={36} />
+                <SomEducationLogo size={32} className="sm:hidden" />
+                <SomEducationLogo size={36} className="hidden sm:block" />
                 <SomEducationWordmark
+                  inverted={isMarketing}
                   className={cn(
-                    "text-base font-semibold sm:text-lg",
-                    isMarketing && "text-white"
+                    isMarketing && "text-white",
+                    isMarketing && isSignedIn && "hidden min-[380px]:inline"
                   )}
                 />
               </Link>
             </div>
 
+            {/* Center nav hidden on mobile — use drawer; lg+ only */}
             {!isDashboard && (
-              <nav className="mx-auto hidden items-center justify-center gap-1 lg:flex">
+              <nav className="mx-auto hidden items-center justify-center gap-0.5 lg:flex xl:gap-1">
                 {marketingNav.map((item) => (
                   <Link
                     key={`${item.href}-${item.label}`}
@@ -157,7 +165,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
             )}
 
             <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
-              {!isDashboard && (
+              {!isDashboard && !isSignedIn && (
                 <Link
                   href="/courses"
                   className={cn(
@@ -206,7 +214,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                 >
                   Dashboard
                 </Link>
-                <NotificationBell />
+                <NotificationBell dark={isMarketing} />
               </Show>
 
               <Show when="signed-out">

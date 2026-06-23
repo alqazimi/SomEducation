@@ -7,6 +7,7 @@ type PageHeaderProps = {
   eyebrow?: string;
   children?: React.ReactNode;
   className?: string;
+  variant?: "default" | "marketing";
 };
 
 export function PageHeader({
@@ -15,23 +16,52 @@ export function PageHeader({
   eyebrow,
   children,
   className,
+  variant = "default",
 }: PageHeaderProps) {
+  const isMarketing = variant === "marketing";
+
   return (
-    <div className={cn("border-b border-border bg-white", className)}>
+    <div
+      className={cn(
+        "border-b",
+        isMarketing
+          ? "border-white/10 bg-[#080c16]"
+          : "border-border bg-white",
+        className
+      )}
+    >
       <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-9 lg:px-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            {eyebrow && <p className={type.eyebrow}>{eyebrow}</p>}
+            {eyebrow && (
+              <p
+                className={cn(
+                  type.eyebrow,
+                  isMarketing && "text-brand-400"
+                )}
+              >
+                {eyebrow}
+              </p>
+            )}
             <h1
               className={cn(
                 type.pageTitle,
+                isMarketing && "text-white",
                 eyebrow ? "mt-2" : undefined
               )}
             >
               {title}
             </h1>
             {description && (
-              <p className={cn(type.lead, "mt-2 max-w-xl")}>{description}</p>
+              <p
+                className={cn(
+                  type.lead,
+                  "mt-2 max-w-xl",
+                  isMarketing && "text-slate-400"
+                )}
+              >
+                {description}
+              </p>
             )}
           </div>
           {children && (

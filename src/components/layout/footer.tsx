@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   SomEducationLogo,
   SomEducationWordmark,
@@ -8,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PLATFORM_NAME } from "@/lib/brand";
+import { isMarketingSitePath } from "@/lib/marketing-theme";
 import { cn } from "@/lib/utils";
 
 const quickLinks = [
@@ -21,8 +23,11 @@ const supportLinks = [
   { href: "/privacy", label: "Privacy Policy" },
 ] as const;
 
-export function Footer({ variant = "default" }: { variant?: "default" | "marketing" }) {
-  const isMarketing = variant === "marketing";
+export function Footer({ variant = "default" }: { variant?: "default" | "marketing" | "light" }) {
+  const pathname = usePathname();
+  const isMarketing =
+    variant === "marketing" ||
+    (variant === "default" && isMarketingSitePath(pathname));
 
   return (
     <footer
@@ -39,7 +44,8 @@ export function Footer({ variant = "default" }: { variant?: "default" | "marketi
             <Link href="/" className="flex items-center gap-2">
               <SomEducationLogo size={36} />
               <SomEducationWordmark
-                className={cn("text-lg", isMarketing && "text-white")}
+                inverted={isMarketing}
+                className={cn(isMarketing && "text-white")}
               />
             </Link>
             <p

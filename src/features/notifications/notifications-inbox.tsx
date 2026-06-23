@@ -20,7 +20,7 @@ const typeLabels: Record<string, string> = {
   course_rejected: "Course",
 };
 
-export function NotificationBell() {
+export function NotificationBell({ dark }: { dark?: boolean }) {
   const { isAuthenticated } = useConvexAuth();
   const me = useQuery(api.users.getMe, isAuthenticated ? {} : "skip");
   const canLoadNotifications = isAuthenticated && me?.status === "active";
@@ -37,7 +37,12 @@ export function NotificationBell() {
   return (
     <Link
       href="/dashboard/notifications"
-      className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-slate-100 hover:text-foreground"
+      className={cn(
+        "relative inline-flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
+        dark
+          ? "text-slate-300 hover:bg-white/10 hover:text-white"
+          : "text-slate-600 hover:bg-slate-100 hover:text-foreground"
+      )}
       aria-label={`Notifications${count > 0 ? `, ${count} unread` : ""}`}
     >
       <Bell className="h-5 w-5" />

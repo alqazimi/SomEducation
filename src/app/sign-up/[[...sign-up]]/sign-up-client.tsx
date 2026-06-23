@@ -6,6 +6,7 @@ import { ClerkSetupRequired } from "@/components/auth/clerk-setup-required";
 import { clerkAppearance } from "@/lib/clerk-appearance";
 import { isClerkConfigured } from "@/lib/clerk-config";
 import { sanitizeRedirectPath } from "@/lib/auth-urls";
+import { marketingPageClass } from "@/lib/marketing-theme";
 
 export default function SignUpClient() {
   const searchParams = useSearchParams();
@@ -16,7 +17,9 @@ export default function SignUpClient() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-8">
+    <div
+      className={`flex min-h-screen items-center justify-center px-4 py-8 ${marketingPageClass}`}
+    >
       <div className="w-full max-w-[min(100%,24rem)]">
         <SignUp
           path="/sign-up"
