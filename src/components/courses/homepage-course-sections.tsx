@@ -150,19 +150,15 @@ function HomepageCourseSectionsContent() {
 
   if (sections === undefined) {
     return (
-      <>
-        {SECTIONS.map((section) => (
-          <section key={section.key} className="py-8 sm:py-10">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              <Skeleton className="h-7 w-48 bg-white/10" />
-              <Skeleton className="mt-2 h-4 w-64 bg-white/5" />
-              <div className="mt-6">
-                <CourseGridSkeleton />
-              </div>
-            </div>
-          </section>
-        ))}
-      </>
+      <section className="py-8 sm:py-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <Skeleton className="h-7 w-48 bg-white/10" />
+          <Skeleton className="mt-2 h-4 w-64 bg-white/5" />
+          <div className="mt-6">
+            <CourseGridSkeleton />
+          </div>
+        </div>
+      </section>
     );
   }
 

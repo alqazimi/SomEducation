@@ -17,8 +17,6 @@ import { isClerkConfigured } from "@/lib/clerk-config";
 import "@/lib/clerk-env";
 import "./globals.css";
 
-export const dynamic = "force-dynamic";
-
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
   subsets: ["latin"],
@@ -108,6 +106,12 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {process.env.NEXT_PUBLIC_CONVEX_URL ? (
+          <link
+            rel="preconnect"
+            href={process.env.NEXT_PUBLIC_CONVEX_URL}
+          />
+        ) : null}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem("someducation-marketing-theme");if(t==="day"||t==="night")document.documentElement.setAttribute("data-marketing-theme",t)}catch(e){}})();`,

@@ -1,163 +1,43 @@
 "use client";
 
-import { Download, Share, X } from "lucide-react";
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { Download, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { Button } from "@/components/ui/button";
+import { usePwaInstall } from "@/hooks/use-pwa-install";
+import { dismissInstallPrompt } from "@/lib/pwa";
 import { PLATFORM_NAME } from "@/lib/brand";
-import {
-  canUseWebShare,
-  dismissInstallPrompt,
-  isAndroid,
-  isInstallPromptDismissed,
-  isIosInstallable,
-  isIosSafari,
-  isStandaloneDisplay,
-  openInstallShareSheet,
-} from "@/lib/pwa";
 import { cn } from "@/lib/utils";
 
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-};
-
-type InstallMode = "android" | "android-manual" | "ios";
-
-const SHOW_DELAY_MS = 2500;
-const ANDROID_FALLBACK_MS = 7000;
-
-function subscribeClientReady(listener: () => void) {
-  listener();
-  return () => undefined;
-}
-
-function getClientReadySnapshot() {
-  return true;
-}
-
-function getClientReadyServerSnapshot() {
-  return false;
-}
+const SHOW_DELAY_MS = 2000;
 
 export function InstallPrompt() {
   const { isNight } = useMarketingTheme();
-  const ready = useSyncExternalStore(
-    subscribeClientReady,
-    getClientReadySnapshot,
-    getClientReadyServerSnapshot
-  );
+  const { canPrompt, platform, installing, install, isIosSafari } = usePwaInstall();
   const [visible, setVisible] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
-  const [androidFallback, setAndroidFallback] = useState(false);
-  const [installing, setInstalling] = useState(false);
-  const [sharing, setSharing] = useState(false);
-  const [showIosSteps, setShowIosSteps] = useState(false);
 
   useEffect(() => {
-    if (isStandaloneDisplay() || isInstallPromptDismissed()) return;
-
-    const onBeforeInstall = (event: Event) => {
-      event.preventDefault();
-      setDeferredPrompt(event as BeforeInstallPromptEvent);
-    };
-
-    window.addEventListener("beforeinstallprompt", onBeforeInstall);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", onBeforeInstall);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!ready || isStandaloneDisplay() || isInstallPromptDismissed()) return;
-    if (isIosInstallable() || deferredPrompt) return;
-    if (!isAndroid()) return;
-
-    const timer = window.setTimeout(() => {
-      setAndroidFallback(true);
-    }, ANDROID_FALLBACK_MS);
-
-    return () => window.clearTimeout(timer);
-  }, [ready, deferredPrompt]);
-
-  const installMode: InstallMode | null = ready
-    ? deferredPrompt
-      ? "android"
-      : isIosInstallable()
-        ? "ios"
-        : androidFallback && isAndroid()
-          ? "android-manual"
-          : null
-    : null;
-
-  const blocked =
-    !ready || isStandaloneDisplay() || isInstallPromptDismissed();
-
-  useEffect(() => {
-    if (blocked || !installMode) return;
-
+    if (!canPrompt) return;
     const timer = window.setTimeout(() => setVisible(true), SHOW_DELAY_MS);
     return () => window.clearTimeout(timer);
-  }, [blocked, installMode]);
+  }, [canPrompt]);
 
-  const handleDismiss = useCallback(() => {
+  const handleDismiss = () => {
     dismissInstallPrompt();
     setVisible(false);
-  }, []);
+  };
 
-  const handleInstall = useCallback(() => {
-    if (!deferredPrompt) return;
-
-    const promptEvent = deferredPrompt;
-    setInstalling(true);
-
-    try {
-      void promptEvent
-        .prompt()
-        .then(() => promptEvent.userChoice)
-        .then(({ outcome }) => {
-          if (outcome === "accepted") {
-            setVisible(false);
-          }
-        })
-        .catch((error) => {
-          console.warn("[SomEducation] PWA install prompt failed:", error);
-        })
-        .finally(() => {
-          setInstalling(false);
-          setDeferredPrompt(null);
-        });
-    } catch (error) {
-      console.warn("[SomEducation] PWA install prompt failed:", error);
-      setInstalling(false);
-      setDeferredPrompt(null);
+  const handleInstall = async () => {
+    const result = await install();
+    if (result === "installed") {
+      setVisible(false);
     }
-  }, [deferredPrompt]);
+  };
 
-  const handleIosShare = useCallback(() => {
-    if (!canUseWebShare()) {
-      setShowIosSteps(true);
-      return;
-    }
+  if (!visible || !canPrompt) return null;
 
-    setSharing(true);
-    void openInstallShareSheet(PLATFORM_NAME)
-      .then((result) => {
-        if (result === "unavailable") {
-          setShowIosSteps(true);
-        }
-      })
-      .finally(() => {
-        setSharing(false);
-      });
-  }, []);
-
-  if (!visible || !installMode) return null;
-
-  const isIos = installMode === "ios";
-  const isAndroidNative = installMode === "android";
-  const isAndroidManual = installMode === "android-manual";
+  const isIos = platform === "ios";
+  const isAndroidManual = platform === "android-manual";
 
   return (
     <div
@@ -174,11 +54,7 @@ export function InstallPrompt() {
         )}
       >
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white">
-          {isIos ? (
-            <Share className="h-5 w-5" aria-hidden />
-          ) : (
-            <Download className="h-5 w-5" aria-hidden />
-          )}
+          <Download className="h-5 w-5" aria-hidden />
         </div>
 
         <div className="min-w-0 flex-1">
@@ -191,7 +67,18 @@ export function InstallPrompt() {
             Install {PLATFORM_NAME}
           </p>
 
-          {isIos && !isIosSafari() && (
+          {platform === "android-native" && (
+            <p
+              className={cn(
+                "mt-1 text-sm leading-relaxed",
+                isNight ? "text-slate-300" : "text-muted-foreground"
+              )}
+            >
+              One tap adds SomEducation to your home screen.
+            </p>
+          )}
+
+          {isIos && !isIosSafari && (
             <p
               className={cn(
                 "mt-2 rounded-lg border px-3 py-2 text-xs leading-relaxed",
@@ -200,19 +87,22 @@ export function InstallPrompt() {
                   : "border-amber-200 bg-amber-50 text-amber-900"
               )}
             >
-              Open this page in <strong>Safari</strong> to install on your home
-              screen.
+              Open in <strong>Safari</strong>, then tap Install app.
             </p>
           )}
 
-          {isAndroidNative && (
+          {isIos && isIosSafari && (
             <p
               className={cn(
                 "mt-1 text-sm leading-relaxed",
                 isNight ? "text-slate-300" : "text-muted-foreground"
               )}
             >
-              Add the app to your home screen for quick access to your courses.
+              Tap Install, then choose{" "}
+              <strong className={isNight ? "text-white" : "text-foreground"}>
+                Add to Home Screen
+              </strong>
+              .
             </p>
           )}
 
@@ -223,85 +113,28 @@ export function InstallPrompt() {
                 isNight ? "text-slate-300" : "text-muted-foreground"
               )}
             >
-              Tap the browser menu{" "}
+              Tap browser menu{" "}
               <strong className={isNight ? "text-white" : "text-foreground"}>
                 (⋮)
-              </strong>
-              , then choose{" "}
+              </strong>{" "}
+              →{" "}
               <strong className={isNight ? "text-white" : "text-foreground"}>
                 Install app
-              </strong>{" "}
-              or{" "}
-              <strong className={isNight ? "text-white" : "text-foreground"}>
-                Add to Home screen
               </strong>
               .
             </p>
           )}
 
-          {isIos && (
-            <>
-              <p
-                className={cn(
-                  "mt-1 text-sm leading-relaxed",
-                  isNight ? "text-slate-300" : "text-muted-foreground"
-                )}
-              >
-                Tap the button below, then choose{" "}
-                <strong className={isNight ? "text-white" : "text-foreground"}>
-                  Add to Home Screen
-                </strong>{" "}
-                in the share menu.
-              </p>
-              {(showIosSteps || !canUseWebShare()) && (
-                <ol
-                  className={cn(
-                    "mt-2 list-decimal space-y-1 pl-4 text-xs leading-relaxed",
-                    isNight ? "text-slate-300" : "text-muted-foreground"
-                  )}
-                >
-                  <li>
-                    Tap{" "}
-                    <strong className={isNight ? "text-white" : "text-foreground"}>
-                      Share
-                    </strong>{" "}
-                    at the bottom of Safari (square with arrow).
-                  </li>
-                  <li>
-                    Scroll and tap{" "}
-                    <strong className={isNight ? "text-white" : "text-foreground"}>
-                      Add to Home Screen
-                    </strong>
-                    .
-                  </li>
-                  <li>Tap Add in the top-right corner.</li>
-                </ol>
-              )}
-            </>
-          )}
-
           <div className="mt-3 flex flex-wrap gap-2">
-            {isAndroidNative && (
+            {platform !== "android-manual" && (
               <Button
                 type="button"
                 size="sm"
                 className="h-9 rounded-lg"
-                onClick={handleInstall}
-                disabled={installing || !deferredPrompt}
+                onClick={() => void handleInstall()}
+                disabled={installing}
               >
                 {installing ? "Installing…" : "Install app"}
-              </Button>
-            )}
-            {isIos && (
-              <Button
-                type="button"
-                size="sm"
-                className="h-9 rounded-lg"
-                onClick={handleIosShare}
-                disabled={sharing}
-              >
-                <Share className="h-4 w-4" />
-                {sharing ? "Opening…" : "Open Share menu"}
               </Button>
             )}
             <Button

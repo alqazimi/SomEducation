@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect } from "react";
+import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { Button } from "@/components/ui/button";
 import {
   DashboardRole,
@@ -276,6 +277,15 @@ export function MobileNavDrawer({
             isMarketing || drawerDark ? "border-marketing-border" : "border-border"
           )}
         >
+          <InstallAppButton
+            className={cn(
+              "mb-3 w-full",
+              isMarketing &&
+                "border-white/20 bg-brand-600 text-white hover:bg-brand-500"
+            )}
+            variant={isMarketing ? "default" : "outline"}
+            size="default"
+          />
           <Show when="signed-out">
             <div className="flex flex-col gap-2">
               <Link href={signInUrl} className="w-full" onClick={onClose}>

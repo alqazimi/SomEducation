@@ -88,22 +88,15 @@ export async function registerServiceWorker(): Promise<void> {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
   if (process.env.NODE_ENV === "development") return;
 
-  const register = async () => {
-    try {
-      await navigator.serviceWorker.register("/sw.js", { scope: "/" });
-    } catch (error) {
+  const register = () => {
+    void navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch((error) => {
       console.warn("[SomEducation] Service worker registration failed:", error);
-    }
+    });
   };
 
-  await register();
-
-  // Retry once after load — helps Android Chrome pick up installability.
-  window.addEventListener(
-    "load",
-    () => {
-      void register();
-    },
-    { once: true }
-  );
+  if (document.readyState === "complete") {
+    register();
+  } else {
+    window.addEventListener("load", register, { once: true });
+  }
 }

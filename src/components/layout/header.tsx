@@ -20,6 +20,7 @@ import {
   isDashboardOverview,
 } from "@/lib/dashboard-nav";
 import { NotificationBell } from "@/features/notifications/notifications-inbox";
+import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { MarketingThemeToggle } from "@/components/marketing/marketing-theme-toggle";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { isMarketingSitePath, marketingHeaderClass, marketingHeaderClassNight } from "@/lib/marketing-theme";
@@ -250,6 +251,16 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
               </Show>
 
               <Show when="signed-out">
+                {isMarketing && (
+                  <InstallAppButton
+                    className={cn(
+                      "hidden h-9 border-white/20 bg-transparent text-white hover:bg-white/10 min-[400px]:inline-flex sm:h-10",
+                      !useDarkChrome &&
+                        "border-border text-foreground hover:bg-muted"
+                    )}
+                    variant="outline"
+                  />
+                )}
                 {isMarketing ? (
                   <Link href={signInUrl}>
                     <Button
