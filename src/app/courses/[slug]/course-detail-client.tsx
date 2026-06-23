@@ -6,6 +6,7 @@ import { useQuery } from "convex/react";
 import { Show } from "@clerk/nextjs";
 import { BookOpen, CheckCircle2, Clock, PlayCircle, User } from "lucide-react";
 import { api } from "convex/_generated/api";
+import { CourseLearningOutcomes } from "@/components/courses/course-learning-outcomes";
 import { MarketingShell } from "@/components/layout/marketing-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -239,16 +240,23 @@ export function CourseDetailClient({ slug }: { slug: string }) {
               </CardContent>
             </Card>
           </div>
+
+          {course.learningOutcomes && course.learningOutcomes.length > 0 && (
+            <CourseLearningOutcomes
+              outcomes={course.learningOutcomes}
+              className="mt-8"
+            />
+          )}
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <h2 className="text-base font-medium text-white sm:text-lg">
-          What you&apos;ll learn
+          Course content
         </h2>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-400 sm:text-base">
-          A structured curriculum designed to take you from fundamentals to
-          practical skills step by step.
+          {course.modules.length} modules · {totalLessons} lessons — full
+          curriculum included with your enrollment.
         </p>
 
         <div className="mt-8 space-y-4">

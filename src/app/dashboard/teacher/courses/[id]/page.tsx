@@ -65,6 +65,7 @@ export default function EditCoursePage() {
     "beginner" | "intermediate" | "advanced"
   >("beginner");
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [learningOutcomes, setLearningOutcomes] = useState<string[]>([""]);
 
   useEffect(() => {
     if (!course) return;
@@ -79,6 +80,11 @@ export default function EditCoursePage() {
     setCategoryId(course.categoryId);
     setDifficulty(course.difficulty);
     setThumbnailPreview(course.thumbnailUrl ?? null);
+    setLearningOutcomes(
+      course.learningOutcomes?.length
+        ? course.learningOutcomes
+        : [""]
+    );
   }, [course?._id]);
 
   const isManagingAsStaff =
@@ -202,6 +208,7 @@ export default function EditCoursePage() {
             categoryId={categoryId}
             difficulty={difficulty}
             thumbnailPreview={thumbnailPreview}
+            learningOutcomes={learningOutcomes}
             onTitleChange={setTitle}
             onDescriptionChange={setDescription}
             onRegularPriceChange={setRegularPrice}
@@ -209,6 +216,7 @@ export default function EditCoursePage() {
             onCategoryIdChange={setCategoryId}
             onDifficultyChange={setDifficulty}
             onThumbnailPreviewChange={setThumbnailPreview}
+            onLearningOutcomesChange={setLearningOutcomes}
           />
         </TabsContent>
 

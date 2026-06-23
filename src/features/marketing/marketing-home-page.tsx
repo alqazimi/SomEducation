@@ -36,66 +36,66 @@ export function MarketingHomePage() {
   return (
     <MarketingShell className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-7xl px-4 pb-10 pt-16 sm:px-6 sm:pt-20 lg:px-8">
-          <div className="flex flex-col items-center justify-between gap-12 md:flex-row md:items-center md:gap-8 lg:gap-12">
+        <div className="mx-auto max-w-7xl px-4 pb-12 pt-24 sm:px-6 sm:pb-14 sm:pt-28 md:pt-32 lg:px-8">
+          <div className="flex flex-col items-center justify-between gap-10 md:flex-row md:items-center md:gap-6 lg:gap-10">
             <div className="relative w-full md:max-w-[480px]">
               <div
                 className="pointer-events-none absolute -right-20 top-0 h-[240px] w-[240px] rounded-full bg-brand-600/35 blur-[120px]"
                 aria-hidden
               />
 
-              <div className="relative z-10">
-                <p className="mb-2 text-lg font-medium text-slate-300">
+              <div className="relative z-10 mb-6">
+                <p className="mb-2 text-base font-medium text-slate-300 sm:text-lg">
                   {MARKETING_HERO.eyebrow}
                 </p>
-                <h1 className="text-3xl font-bold leading-tight tracking-tight text-white md:text-4xl lg:text-[42px] lg:leading-[3.5rem]">
+                <h1 className="text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl md:text-4xl lg:text-[42px] lg:leading-[3.25rem]">
                   {MARKETING_HERO.headline}
                 </h1>
-                <p className="mt-4 max-w-lg text-base leading-relaxed text-slate-400 sm:text-lg">
+                <p className="mt-4 max-w-lg text-sm leading-relaxed text-slate-400 sm:text-base">
                   {MARKETING_HERO.subheadline}
                 </p>
+              </div>
 
-                <div className="mt-8">
-                  <Link href="/courses">
-                    <Button
-                      size="lg"
-                      className="h-12 rounded-lg bg-brand-600 px-8 text-base font-medium shadow-lg shadow-brand-600/25 transition-colors hover:bg-brand-500"
+              <div className="relative z-10 mb-10 md:mb-14">
+                <Link href="/courses">
+                  <Button
+                    size="default"
+                    className="h-10 rounded-lg bg-brand-600 px-5 text-sm font-medium shadow-none transition-colors hover:bg-brand-500"
+                  >
+                    Browse Courses
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="relative z-10 flex items-center gap-3">
+                <div className="flex -space-x-2.5">
+                  {MARKETING_AVATAR_COLORS.map((color, index) => (
+                    <div
+                      key={color}
+                      className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#080c16] text-[10px] font-semibold text-white ring-2 ring-[#080c16] sm:h-10 sm:w-10 sm:text-xs ${color}`}
                     >
-                      Browse Courses
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-
-                <div className="mt-10 flex items-center gap-3 md:mt-14">
-                  <div className="flex -space-x-3">
-                    {MARKETING_AVATAR_COLORS.map((color, index) => (
-                      <div
-                        key={color}
-                        className={`flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#080c16] text-xs font-semibold text-white ring-2 ring-[#080c16] ${color}`}
-                      >
-                        {String.fromCharCode(65 + index)}
-                      </div>
-                    ))}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex text-amber-400">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className="h-4 w-4 fill-current"
-                          />
-                        ))}
-                      </div>
-                      <p className="font-medium text-white">
-                        {MARKETING_HERO.rating}
-                      </p>
+                      {String.fromCharCode(65 + index)}
                     </div>
-                    <p className="text-sm text-slate-400">
-                      {MARKETING_HERO.studentsLabel}
+                  ))}
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex text-amber-400">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className="h-3.5 w-3.5 fill-current"
+                        />
+                      ))}
+                    </div>
+                    <p className="text-sm font-medium text-white">
+                      {MARKETING_HERO.rating}
                     </p>
                   </div>
+                  <p className="text-xs text-slate-400 sm:text-sm">
+                    {MARKETING_HERO.studentsLabel}
+                  </p>
                 </div>
               </div>
             </div>
@@ -124,16 +124,16 @@ export function MarketingHomePage() {
 
       <section className="pb-10 pt-2 sm:pb-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center gap-5 rounded-2xl bg-brand-600 px-5 py-8 sm:flex-row sm:justify-between sm:px-8">
-            <div className="flex items-center gap-4 text-center sm:text-left">
-              <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15 sm:flex">
-                <ArrowRight className="h-6 w-6 text-white" />
+          <div className="flex flex-col items-center gap-4 rounded-2xl bg-brand-600 px-5 py-6 sm:flex-row sm:justify-between sm:px-8 sm:py-7">
+            <div className="flex items-center gap-3 text-center sm:text-left">
+              <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15 sm:flex">
+                <ArrowRight className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-white sm:text-xl">
+                <h2 className="text-base font-semibold text-white sm:text-lg">
                   Ready to start your learning journey?
                 </h2>
-                <p className="mt-1 text-sm text-blue-100">
+                <p className="mt-1 text-xs text-blue-100 sm:text-sm">
                   Join thousands of students learning new skills today.
                 </p>
               </div>
@@ -141,7 +141,7 @@ export function MarketingHomePage() {
             <Link href="/courses" className="shrink-0">
               <Button
                 size="default"
-                className="h-11 rounded-lg bg-[#080c16] px-6 text-sm text-white hover:bg-[#121a2e]"
+                className="h-10 rounded-lg bg-[#080c16] px-5 text-sm text-white hover:bg-[#121a2e]"
               >
                 Browse Courses
                 <ArrowRight className="h-4 w-4" />

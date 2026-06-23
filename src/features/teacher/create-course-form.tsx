@@ -24,6 +24,10 @@ import { courseFormSchema, type CourseFormValues } from "@/schemas";
 import { useState } from "react";
 import { ImageUploadField } from "@/components/ui/image-upload-field";
 import { CoursePricingFields } from "@/components/courses/course-pricing-fields";
+import {
+  LearningOutcomesEditor,
+  normalizeLearningOutcomes,
+} from "@/components/courses/learning-outcomes-editor";
 
 export function CreateCourseForm() {
   const router = useRouter();
@@ -48,6 +52,7 @@ export function CreateCourseForm() {
     },
   });
   const [regularPrice, setRegularPrice] = useState("");
+  const [learningOutcomes, setLearningOutcomes] = useState(["", "", ""]);
 
   async function onSubmit(data: CourseFormValues) {
     if (!moduleTitle.trim()) {
@@ -63,6 +68,7 @@ export function CreateCourseForm() {
         difficulty: data.difficulty,
         price: data.price,
         compareAtPrice: data.compareAtPrice,
+        learningOutcomes: normalizeLearningOutcomes(learningOutcomes),
         thumbnailStorageId: thumbnailStorageId ?? undefined,
       });
 
@@ -205,6 +211,11 @@ export function CreateCourseForm() {
                 form.formState.errors.compareAtPrice?.message
               }
               salePriceError={form.formState.errors.price?.message}
+            />
+
+            <LearningOutcomesEditor
+              outcomes={learningOutcomes}
+              onChange={setLearningOutcomes}
             />
 
             <ImageUploadField

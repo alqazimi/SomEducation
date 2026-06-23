@@ -64,6 +64,20 @@ export function resolveCompareAtPrice(
   return compareAtPrice;
 }
 
+const MAX_LEARNING_OUTCOMES = 12;
+const MAX_OUTCOME_LENGTH = 200;
+
+export function sanitizeLearningOutcomes(outcomes: string[] | undefined) {
+  if (!outcomes?.length) return undefined;
+
+  const cleaned = outcomes
+    .map((item) => sanitizeText(item, MAX_OUTCOME_LENGTH))
+    .filter((item) => item.length > 0)
+    .slice(0, MAX_LEARNING_OUTCOMES);
+
+  return cleaned.length > 0 ? cleaned : undefined;
+}
+
 export function validateImageUrl(url: string): boolean {
   try {
     const parsed = new URL(url.trim());

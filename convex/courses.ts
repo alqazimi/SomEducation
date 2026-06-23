@@ -12,7 +12,7 @@ import { deleteExamsForCourse } from "./exams";
 import { logAudit } from "./lib/audit";
 import { createNotification } from "./lib/notifications";
 import { validateImageStorageFile } from "./lib/files";
-import { sanitizeText, validateImageUrl, validatePrice, resolveCompareAtPrice } from "./lib/validation";
+import { sanitizeText, validateImageUrl, validatePrice, resolveCompareAtPrice, sanitizeLearningOutcomes } from "./lib/validation";
 import {
   assertCanManageCourse,
   canLearnCourse,
@@ -514,6 +514,7 @@ export const create = mutation({
     difficulty: courseDifficulty,
     price: v.number(),
     compareAtPrice: v.optional(v.number()),
+    learningOutcomes: v.optional(v.array(v.string())),
     thumbnailStorageId: v.optional(v.id("_storage")),
     thumbnailUrl: v.optional(v.string()),
   },
@@ -521,6 +522,7 @@ export const create = mutation({
     const user = await requireTeacherOrAdmin(ctx);
     if (!validatePrice(args.price)) throw new Error("Invalid price");
     const compareAtPrice = resolveCompareAtPrice(args.compareAtPrice, args.price);
+    const learningOutcomes = sanitizeLearningOutcomes(args.learningOutcomes);
 
     if (args.thumbnailStorageId) {
       await validateImageStorageFile(ctx, args.thumbnailStorageId);
@@ -550,6 +552,7 @@ export const create = mutation({
       difficulty: args.difficulty,
       price: args.price,
       compareAtPrice,
+      learningOutcomes,
       currency: "USD",
       teacherId: user._id,
       status: "draft",
@@ -569,6 +572,7 @@ export const update = mutation({
     difficulty: v.optional(courseDifficulty),
     price: v.optional(v.number()),
     compareAtPrice: v.optional(v.union(v.number(), v.null())),
+    learningOutcomes: v.optional(v.array(v.string())),
     thumbnailStorageId: v.optional(v.id("_storage")),
     thumbnailUrl: v.optional(v.string()),
   },
@@ -597,6 +601,9 @@ export const update = mutation({
         course.compareAtPrice,
         args.price
       );
+    }
+    if (args.learningOutcomes !== undefined) {
+      updates.learningOutcomes = sanitizeLearningOutcomes(args.learningOutcomes);
     }
     if (args.thumbnailStorageId) {
       await validateImageStorageFile(ctx, args.thumbnailStorageId);

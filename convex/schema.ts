@@ -139,6 +139,7 @@ export default defineSchema({
     difficulty: courseDifficulty,
     price: v.number(),
     compareAtPrice: v.optional(v.number()),
+    learningOutcomes: v.optional(v.array(v.string())),
     currency: v.string(),
     teacherId: v.id("users"),
     status: courseStatus,

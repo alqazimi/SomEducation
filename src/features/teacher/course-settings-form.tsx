@@ -12,6 +12,10 @@ import {
   CoursePricingFields,
   parseCoursePricing,
 } from "@/components/courses/course-pricing-fields";
+import {
+  LearningOutcomesEditor,
+  normalizeLearningOutcomes,
+} from "@/components/courses/learning-outcomes-editor";
 import { ImageUploadField } from "@/components/ui/image-upload-field";
 import { SectionTitle } from "@/components/ui/typography";
 
@@ -32,6 +36,7 @@ type CourseSettingsFormProps = {
   categoryId: string;
   difficulty: CourseDifficulty;
   thumbnailPreview: string | null;
+  learningOutcomes: string[];
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onRegularPriceChange: (value: string) => void;
@@ -39,6 +44,7 @@ type CourseSettingsFormProps = {
   onCategoryIdChange: (value: string) => void;
   onDifficultyChange: (value: CourseDifficulty) => void;
   onThumbnailPreviewChange: (value: string | null) => void;
+  onLearningOutcomesChange: (value: string[]) => void;
 };
 
 export function CourseSettingsForm({
@@ -51,6 +57,7 @@ export function CourseSettingsForm({
   categoryId,
   difficulty,
   thumbnailPreview,
+  learningOutcomes,
   onTitleChange,
   onDescriptionChange,
   onRegularPriceChange,
@@ -58,6 +65,7 @@ export function CourseSettingsForm({
   onCategoryIdChange,
   onDifficultyChange,
   onThumbnailPreviewChange,
+  onLearningOutcomesChange,
 }: CourseSettingsFormProps) {
   const updateCourse = useMutation(api.courses.update);
 
@@ -96,6 +104,7 @@ export function CourseSettingsForm({
           pricing.compareAtPrice === undefined ? null : pricing.compareAtPrice,
         categoryId: categoryId as Id<"categories">,
         difficulty,
+        learningOutcomes: normalizeLearningOutcomes(learningOutcomes),
       });
       toast.success("Course details updated");
     } catch (error) {
@@ -163,6 +172,12 @@ export function CourseSettingsForm({
             salePrice={salePrice}
             onRegularPriceChange={onRegularPriceChange}
             onSalePriceChange={onSalePriceChange}
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <LearningOutcomesEditor
+            outcomes={learningOutcomes}
+            onChange={onLearningOutcomesChange}
           />
         </div>
         <div className="sm:col-span-2">
