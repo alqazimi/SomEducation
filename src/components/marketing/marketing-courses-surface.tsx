@@ -15,7 +15,7 @@ export function MarketingCoursesSurface({
     <div
       data-surface="courses-light"
       className={cn(
-        "bg-marketing-bg pt-8 text-marketing-fg sm:pt-10 lg:pt-12",
+        "bg-marketing-bg pt-0 text-marketing-fg sm:pt-1 lg:pt-2",
         className
       )}
     >
