@@ -26,34 +26,34 @@ function MarketingHero() {
         isDay ? "bg-marketing-hero" : "bg-marketing-bg"
       )}
     >
-      <div className="mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-between gap-10 md:flex-row md:items-center md:gap-12 lg:gap-16">
-          <div className="relative w-full text-center md:max-w-xl md:text-left">
-            <div className="relative z-10 mb-6 md:mb-8">
+      <div className="mx-auto max-w-7xl px-4 pb-8 pt-2 sm:px-6 sm:pb-12 sm:pt-4 lg:px-8">
+        <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between md:gap-12 lg:gap-16">
+          <div className="relative w-full md:max-w-xl">
+            <div className="relative z-10">
               <p
                 className={cn(
-                  "mb-3 text-[11px] font-semibold uppercase tracking-[0.14em]",
+                  "mb-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] sm:mb-3",
                   isDay ? "text-brand-600" : "text-brand-400"
                 )}
               >
                 {hero.eyebrow}
               </p>
-              <h1 className="text-3xl font-bold leading-[1.15] tracking-tight text-marketing-fg sm:text-4xl lg:text-[2.75rem] lg:leading-[1.12]">
+              <h1 className="text-[1.65rem] font-bold leading-[1.18] tracking-tight text-marketing-fg min-[400px]:text-3xl sm:text-4xl lg:text-[2.75rem] lg:leading-[1.12]">
                 {hero.headlineBefore}
                 <span className={isDay ? "text-brand-600" : "text-brand-500"}>
                   {hero.headlineHighlight}
                 </span>
               </h1>
-              <p className="mt-5 max-w-lg text-base leading-relaxed text-marketing-muted md:text-lg">
+              <p className="mt-4 max-w-md text-[15px] leading-relaxed text-marketing-muted sm:mt-5 sm:max-w-lg sm:text-base md:text-lg">
                 {hero.subheadline}
               </p>
             </div>
 
-            <div className="relative z-10 flex justify-center md:justify-start">
-              <Link href="/courses">
+            <div className="relative z-10 mt-6 sm:mt-7">
+              <Link href="/courses" className="inline-block">
                 <Button
                   size="default"
-                  className="h-11 rounded-lg bg-brand-600 px-6 text-sm font-semibold shadow-sm transition-colors hover:bg-brand-500"
+                  className="h-11 w-full rounded-lg bg-brand-600 px-6 text-sm font-semibold shadow-sm transition-colors hover:bg-brand-500 min-[400px]:w-auto"
                 >
                   Browse Courses
                   <ArrowRight className="h-4 w-4" />
@@ -62,7 +62,7 @@ function MarketingHero() {
             </div>
           </div>
 
-          <MarketingHeroImage />
+          <MarketingHeroImage className="md:shrink-0" />
         </div>
       </div>
     </section>

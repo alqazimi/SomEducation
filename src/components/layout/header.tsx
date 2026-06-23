@@ -100,20 +100,20 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
         <div
           className={cn(
             "mx-auto max-w-7xl",
-            isMarketing ? "px-4 lg:px-8" : "px-3 sm:px-6 lg:px-8"
+            isMarketing ? "px-3 sm:px-4 lg:px-8" : "px-3 sm:px-6 lg:px-8"
           )}
         >
           <div
             className={cn(
-              "flex h-16 items-center",
-              isMarketing ? "gap-2 md:gap-6" : "gap-3"
+              "flex h-14 items-center sm:h-16",
+              isMarketing ? "gap-1 sm:gap-2 md:gap-6" : "gap-3"
             )}
           >
-            <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2">
+            <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-2">
               <button
                 type="button"
                 className={cn(
-                  "inline-flex h-10 w-10 items-center justify-center rounded-lg lg:hidden",
+                  "inline-flex h-9 w-9 items-center justify-center rounded-lg lg:hidden sm:h-10 sm:w-10",
                   isMarketing
                     ? isNight
                       ? "text-slate-300 hover:bg-white/10"
@@ -138,13 +138,13 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                 className="flex min-w-0 items-center gap-2 rounded-lg transition-opacity hover:opacity-90 sm:gap-2.5"
                 aria-label={`${PLATFORM_NAME} home`}
               >
-                <SomEducationLogo size={32} className="sm:hidden" />
-                <SomEducationLogo size={36} className="hidden sm:block" />
+                <SomEducationLogo size={30} className="sm:hidden" />
+                <SomEducationLogo size={34} className="hidden sm:block" />
                 <SomEducationWordmark
                   inverted={isMarketing && isNight}
                   className={cn(
                     isMarketing && isNight && "text-white",
-                    isMarketing && isSignedIn && "hidden min-[380px]:inline"
+                    isMarketing && "text-sm sm:text-[0.9375rem]"
                   )}
                 />
               </Link>
@@ -186,14 +186,14 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
               </div>
             )}
 
-            <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+            <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1.5 md:gap-2">
               {isMarketing && <MarketingThemeToggle />}
 
               {!isDashboard && !isSignedIn && (
                 <Link
                   href="/courses"
                   className={cn(
-                    "inline-flex h-10 w-10 items-center justify-center rounded-lg",
+                    "inline-flex h-9 w-9 items-center justify-center rounded-lg sm:h-10 sm:w-10",
                     isMarketing
                       ? isNight
                         ? "text-slate-300 hover:bg-white/10"
@@ -252,7 +252,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                   <Link href={signInUrl}>
                     <Button
                       size="sm"
-                      className="h-9 rounded-lg bg-brand-600 px-5 hover:bg-brand-500 sm:h-10 sm:px-6"
+                      className="h-9 rounded-lg bg-brand-600 px-3.5 text-xs font-semibold hover:bg-brand-500 min-[400px]:px-5 min-[400px]:text-sm sm:h-10 sm:px-6"
                     >
                       Login
                     </Button>

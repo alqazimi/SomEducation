@@ -59,9 +59,9 @@ const SECTIONS = [
 
 function CourseGridSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
       {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} className="h-[300px] rounded-2xl bg-white/5" />
+        <Skeleton key={i} className="h-[7.5rem] rounded-2xl bg-slate-200/80 sm:h-[8.5rem] lg:h-[300px]" />
       ))}
     </div>
   );
@@ -85,28 +85,28 @@ function HomepageCourseSection({
   if (courses.length === 0) return null;
 
   return (
-    <section className="py-8 sm:py-10">
+    <section className="py-6 first:pt-8 sm:py-8 sm:first:pt-10 lg:py-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div>
+        <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+          <div className="min-w-0 flex-1">
             <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-600">
               {eyebrow}
             </p>
-            <h2 className="text-lg font-semibold tracking-tight text-marketing-fg sm:text-xl">
+            <h2 className="text-base font-semibold tracking-tight text-marketing-fg sm:text-lg lg:text-xl">
               {title}
             </h2>
-            <p className="mt-1 text-sm text-marketing-muted">{description}</p>
+            <p className="mt-1 text-xs text-marketing-muted sm:text-sm">{description}</p>
           </div>
           <Link
             href={href}
-            className="inline-flex items-center gap-1 text-sm font-medium text-brand-600 transition-colors hover:text-brand-500"
+            className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-brand-600 transition-colors hover:text-brand-500"
           >
             View all courses
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           {courses.map((course) => (
             <HomepageCourseCard
               key={course._id}

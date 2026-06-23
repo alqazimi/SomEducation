@@ -16,40 +16,44 @@ export function MarketingStatsBar({ className }: { className?: string }) {
   const { isNight } = useMarketingTheme();
 
   return (
-    <section
-      className={cn(
-        "border-y border-marketing-border bg-marketing-card py-8",
-        isNight && "shadow-[0_4px_24px_rgba(0,82,255,0.06)]",
-        className
-      )}
-    >
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 sm:grid-cols-4 sm:px-6 lg:px-8">
-        {MARKETING_STATS.map((stat) => {
-          const Icon = ICONS[stat.icon];
-          return (
-            <div
-              key={stat.label}
-              className="flex flex-col items-center gap-2 text-center sm:flex-row sm:text-left"
-            >
+    <section className={cn("relative z-10 px-4 sm:px-6 lg:px-8", className)}>
+      <div
+        className={cn(
+          "mx-auto max-w-7xl rounded-2xl border border-marketing-border bg-marketing-card px-4 py-6 sm:px-6 sm:py-7",
+          isNight && "shadow-[0_8px_32px_rgba(0,82,255,0.12)]",
+          "-mt-5 sm:-mt-7"
+        )}
+      >
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-4 sm:gap-6">
+          {MARKETING_STATS.map((stat) => {
+            const Icon = ICONS[stat.icon];
+            return (
               <div
-                className={cn(
-                  "flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
-                  isNight
-                    ? "bg-brand-600/15 text-brand-400"
-                    : "bg-brand-50 text-brand-600"
-                )}
+                key={stat.label}
+                className="flex flex-col items-center gap-2 text-center sm:flex-row sm:gap-3 sm:text-left"
               >
-                <Icon className="h-5 w-5" />
+                <div
+                  className={cn(
+                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-11 sm:w-11",
+                    isNight
+                      ? "bg-brand-600/15 text-brand-400"
+                      : "bg-brand-50 text-brand-600"
+                  )}
+                >
+                  <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-lg font-bold text-marketing-fg sm:text-xl lg:text-2xl">
+                    {stat.value}
+                  </p>
+                  <p className="text-[11px] leading-tight text-marketing-muted sm:text-sm">
+                    {stat.label}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-xl font-bold text-marketing-fg sm:text-2xl">
-                  {stat.value}
-                </p>
-                <p className="text-sm text-marketing-muted">{stat.label}</p>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </section>
   );

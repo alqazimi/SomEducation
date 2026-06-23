@@ -8,10 +8,10 @@ const HERO_ILLUSTRATION = "/images/hero-illustration.svg";
 export function MarketingHeroImage({ className }: { className?: string }) {
   return (
     <div
-      className={cn(
-        "relative mx-auto w-full max-w-[320px] sm:max-w-[380px] md:mx-0 md:max-w-[440px] lg:max-w-[480px]",
-        className
-      )}
+        className={cn(
+          "relative w-full max-w-[240px] min-[400px]:max-w-[280px] sm:max-w-[300px] md:max-w-[400px] lg:max-w-[480px]",
+          className
+        )}
     >
       <div
         className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-[#0052ff]/25 blur-[90px]"
