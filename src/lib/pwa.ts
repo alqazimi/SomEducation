@@ -14,12 +14,10 @@ export function isStandaloneDisplay(): boolean {
 export function isIosInstallable(): boolean {
   if (typeof window === "undefined") return false;
   const ua = window.navigator.userAgent;
-  const isIos =
+  return (
     /iPad|iPhone|iPod/.test(ua) ||
-    (ua.includes("Mac") && "ontouchend" in document);
-  const isSafari =
-    /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
-  return isIos && isSafari;
+    (ua.includes("Mac") && "ontouchend" in document)
+  );
 }
 
 export function isInstallPromptDismissed(): boolean {

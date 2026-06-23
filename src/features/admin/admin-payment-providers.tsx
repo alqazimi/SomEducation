@@ -282,14 +282,14 @@ export function AdminPaymentProviders() {
               <Skeleton className="h-16 w-full" />
             </div>
           ) : isAdminListDenied(providers) ? (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               Could not load payment providers. Check your admin access and
               Convex connection.
             </p>
           ) : isAdminListReady(providers) && providers.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border py-12 text-center">
-              <p className="text-sm text-slate-600">No payment providers yet.</p>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">No payment providers yet.</p>
+              <p className="mt-1 text-sm text-muted-foreground">
                 Add providers manually or load the Somalia starter list.
               </p>
             </div>
@@ -297,7 +297,7 @@ export function AdminPaymentProviders() {
             providers.map((provider) => (
               <div
                 key={provider._id}
-                className="rounded-xl border border-border bg-white p-4"
+                className="rounded-xl border border-border bg-card p-4"
               >
                 {editingId === provider._id && editingProvider ? (
                   <ProviderForm
@@ -321,7 +321,7 @@ export function AdminPaymentProviders() {
                         ) : (
                           <Building2 className="h-4 w-4 text-brand-600" />
                         )}
-                        <h3 className="font-medium text-stone-900">
+                        <h3 className="font-medium text-foreground">
                           {provider.name}
                         </h3>
                         <Badge variant="outline">
@@ -337,18 +337,18 @@ export function AdminPaymentProviders() {
                         className={cn(
                           "mt-2 font-mono text-sm",
                           provider.accountNumber.trim()
-                            ? "text-stone-900"
+                            ? "text-foreground"
                             : "text-amber-700"
                         )}
                       >
                         {provider.accountNumber.trim() || "No number set yet"}
                       </p>
                       {provider.instructions && (
-                        <p className="mt-2 text-sm text-slate-600">
+                        <p className="mt-2 text-sm text-muted-foreground">
                           {provider.instructions}
                         </p>
                       )}
-                      <p className="mt-2 text-xs text-slate-500">
+                      <p className="mt-2 text-xs text-muted-foreground">
                         {provider.paymentCount} payment
                         {provider.paymentCount === 1 ? "" : "s"} submitted
                       </p>

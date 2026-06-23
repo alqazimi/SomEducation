@@ -82,7 +82,7 @@ export function StudentDashboard() {
               </p>
             </div>
             <Link href="/dashboard/student/payments">
-              <Button variant="outline" className="border-red-300 bg-white">
+              <Button variant="outline" className="border-red-300">
                 Fix Payment
               </Button>
             </Link>
@@ -103,7 +103,7 @@ export function StudentDashboard() {
               </p>
             </div>
             <Link href="/dashboard/student/payments">
-              <Button variant="outline" className="border-amber-300 bg-white">
+              <Button variant="outline" className="border-amber-300">
                 View Payments
               </Button>
             </Link>

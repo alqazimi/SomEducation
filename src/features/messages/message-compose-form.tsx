@@ -92,13 +92,13 @@ export function MessageComposeForm({
       <div>
         <Label htmlFor="recipient">To</Label>
         {recipients === undefined ? (
-          <p className="mt-2 text-sm text-slate-500">Loading recipients...</p>
+          <p className="mt-2 text-sm text-muted-foreground">Loading recipients...</p>
         ) : recipients.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             No recipients available.
           </p>
         ) : recipients.length === 1 && !isAdmin ? (
-          <p className="mt-2 text-sm text-slate-700">
+          <p className="mt-2 text-sm text-foreground/90">
             {recipients[0].firstName} {recipients[0].lastName} (
             {recipients[0].email})
           </p>

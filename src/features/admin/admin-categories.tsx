@@ -194,14 +194,14 @@ export function AdminCategories() {
               <Skeleton className="h-16 w-full" />
             </div>
           ) : isAdminListDenied(categories) ? (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               Could not load categories. Check your admin access and Convex
               connection.
             </p>
           ) : isAdminListReady(categories) && categories.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border py-12 text-center">
-              <p className="text-sm text-slate-600">No categories yet.</p>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">No categories yet.</p>
+              <p className="mt-1 text-sm text-muted-foreground">
                 Click Add category above to create your first one.
               </p>
             </div>
@@ -209,7 +209,7 @@ export function AdminCategories() {
             categories.map((category) => (
               <div
                 key={category._id}
-                className="rounded-xl border border-border bg-white p-4"
+                className="rounded-xl border border-border bg-card p-4"
               >
                 {editingId === category._id && editingCategory ? (
                   <CategoryForm
@@ -226,7 +226,7 @@ export function AdminCategories() {
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-medium text-stone-900">
+                        <h3 className="font-medium text-foreground">
                           {category.name}
                         </h3>
                         <Badge
@@ -236,11 +236,11 @@ export function AdminCategories() {
                         </Badge>
                       </div>
                       {category.description && (
-                        <p className="mt-1 text-sm text-slate-600">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           {category.description}
                         </p>
                       )}
-                      <p className="mt-2 text-xs text-slate-500">
+                      <p className="mt-2 text-xs text-muted-foreground">
                         {category.courseCount} course
                         {category.courseCount === 1 ? "" : "s"} ·{" "}
                         {category.publishedCourseCount} published · slug:{" "}

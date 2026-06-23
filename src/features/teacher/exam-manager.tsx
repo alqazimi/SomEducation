@@ -75,7 +75,7 @@ function QuestionFormPanel({
               onChange({ ...draft, questionText: e.target.value })
             }
             rows={2}
-            className="mt-2 bg-white"
+            className="mt-2 bg-card"
             autoFocus
           />
         </div>
@@ -102,11 +102,11 @@ function QuestionFormPanel({
                   })
                 }
                 placeholder={`Option ${index + 1}`}
-                className="bg-white"
+                className="bg-card"
               />
             </div>
           ))}
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Select the radio button for the correct answer.
           </p>
         </div>
@@ -118,7 +118,7 @@ function QuestionFormPanel({
               onChange({ ...draft, explanation: e.target.value })
             }
             rows={2}
-            className="mt-2 bg-white"
+            className="mt-2 bg-card"
           />
         </div>
         <div className="flex gap-2">
@@ -404,14 +404,14 @@ export function ExamManager({
   }
 
   if (exams === undefined) {
-    return <p className="text-sm text-slate-500">Loading exams...</p>;
+    return <p className="text-sm text-muted-foreground">Loading exams...</p>;
   }
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-border bg-white p-5">
-        <h3 className="font-medium text-slate-900">Create Module Exam</h3>
-        <p className="mt-1 text-sm text-slate-500">
+      <div className="rounded-lg border border-border bg-card p-5">
+        <h3 className="font-medium text-foreground">Create Module Exam</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
           Add Coursera-style quizzes at the end of each module. Drag exams and
           questions by the grip handle to reorder them.
         </p>
@@ -451,7 +451,7 @@ export function ExamManager({
 
       <div className="space-y-4">
         {exams.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-border px-4 py-6 text-sm text-slate-500">
+          <p className="rounded-lg border border-dashed border-border px-4 py-6 text-sm text-muted-foreground">
             No exams yet. Create one to let students test their knowledge.
           </p>
         ) : (
@@ -459,7 +459,7 @@ export function ExamManager({
             <div
               key={exam._id}
               className={cn(
-                "rounded-lg border border-border bg-white p-5 transition-shadow",
+                "rounded-lg border border-border bg-card p-5 transition-shadow",
                 reorderDropClass(
                   examDrag.isDropTarget(examIndex),
                   examDrag.isDragging(examIndex)
@@ -480,9 +480,9 @@ export function ExamManager({
                   <div>
                     <div className="flex items-center gap-2">
                       <ClipboardCheck className="h-4 w-4 text-brand-600" />
-                      <h4 className="font-medium text-slate-900">{exam.title}</h4>
+                      <h4 className="font-medium text-foreground">{exam.title}</h4>
                     </div>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {exam.questions.length} questions · Pass{" "}
                       {exam.passingScore}% ·{" "}
                       {exam.maxAttempts === 0
@@ -575,7 +575,7 @@ export function ExamManager({
 
                   <div>
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h5 className="text-sm font-semibold text-slate-800">
+                      <h5 className="text-sm font-semibold text-foreground">
                         Questions
                       </h5>
                       {!editingQuestionId && (
@@ -594,7 +594,7 @@ export function ExamManager({
                     </div>
                     <ul className="mt-3 space-y-3">
                       {exam.questions.length === 0 && !editingQuestionId ? (
-                        <li className="rounded-md border border-dashed border-border px-4 py-6 text-center text-sm text-slate-500">
+                        <li className="rounded-md border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
                           No questions yet. Click Add Question to create one.
                         </li>
                       ) : (
@@ -646,7 +646,7 @@ export function ExamManager({
                                 "flex flex-wrap items-center justify-between gap-2 rounded-md px-3 py-2 text-sm",
                                 editingQuestionId === q._id
                                   ? "border border-brand-300 bg-brand-50/30"
-                                  : "bg-slate-50"
+                                  : "bg-muted"
                               )}
                             >
                               <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -712,7 +712,7 @@ export function ExamManager({
 
                     {!editingQuestionId && (
                       <div className="mt-4">
-                        <p className="mb-2 text-sm font-medium text-slate-800">
+                        <p className="mb-2 text-sm font-medium text-foreground">
                           New question
                         </p>
                         <QuestionFormPanel

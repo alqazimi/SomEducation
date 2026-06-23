@@ -59,12 +59,12 @@ export function AdminSettings() {
           <CardTitle>Course Categories</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-muted-foreground">
             Manage categories from the dedicated admin page. Teachers choose a
             category when creating a course; students use them to filter the
             catalog.
           </p>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Active categories:{" "}
             {categories?.filter((cat) => cat.isActive).length ?? "…"} of{" "}
             {categories?.length ?? "…"}
@@ -80,12 +80,12 @@ export function AdminSettings() {
           <CardTitle>Payment Providers</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-muted-foreground">
             Mobile money and bank numbers are managed per provider (EVC Plus,
             Zaad, Premier Bank, etc.). Students only see the number for the
             provider they choose.
           </p>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Active providers with numbers: {activeProviders}
           </p>
           <Link href="/dashboard/admin/payment-providers">

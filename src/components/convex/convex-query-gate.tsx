@@ -17,15 +17,15 @@ export function ConvexConnectionError({
 
   return (
     <div className="flex min-h-[40vh] flex-col items-center justify-center px-4 py-16 text-center">
-      <h2 className="text-xl font-semibold text-slate-900">{title}</h2>
-      <p className="mt-3 max-w-md text-sm text-slate-600">
+      <h2 className="text-xl font-semibold text-foreground">{title}</h2>
+      <p className="mt-3 max-w-md text-sm text-muted-foreground">
         {description ??
           (configured
             ? "The app could not reach Convex. Check that your production deployment is running and try again."
             : "NEXT_PUBLIC_CONVEX_URL is missing. Add it in Vercel environment variables, then redeploy.")}
       </p>
       {!configured && (
-        <div className="mt-4 max-w-md rounded-lg border border-border bg-white p-4 text-left text-xs text-slate-600">
+        <div className="mt-4 max-w-md rounded-lg border border-border bg-card p-4 text-left text-xs text-muted-foreground">
           <p className="font-medium text-foreground">Vercel → Settings → Environment Variables</p>
           <p className="mt-2 font-mono text-[11px] text-brand-700">
             NEXT_PUBLIC_CONVEX_URL=https://precious-duck-100.eu-west-1.convex.cloud

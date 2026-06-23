@@ -105,10 +105,10 @@ export function CreateCourseForm() {
 
       <form className="mt-8 space-y-10" onSubmit={form.handleSubmit(onSubmit)}>
         <section>
-          <h2 className="text-base font-semibold text-slate-900">
+          <h2 className="text-base font-semibold text-foreground">
             Course Information
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Basic details shown on the public course page.
           </p>
 
@@ -230,8 +230,8 @@ export function CreateCourseForm() {
         <Separator />
 
         <section>
-          <h2 className="text-base font-semibold text-slate-900">Curriculum</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <h2 className="text-base font-semibold text-foreground">Curriculum</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             Start with one module and optional first lesson. After creating the
             course, use the course builder to add, edit, or delete modules and
             lessons inline.

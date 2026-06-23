@@ -135,7 +135,7 @@ export function AdminSupportInbox() {
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-slate-900">Student conversations</h2>
+          <h2 className="text-sm font-semibold text-foreground">Student conversations</h2>
           <Button size="sm" onClick={() => setShowNewThread((v) => !v)}>
             {showNewThread ? "Cancel" : "Message student"}
           </Button>
@@ -190,10 +190,10 @@ export function AdminSupportInbox() {
         )}
 
         {!threads ? (
-          <p className="text-sm text-slate-500">Loading...</p>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         ) : threads.length === 0 ? (
           <Card>
-            <CardContent className="py-8 text-center text-sm text-slate-500">
+            <CardContent className="py-8 text-center text-sm text-muted-foreground">
               No student conversations yet.
             </CardContent>
           </Card>
@@ -210,12 +210,12 @@ export function AdminSupportInbox() {
                   onClick={() => setSelectedThreadId(thread._id)}
                   className={`w-full rounded-lg border p-3 text-left transition-colors ${
                     active
-                      ? "border-slate-900 bg-slate-50"
-                      : "border-border hover:bg-stone-50"
+                      ? "border-brand-600 bg-muted"
+                      : "border-border hover:bg-muted"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <p className="font-medium text-slate-900 text-sm">
+                    <p className="font-medium text-foreground text-sm">
                       {studentLabel(student)}
                     </p>
                     {thread.unreadCount > 0 && (
@@ -223,11 +223,11 @@ export function AdminSupportInbox() {
                     )}
                   </div>
                   {thread.lastMessage && (
-                    <p className="mt-1 text-xs text-slate-500 line-clamp-2">
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
                       {thread.lastMessage.body}
                     </p>
                   )}
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {formatDate(thread.lastMessageAt)}
                   </p>
                 </button>
@@ -240,15 +240,15 @@ export function AdminSupportInbox() {
       <div>
         {!selectedThreadId ? (
           <Card>
-            <CardContent className="py-16 text-center text-sm text-slate-500">
+            <CardContent className="py-16 text-center text-sm text-muted-foreground">
               Select a conversation to view messages and reply.
             </CardContent>
           </Card>
         ) : threadDetail === undefined ? (
-          <p className="text-sm text-slate-500">Loading conversation...</p>
+          <p className="text-sm text-muted-foreground">Loading conversation...</p>
         ) : !threadDetail ? (
           <Card>
-            <CardContent className="py-16 text-center text-sm text-slate-500">
+            <CardContent className="py-16 text-center text-sm text-muted-foreground">
               Conversation not found.
             </CardContent>
           </Card>
@@ -261,7 +261,7 @@ export function AdminSupportInbox() {
                     ? studentLabel(threadDetail.student)
                     : "Student"}
                 </CardTitle>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                   Shared inbox — all admins and owners see this thread.
                 </p>
               </CardHeader>
@@ -304,15 +304,15 @@ export function AdminSupportInbox() {
                       className={`rounded-lg border p-4 ${
                         fromStudent
                           ? "border-brand-200 bg-brand-50/40"
-                          : "border-slate-200 bg-slate-50"
+                          : "border-border bg-muted"
                       }`}
                     >
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div>
-                          <p className="font-medium text-slate-900">
+                          <p className="font-medium text-foreground">
                             {message.subject}
                           </p>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-muted-foreground">
                             {fromStudent
                               ? studentLabel(
                                   threadDetail.student ?? {
@@ -351,7 +351,7 @@ export function AdminSupportInbox() {
                           </div>
                         )}
                       </div>
-                      <p className="mt-3 text-sm whitespace-pre-wrap text-slate-700">
+                      <p className="mt-3 text-sm whitespace-pre-wrap text-foreground/90">
                         {message.body}
                       </p>
                     </div>

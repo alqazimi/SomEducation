@@ -10,6 +10,7 @@ const isPublicRoute = createRouteMatcher([
   "/robots.txt",
   "/sitemap.xml",
   "/manifest.webmanifest",
+  "/sw.js",
   "/icon(.*)",
   "/apple-icon(.*)",
   "/opengraph-image(.*)",

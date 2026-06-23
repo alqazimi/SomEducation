@@ -115,7 +115,7 @@ export function CourseSettingsForm({
   return (
     <section>
       <SectionTitle>Course settings</SectionTitle>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm text-muted-foreground">
         Update how your course appears in the catalog and on the public page.
       </p>
 

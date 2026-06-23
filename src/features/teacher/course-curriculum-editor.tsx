@@ -92,7 +92,7 @@ function LessonFormPanel({
             value={draft.title}
             onChange={(e) => onChange({ ...draft, title: e.target.value })}
             placeholder="e.g. Introduction to the topic"
-            className="mt-2 bg-white"
+            className="mt-2 bg-card"
             autoFocus
           />
         </div>
@@ -102,7 +102,7 @@ function LessonFormPanel({
             value={draft.youtubeUrl}
             onChange={(e) => onChange({ ...draft, youtubeUrl: e.target.value })}
             placeholder="https://www.youtube.com/watch?v=..."
-            className="mt-2 bg-white"
+            className="mt-2 bg-card"
           />
         </div>
         <div>
@@ -115,11 +115,11 @@ function LessonFormPanel({
               onChange({ ...draft, durationMinutes: e.target.value })
             }
             placeholder="10"
-            className="mt-2 bg-white"
+            className="mt-2 bg-card"
           />
         </div>
         <div className="flex items-end pb-2">
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground/90">
             <input
               type="checkbox"
               checked={draft.isFreePreview}
@@ -138,7 +138,7 @@ function LessonFormPanel({
             onChange={(e) => onChange({ ...draft, content: e.target.value })}
             rows={3}
             placeholder="Optional notes or resources for students"
-            className="mt-2 bg-white"
+            className="mt-2 bg-card"
           />
         </div>
       </div>
@@ -466,12 +466,12 @@ export function CourseCurriculumEditor({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <SectionTitle>Curriculum</SectionTitle>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Build your course in modules. Drag the grip handle to reorder modules
             and lessons. Edit or delete anything inline.
           </p>
         </div>
-        <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+        <div className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
           {sortedModules.length} module{sortedModules.length === 1 ? "" : "s"} ·{" "}
           {sortedModules.reduce((sum, mod) => sum + mod.lessons.length, 0)} lesson
           {sortedModules.reduce((sum, mod) => sum + mod.lessons.length, 0) === 1
@@ -506,9 +506,9 @@ export function CourseCurriculumEditor({
         {sortedModules.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center py-14 text-center">
-              <BookOpen className="h-10 w-10 text-slate-300" />
-              <p className="mt-4 font-medium text-slate-800">No modules yet</p>
-              <p className="mt-1 max-w-sm text-sm text-slate-500">
+              <BookOpen className="h-10 w-10 text-muted-foreground" />
+              <p className="mt-4 font-medium text-foreground">No modules yet</p>
+              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
                 Add your first module above, then add lessons inside it. You need
                 at least one module before submitting for review.
               </p>
@@ -533,7 +533,7 @@ export function CourseCurriculumEditor({
                 onDragOver={moduleDrag.onDragOver(moduleIndex)}
                 onDrop={moduleDrag.onDrop(moduleIndex)}
               >
-                <div className="border-b border-border bg-slate-50/80 px-4 py-3 sm:px-5">
+                <div className="border-b border-border bg-muted/80 px-4 py-3 sm:px-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="flex min-w-0 flex-1 items-start gap-2">
                       <DragHandle
@@ -550,7 +550,7 @@ export function CourseCurriculumEditor({
                       <button
                         type="button"
                         onClick={() => toggleModuleCollapsed(mod._id)}
-                        className="mt-0.5 rounded p-1 text-slate-500 hover:bg-white hover:text-slate-800"
+                        className="mt-0.5 rounded p-1 text-muted-foreground hover:bg-card hover:text-foreground"
                         aria-label={isCollapsed ? "Expand module" : "Collapse module"}
                       >
                         {isCollapsed ? (
@@ -561,7 +561,7 @@ export function CourseCurriculumEditor({
                       </button>
 
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                           Module {moduleIndex + 1}
                         </p>
                         {isEditingModule ? (
@@ -569,7 +569,7 @@ export function CourseCurriculumEditor({
                             <Input
                               value={moduleEditTitle}
                               onChange={(e) => setModuleEditTitle(e.target.value)}
-                              className="max-w-md bg-white"
+                              className="max-w-md bg-card"
                               autoFocus
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") void handleSaveModule();
@@ -583,7 +583,7 @@ export function CourseCurriculumEditor({
                               }
                               rows={2}
                               placeholder="Optional module description"
-                              className="max-w-md bg-white"
+                              className="max-w-md bg-card"
                             />
                             <div className="flex flex-wrap gap-2">
                               <Button
@@ -603,12 +603,12 @@ export function CourseCurriculumEditor({
                             </div>
                           </div>
                         ) : (
-                          <h3 className="mt-1 truncate text-base font-semibold text-slate-900">
+                          <h3 className="mt-1 truncate text-base font-semibold text-foreground">
                             {mod.title}
                           </h3>
                         )}
                         {!isCollapsed && !isEditingModule && (
-                          <p className="mt-1 text-sm text-slate-500">
+                          <p className="mt-1 text-sm text-muted-foreground">
                             {lessons.length} lesson{lessons.length === 1 ? "" : "s"}
                           </p>
                         )}
@@ -652,9 +652,9 @@ export function CourseCurriculumEditor({
                   <CardContent className="space-y-3 p-4 sm:p-5">
                     {lessons.length === 0 &&
                       !isLessonFormOpen(mod._id) && (
-                        <p className="rounded-md border border-dashed border-border px-4 py-6 text-center text-sm text-slate-500">
+                        <p className="rounded-md border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
                           No lessons in this module yet. Click{" "}
-                          <span className="font-medium text-slate-700">
+                          <span className="font-medium text-foreground/90">
                             Add Lesson
                           </span>{" "}
                           to create one.
@@ -709,7 +709,7 @@ export function CourseCurriculumEditor({
                             "flex flex-wrap items-center justify-between gap-3 rounded-lg border px-3 py-2.5 sm:px-4",
                             isLessonFormOpen(mod._id, lesson._id)
                               ? "border-brand-300 bg-brand-50/30"
-                              : "border-border bg-white"
+                              : "border-border bg-card"
                           )}
                         >
                           <div className="flex min-w-0 items-center gap-3">
@@ -730,13 +730,13 @@ export function CourseCurriculumEditor({
                               onDragEnd={resetLessonDrag}
                               label="Drag to reorder lesson"
                             />
-                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
                               {lessonIndex + 1}
                             </span>
                             <div className="min-w-0">
                               <div className="flex flex-wrap items-center gap-2">
                                 <Video className="h-4 w-4 shrink-0 text-brand-600" />
-                                <span className="truncate font-medium text-slate-900">
+                                <span className="truncate font-medium text-foreground">
                                   {lesson.title}
                                 </span>
                                 {lesson.isFreePreview && (
@@ -746,7 +746,7 @@ export function CourseCurriculumEditor({
                                 )}
                               </div>
                               {lesson.youtubeUrl && (
-                                <p className="mt-0.5 truncate text-xs text-slate-500">
+                                <p className="mt-0.5 truncate text-xs text-muted-foreground">
                                   Video linked
                                 </p>
                               )}
@@ -796,7 +796,7 @@ export function CourseCurriculumEditor({
 
                     {isLessonFormOpen(mod._id) && (
                       <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-800">
+                        <p className="text-sm font-medium text-foreground">
                           New lesson
                         </p>
                         <LessonFormPanel

@@ -73,7 +73,7 @@ export function StudentCoursesSection() {
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="h-80 animate-pulse rounded-xl bg-slate-200"
+            className="h-80 animate-pulse rounded-xl bg-muted-foreground/15"
           />
         ))}
       </div>

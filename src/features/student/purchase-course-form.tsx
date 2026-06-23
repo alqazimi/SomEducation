@@ -216,13 +216,13 @@ export function PurchaseCourseForm() {
   }
 
   if (course === undefined && !courseReady) {
-    return <p className="text-sm text-slate-500">Loading course...</p>;
+    return <p className="text-sm text-muted-foreground">Loading course...</p>;
   }
 
   if (!course) {
     return (
       <div className="text-center">
-        <p className="text-slate-600">Course not found.</p>
+        <p className="text-muted-foreground">Course not found.</p>
         <Link href="/courses" className="mt-4 inline-block">
           <Button variant="outline">Back to courses</Button>
         </Link>
@@ -233,7 +233,7 @@ export function PurchaseCourseForm() {
   if (course.isEnrolled) {
     return (
       <div className="text-center">
-        <p className="text-slate-600">You already have access to this course.</p>
+        <p className="text-muted-foreground">You already have access to this course.</p>
         <Link href={`/learn/${course.slug}`} className="mt-4 inline-block">
           <Button>Continue Learning</Button>
         </Link>
@@ -244,13 +244,13 @@ export function PurchaseCourseForm() {
   if (suspendedAccess) {
     return (
       <div className="text-center">
-        <p className="text-slate-600">
+        <p className="text-muted-foreground">
           Your access to this course is suspended. You cannot submit a new payment
           request until an administrator restores access or updates your payment
           status.
         </p>
         {suspendedAccess.adminNote && (
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             Admin note: {suspendedAccess.adminNote}
           </p>
         )}
@@ -267,13 +267,13 @@ export function PurchaseCourseForm() {
   }
 
   if (openPayment === undefined && !openPaymentReady) {
-    return <p className="text-sm text-slate-500">Loading payment status...</p>;
+    return <p className="text-sm text-muted-foreground">Loading payment status...</p>;
   }
 
   if (openPayment?.status === "pending") {
     return (
       <div className="text-center">
-        <p className="text-slate-600">
+        <p className="text-muted-foreground">
           You already submitted payment for this course. It is awaiting admin
           review.
         </p>
@@ -293,7 +293,7 @@ export function PurchaseCourseForm() {
       <>
         <Link
           href={`/courses/${params.slug}`}
-          className="text-sm text-slate-600 hover:text-slate-900"
+          className="text-sm text-muted-foreground hover:text-foreground"
         >
           ← Back to course
         </Link>
@@ -318,7 +318,7 @@ export function PurchaseCourseForm() {
     <>
       <Link
         href={`/courses/${params.slug}`}
-        className="text-sm text-slate-600 hover:text-slate-900"
+        className="text-sm text-muted-foreground hover:text-foreground"
       >
         ← Back to course
       </Link>
@@ -332,7 +332,7 @@ export function PurchaseCourseForm() {
           <div
             key={s}
             className={`h-1.5 flex-1 rounded-full ${
-              s <= step ? "bg-slate-900" : "bg-slate-200"
+              s <= step ? "bg-brand-600" : "bg-muted-foreground/15"
             }`}
           />
         ))}
@@ -390,16 +390,16 @@ export function PurchaseCourseForm() {
                       "rounded-xl border p-4 text-left transition-colors",
                       active
                         ? "border-brand-600 bg-brand-50"
-                        : "border-border hover:bg-stone-50"
+                        : "border-border hover:bg-muted"
                     )}
                   >
                     <Icon
                       className={cn(
                         "h-5 w-5",
-                        active ? "text-brand-700" : "text-stone-500"
+                        active ? "text-brand-700" : "text-muted-foreground"
                       )}
                     />
-                    <p className="mt-3 font-medium text-stone-900">
+                    <p className="mt-3 font-medium text-foreground">
                       {option.label}
                     </p>
                   </button>
@@ -413,7 +413,7 @@ export function PurchaseCourseForm() {
                   Choose {paymentType === "mobile_money" ? "wallet" : "bank"}
                 </p>
                 {!providers ? (
-                  <p className="text-sm text-slate-500">Loading options...</p>
+                  <p className="text-sm text-muted-foreground">Loading options...</p>
                 ) : providers.length === 0 ? (
                   <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                     No active {paymentType === "mobile_money" ? "mobile money" : "bank"}{" "}
@@ -432,7 +432,7 @@ export function PurchaseCourseForm() {
                             "rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors",
                             active
                               ? "border-brand-600 bg-brand-50 text-brand-800"
-                              : "border-border text-stone-700 hover:bg-stone-50"
+                              : "border-border text-foreground/90 hover:bg-muted"
                           )}
                         >
                           {provider.name}
@@ -480,7 +480,7 @@ export function PurchaseCourseForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             {selectedProvider && (
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-muted-foreground">
                 Upload proof for your {selectedProvider.name} payment.
               </p>
             )}
@@ -495,10 +495,10 @@ export function PurchaseCourseForm() {
               }}
             />
             {statusMessage && (
-              <p className="text-sm text-slate-500">{statusMessage}</p>
+              <p className="text-sm text-muted-foreground">{statusMessage}</p>
             )}
             {uploading && (
-              <p className="text-sm text-slate-500">Uploading… this may take a moment.</p>
+              <p className="text-sm text-muted-foreground">Uploading… this may take a moment.</p>
             )}
             {screenshotId && (
               <p className="text-sm text-green-600">Screenshot uploaded successfully</p>
@@ -517,7 +517,7 @@ export function PurchaseCourseForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             {selectedProvider && (
-              <div className="rounded-lg border border-border bg-stone-50 p-4 text-sm text-slate-600">
+              <div className="rounded-lg border border-border bg-muted p-4 text-sm text-muted-foreground">
                 <p>
                   <strong>Provider:</strong> {selectedProvider.name}
                 </p>
@@ -526,7 +526,7 @@ export function PurchaseCourseForm() {
                 </p>
               </div>
             )}
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               Your payment will be reviewed by our admin team. You&apos;ll receive a
               notification once approved.
             </p>

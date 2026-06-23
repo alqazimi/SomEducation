@@ -62,7 +62,7 @@ function TeacherMessagesInbox() {
           <p>Loading...</p>
         ) : messages.length === 0 ? (
           <Card>
-            <CardContent className="py-12 text-center text-slate-500">
+            <CardContent className="py-12 text-center text-muted-foreground">
               {view === "sent" ? "No sent messages" : "No messages"}
             </CardContent>
           </Card>
@@ -79,7 +79,7 @@ function TeacherMessagesInbox() {
             >
               <CardHeader>
                 <CardTitle className="text-base">{msg.subject}</CardTitle>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                   {view === "sent" ? (
                     <>
                       To{" "}
@@ -131,7 +131,7 @@ export function MessagesInbox() {
       />
 
       {me === undefined ? (
-        <p className="mt-8 text-sm text-slate-500">Loading...</p>
+        <p className="mt-8 text-sm text-muted-foreground">Loading...</p>
       ) : isStudent ? (
         <div className="mt-8">
           <StudentSupportThread />

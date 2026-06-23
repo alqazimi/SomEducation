@@ -170,9 +170,9 @@ export function AccountSetupState({
       {syncError ? (
         <>
           <h1 className="text-xl font-semibold">Could not set up your account</h1>
-          <p className="max-w-md text-sm text-slate-500">{syncError}</p>
-          <div className="max-w-lg space-y-4 text-left text-xs text-slate-600">
-            <div className="rounded-lg border border-border bg-white p-4">
+          <p className="max-w-md text-sm text-muted-foreground">{syncError}</p>
+          <div className="max-w-lg space-y-4 text-left text-xs text-muted-foreground">
+            <div className="rounded-lg border border-border bg-card p-4">
               <p className="font-medium text-foreground">
                 1. Clerk Production → JWT Templates
               </p>
@@ -205,7 +205,7 @@ export function AccountSetupState({
               <p className="mt-2 text-amber-900">
                 In Convex dashboard for <strong>precious-duck-100</strong>, set:
               </p>
-              <pre className="mt-2 overflow-x-auto rounded bg-white p-2 font-mono text-[11px] text-stone-800">
+              <pre className="mt-2 overflow-x-auto rounded bg-card p-2 font-mono text-[11px] text-foreground">
                 CLERK_JWT_ISSUER_DOMAIN=https://clerk.someducation.com
               </pre>
               <p className="mt-2 text-amber-900">
@@ -217,7 +217,7 @@ export function AccountSetupState({
                 https://clerk.someducation.com --prod
               </p>
             </div>
-            <div className="rounded-lg border border-border bg-white p-4">
+            <div className="rounded-lg border border-border bg-card p-4">
               <p className="font-medium text-foreground">3. After fixing</p>
               <ol className="mt-2 list-decimal space-y-1 pl-4">
                 <li>Sign out completely</li>
@@ -231,8 +231,8 @@ export function AccountSetupState({
       ) : (
         <>
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" />
-          <p className="text-slate-500">Setting up your account...</p>
-          <p className="max-w-sm text-xs text-slate-400">
+          <p className="text-muted-foreground">Setting up your account...</p>
+          <p className="max-w-sm text-xs text-muted-foreground">
             Connecting Clerk to Convex and creating your profile.
           </p>
         </>
@@ -244,8 +244,8 @@ export function AccountSetupState({
 export function SuspendedAccountState() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-8 text-center">
-      <h1 className="text-xl font-semibold text-slate-900">Account suspended</h1>
-      <p className="max-w-md text-sm text-slate-600">
+      <h1 className="text-xl font-semibold text-foreground">Account suspended</h1>
+      <p className="max-w-md text-sm text-muted-foreground">
         Your account has been suspended and you cannot use the dashboard right now.
         If you believe this is a mistake, contact platform support.
       </p>

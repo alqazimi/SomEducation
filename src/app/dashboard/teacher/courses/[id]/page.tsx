@@ -109,8 +109,8 @@ export default function EditCoursePage() {
   if (!course) {
     return (
       <div className="mx-auto max-w-lg py-16 text-center">
-        <h1 className="text-xl font-semibold text-slate-900">Access Denied</h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <h1 className="text-xl font-semibold text-foreground">Access Denied</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           You can only manage courses that belong to you, or courses you have
           admin access to.
         </p>
@@ -127,7 +127,7 @@ export default function EditCoursePage() {
         <div className="min-w-0 flex-1">
           <Link
             href="/dashboard/teacher/courses"
-            className={`${type.muted} hover:text-stone-800`}
+            className={`${type.muted} hover:text-foreground`}
           >
             ← Back to courses
           </Link>
@@ -179,14 +179,14 @@ export default function EditCoursePage() {
 
         <TabsContent value="exams">
           <section>
-            <h2 className="text-lg font-semibold text-slate-900">Module exams</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2 className="text-lg font-semibold text-foreground">Module exams</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               Add practice quizzes and graded exams at the end of each module.
             </p>
             <div className="mt-6">
               {modules.length === 0 ? (
                 <Card>
-                  <CardContent className="py-10 text-center text-sm text-slate-500">
+                  <CardContent className="py-10 text-center text-sm text-muted-foreground">
                     Add at least one module in the Curriculum tab before creating
                     exams.
                   </CardContent>
@@ -230,15 +230,15 @@ export default function EditCoursePage() {
                     <Rocket className="h-6 w-6 text-brand-600" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h2 className="text-lg font-semibold text-slate-900">
+                    <h2 className="text-lg font-semibold text-foreground">
                       Ready to publish?
                     </h2>
-                    <p className="mt-2 text-sm text-slate-600">
+                    <p className="mt-2 text-sm text-muted-foreground">
                       Submit your course for admin review. Once approved, it will
                       appear in the public catalog for students to enroll.
                     </p>
 
-                    <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                    <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                       <li
                         className={cn(
                           "flex items-center gap-2",
@@ -247,7 +247,7 @@ export default function EditCoursePage() {
                       >
                         {hasModules ? "✓" : "○"} At least one module with lessons
                       </li>
-                      <li className="flex items-center gap-2 text-slate-600">
+                      <li className="flex items-center gap-2 text-muted-foreground">
                         ✓ Course title and description filled in
                       </li>
                     </ul>

@@ -96,7 +96,7 @@ function PaymentDetails({ payment }: { payment: PaymentRow }) {
           </p>
         )}
         {payment.adminNote && (
-          <p className="rounded-md bg-slate-50 px-3 py-2 text-slate-700">
+          <p className="rounded-md bg-muted px-3 py-2 text-foreground/90">
             <strong>Admin note:</strong> {payment.adminNote}
           </p>
         )}
@@ -205,8 +205,8 @@ export function AdminPayments() {
             className={cn(
               "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
               filter === item.id
-                ? "bg-slate-900 text-white"
-                : "bg-white text-slate-600 ring-1 ring-border hover:bg-slate-50"
+                ? "bg-brand-600 text-white"
+                : "bg-card text-muted-foreground ring-1 ring-border hover:bg-muted"
             )}
           >
             {item.label}
@@ -221,12 +221,12 @@ export function AdminPayments() {
             <Skeleton className="h-32 w-full" />
           </div>
         ) : isAdminListDenied(payments) ? (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Could not load payments. Check your admin access and Convex connection.
           </p>
         ) : isAdminListReady(payments) && payments.length === 0 ? (
           <Card>
-            <CardContent className="py-12 text-center text-slate-500">
+            <CardContent className="py-12 text-center text-muted-foreground">
               {emptyLabel}
             </CardContent>
           </Card>
@@ -244,7 +244,7 @@ export function AdminPayments() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <CardTitle>{courseTitle}</CardTitle>
-                      <p className="text-sm text-slate-500">
+                      <p className="text-sm text-muted-foreground">
                         {studentName} · {payment.student?.email}
                       </p>
                     </div>

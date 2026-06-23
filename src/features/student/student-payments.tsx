@@ -41,7 +41,7 @@ export function StudentPayments() {
           <p>Loading...</p>
         ) : payments.length === 0 ? (
           <Card>
-            <CardContent className="py-12 text-center text-slate-500">
+            <CardContent className="py-12 text-center text-muted-foreground">
               No payment requests yet.
             </CardContent>
           </Card>
@@ -53,7 +53,7 @@ export function StudentPayments() {
                   <CardTitle className="text-lg">
                     {payment.course?.title ?? "Course"}
                   </CardTitle>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-muted-foreground">
                     {formatDate(payment.createdAt)}
                   </p>
                 </div>
@@ -75,13 +75,13 @@ export function StudentPayments() {
                   )}
                 </div>
                 {payment.status === "pending" && (
-                  <p className="mt-3 text-sm text-slate-600">
+                  <p className="mt-3 text-sm text-muted-foreground">
                     Your payment is awaiting admin review. You will be notified
                     when it is approved.
                   </p>
                 )}
                 {payment.status === "suspended" && (
-                  <div className="mt-3 space-y-2 text-sm text-slate-600">
+                  <div className="mt-3 space-y-2 text-sm text-muted-foreground">
                     <p>
                       Your course access for this payment has been suspended. You
                       cannot submit a new purchase request for this course.

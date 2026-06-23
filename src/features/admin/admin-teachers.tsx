@@ -26,7 +26,7 @@ export function AdminTeachers() {
           <p>Loading...</p>
         ) : requests.length === 0 ? (
           <Card>
-            <CardContent className="py-12 text-center text-slate-500">
+            <CardContent className="py-12 text-center text-muted-foreground">
               No pending requests
             </CardContent>
           </Card>
@@ -37,12 +37,12 @@ export function AdminTeachers() {
                 <CardTitle>
                   {req.user?.firstName} {req.user?.lastName}
                 </CardTitle>
-                <p className="text-sm text-slate-500">{req.user?.email}</p>
+                <p className="text-sm text-muted-foreground">{req.user?.email}</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm">{req.reason}</p>
                 {req.experience && (
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-muted-foreground">
                     Experience: {req.experience}
                   </p>
                 )}

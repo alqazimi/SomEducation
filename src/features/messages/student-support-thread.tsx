@@ -75,13 +75,13 @@ function MessageBubble({
       className={`rounded-lg border p-4 ${
         fromSupport
           ? "border-brand-300 bg-brand-50"
-          : "border-slate-200 bg-slate-50"
+          : "border-border bg-muted"
       }`}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <p className="font-medium text-slate-900">{message.subject}</p>
-          <p className="text-xs text-slate-500">
+          <p className="font-medium text-foreground">{message.subject}</p>
+          <p className="text-xs text-muted-foreground">
             {isOwn ? "You" : senderName} · {formatDate(message.createdAt)}
             {fromSupport && !isOwn && " · Reply from support"}
             {message.editedAt && " · edited"}
@@ -103,11 +103,11 @@ function MessageBubble({
           </div>
         )}
       </div>
-      <p className="mt-3 text-sm whitespace-pre-wrap text-slate-700">
+      <p className="mt-3 text-sm whitespace-pre-wrap text-foreground/90">
         {message.body}
       </p>
       {message.isRead && (
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-muted-foreground">
           Read · auto-deletes 24 hours after read
         </p>
       )}
@@ -174,13 +174,13 @@ export function StudentSupportThread() {
   }
 
   if (data === undefined || me === undefined) {
-    return <p className="text-sm text-slate-500">Loading messages...</p>;
+    return <p className="text-sm text-muted-foreground">Loading messages...</p>;
   }
 
   if (data === null) {
     return (
       <Card>
-        <CardContent className="py-8 text-center text-sm text-slate-600">
+        <CardContent className="py-8 text-center text-sm text-muted-foreground">
           Messages are unavailable for suspended accounts. Contact us by email if
           you need help.
         </CardContent>
@@ -196,7 +196,7 @@ export function StudentSupportThread() {
             <CardTitle className="text-lg">Message support</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="mb-4 text-sm text-slate-600">
+            <p className="mb-4 text-sm text-muted-foreground">
               Send a message to our support team. All administrators can see your
               message and reply here.
             </p>

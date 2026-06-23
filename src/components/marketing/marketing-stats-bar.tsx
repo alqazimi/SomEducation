@@ -29,7 +29,7 @@ export function MarketingStatsBar({ className }: { className?: string }) {
           "-mt-4 sm:-mt-6 lg:-mt-8"
         )}
       >
-        <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-4 sm:gap-6">
+        <div className="mx-auto grid w-full max-w-[18.5rem] grid-cols-2 place-items-center gap-x-10 gap-y-6 min-[400px]:max-w-[20rem] sm:max-w-none sm:grid-cols-4 sm:place-items-stretch sm:gap-6">
           {MARKETING_STATS.map((stat) => {
             const Icon = ICONS[stat.icon];
             return (

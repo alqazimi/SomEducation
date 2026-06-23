@@ -186,6 +186,19 @@
   color: #ffffff;
 }
 
+/* Dashboard status / alert panels in night mode */
+[data-marketing-theme="night"] .dashboard-main .bg-red-50 {
+  background-color: rgb(127 29 29 / 0.2);
+}
+
+[data-marketing-theme="night"] .dashboard-main .bg-amber-50 {
+  background-color: rgb(120 53 15 / 0.2);
+}
+
+[data-marketing-theme="night"] .dashboard-main .bg-emerald-50 {
+  background-color: rgb(6 78 59 / 0.2);
+}
+
 /* Night mockup: white courses band (sheerxirfad-style) */
 [data-marketing-theme="night"] [data-surface="courses-light"] {
   --marketing-bg: #ffffff;

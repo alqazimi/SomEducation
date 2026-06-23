@@ -58,7 +58,7 @@ function DashboardRedirectSkeleton() {
     <div className="min-h-screen bg-muted p-8">
       <Skeleton className="h-8 w-48" />
       <Skeleton className="mt-4 h-64 w-full" />
-      <p className="mt-4 text-sm text-slate-500">Preparing your dashboard...</p>
+      <p className="mt-4 text-sm text-muted-foreground">Preparing your dashboard...</p>
     </div>
   );
 }

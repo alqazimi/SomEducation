@@ -82,7 +82,7 @@ export function TeacherDashboard() {
         ) : courses.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center py-16 text-center">
-              <BookOpen className="h-10 w-10 text-slate-300" />
+              <BookOpen className="h-10 w-10 text-muted-foreground" />
               <p className={`mt-4 ${type.cardTitle}`}>No courses yet</p>
               <p className={`mt-1 ${type.muted}`}>
                 Create your first course to start building your curriculum.

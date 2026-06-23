@@ -320,8 +320,8 @@ export function PaymentFixForm({
                     className={cn(
                       "flex items-center gap-2 rounded-lg border px-3 py-3 text-left text-sm transition-colors",
                       active
-                        ? "border-brand-600 bg-white shadow-sm"
-                        : "border-amber-200 bg-white/60 hover:bg-white"
+                        ? "border-brand-600 bg-card shadow-sm"
+                        : "border-amber-200 bg-card/60 hover:bg-card"
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
@@ -358,8 +358,8 @@ export function PaymentFixForm({
                         className={cn(
                           "rounded-lg border px-3 py-3 text-left text-sm font-medium transition-colors",
                           active
-                            ? "border-brand-600 bg-white text-brand-800 shadow-sm"
-                            : "border-amber-200 bg-white/60 text-stone-700 hover:bg-white"
+                            ? "border-brand-600 bg-card text-brand-800 shadow-sm"
+                            : "border-amber-200 bg-card/60 text-foreground/90 hover:bg-card"
                         )}
                       >
                         {provider.name}
@@ -372,7 +372,7 @@ export function PaymentFixForm({
           )}
 
           {selectedProvider && (
-            <div className="rounded-lg border border-amber-300 bg-white p-3 text-sm">
+            <div className="rounded-lg border border-amber-300 bg-card p-3 text-sm">
               <p className="font-medium">
                 Send payment to {selectedProvider.name}
               </p>
@@ -380,7 +380,7 @@ export function PaymentFixForm({
                 {selectedProvider.accountNumber}
               </p>
               {selectedProvider.instructions && (
-                <p className="mt-2 text-slate-600">
+                <p className="mt-2 text-muted-foreground">
                   {selectedProvider.instructions}
                 </p>
               )}
@@ -404,7 +404,7 @@ export function PaymentFixForm({
           className="mt-4 space-y-4"
         >
           {selectedProvider && (
-            <div className="rounded-lg border border-amber-300 bg-white p-3 text-sm">
+            <div className="rounded-lg border border-amber-300 bg-card p-3 text-sm">
               <p className="font-medium">Paying via {selectedProvider.name}</p>
               <p className="mt-1 font-mono">{selectedProvider.accountNumber}</p>
               <Button
@@ -422,7 +422,7 @@ export function PaymentFixForm({
             <Label htmlFor={`ref-${payment._id}`}>Transaction reference</Label>
             <Input
               id={`ref-${payment._id}`}
-              className="mt-1 bg-white"
+              className="mt-1 bg-card"
               {...form.register("transactionReference")}
             />
             {form.formState.errors.transactionReference && (
@@ -436,7 +436,7 @@ export function PaymentFixForm({
             <Label htmlFor={`notes-${payment._id}`}>Notes (optional)</Label>
             <Textarea
               id={`notes-${payment._id}`}
-              className="mt-1 bg-white"
+              className="mt-1 bg-card"
               rows={2}
               {...form.register("notes")}
             />
@@ -451,7 +451,7 @@ export function PaymentFixForm({
               id={`screenshot-${payment._id}`}
               type="file"
               accept={PAYMENT_PROOF_ACCEPT}
-              className="mt-1 bg-white"
+              className="mt-1 bg-card"
               disabled={uploading || submitting || !canUpload}
               onChange={(event) => {
                 const file = event.target.files?.[0];

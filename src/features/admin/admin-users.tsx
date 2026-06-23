@@ -146,7 +146,7 @@ export function AdminUsers() {
     const canManage = user.canManage ?? false;
 
     if (!canManage || isSelf) {
-      return <span className="text-xs text-slate-400">Protected</span>;
+      return <span className="text-xs text-muted-foreground">Protected</span>;
     }
 
     return (
@@ -189,7 +189,7 @@ export function AdminUsers() {
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <div className="relative min-w-[220px] flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search by name or email..."
             value={search}
@@ -227,7 +227,7 @@ export function AdminUsers() {
         </Select>
       </div>
 
-      <div className="mt-6 hidden overflow-hidden rounded-xl border border-border bg-white md:block">
+      <div className="mt-6 hidden overflow-hidden rounded-xl border border-border bg-card md:block">
         <table className="w-full text-sm">
           <thead className="border-b bg-muted/50">
             <tr>
@@ -241,13 +241,13 @@ export function AdminUsers() {
           <tbody>
             {users === undefined ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
                   Loading users...
                 </td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
                   No users found
                 </td>
               </tr>
@@ -262,7 +262,7 @@ export function AdminUsers() {
                             ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
                             : "Unnamed user"}
                         </div>
-                        <div className="text-slate-500">{user.email}</div>
+                        <div className="text-muted-foreground">{user.email}</div>
                       </div>
                       {me?._id === user._id && (
                         <Badge variant="outline" className="shrink-0">
@@ -271,7 +271,7 @@ export function AdminUsers() {
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-slate-500">
+                  <td className="px-4 py-3 text-muted-foreground">
                     {formatDate(user.createdAt)}
                   </td>
                   <td className="px-4 py-3">{renderRoleControl(user)}</td>
@@ -295,9 +295,9 @@ export function AdminUsers() {
 
       <div className="mt-6 space-y-4 md:hidden">
         {users === undefined ? (
-          <p className="text-center text-sm text-slate-500">Loading users...</p>
+          <p className="text-center text-sm text-muted-foreground">Loading users...</p>
         ) : users.length === 0 ? (
-          <p className="text-center text-sm text-slate-500">No users found</p>
+          <p className="text-center text-sm text-muted-foreground">No users found</p>
         ) : (
           users.map((user) => (
           <Card key={user._id}>
@@ -311,7 +311,7 @@ export function AdminUsers() {
                   </h3>
                   {me?._id === user._id && <Badge variant="outline">You</Badge>}
                 </div>
-                <p className="text-sm text-slate-500">{user.email}</p>
+                <p className="text-sm text-muted-foreground">{user.email}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {renderRoleControl(user)}

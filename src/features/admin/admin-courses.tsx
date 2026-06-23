@@ -113,8 +113,8 @@ export function AdminCourses() {
             className={cn(
               "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
               filter === item.id
-                ? "bg-slate-900 text-white"
-                : "bg-white text-slate-600 ring-1 ring-border hover:bg-slate-50"
+                ? "bg-brand-600 text-white"
+                : "bg-card text-muted-foreground ring-1 ring-border hover:bg-muted"
             )}
           >
             {item.label}
@@ -124,13 +124,13 @@ export function AdminCourses() {
 
       <div className="mt-8 space-y-4">
         {courses === undefined ? (
-          <p className="text-sm text-slate-500">Loading courses...</p>
+          <p className="text-sm text-muted-foreground">Loading courses...</p>
         ) : courses.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center py-16 text-center">
-              <BookOpen className="h-10 w-10 text-slate-300" />
-              <p className="mt-4 font-medium text-slate-700">No courses found</p>
-              <p className="mt-1 max-w-md text-sm text-slate-500">
+              <BookOpen className="h-10 w-10 text-muted-foreground" />
+              <p className="mt-4 font-medium text-foreground/90">No courses found</p>
+              <p className="mt-1 max-w-md text-sm text-muted-foreground">
                 Courses appear here after a teacher creates them.
               </p>
             </CardContent>
@@ -148,7 +148,7 @@ export function AdminCourses() {
               <Card key={course._id} className="overflow-hidden">
                 <CardContent className="p-0">
                   <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-start">
-                    <div className="h-24 w-full shrink-0 overflow-hidden rounded-lg bg-slate-100 sm:h-20 sm:w-32">
+                    <div className="h-24 w-full shrink-0 overflow-hidden rounded-lg bg-muted sm:h-20 sm:w-32">
                       {course.thumbnailUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -157,7 +157,7 @@ export function AdminCourses() {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center text-slate-400">
+                        <div className="flex h-full items-center justify-center text-muted-foreground">
                           <BookOpen className="h-6 w-6" />
                         </div>
                       )}
@@ -166,19 +166,19 @@ export function AdminCourses() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <h3 className="text-lg font-semibold text-slate-900">
+                          <h3 className="text-lg font-semibold text-foreground">
                             {course.title}
                           </h3>
-                          <p className="mt-1 text-sm text-slate-500">
+                          <p className="mt-1 text-sm text-muted-foreground">
                             {course.category ? `${course.category.name} · ` : ""}
                             {formatPrice(course.price, course.currency)}
                           </p>
-                          <div className="mt-2 flex flex-wrap gap-3 text-sm text-slate-600">
+                          <div className="mt-2 flex flex-wrap gap-3 text-sm text-muted-foreground">
                             <span className="inline-flex items-center gap-1.5">
-                              <GraduationCap className="h-4 w-4 text-slate-400" />
+                              <GraduationCap className="h-4 w-4 text-muted-foreground" />
                               <span>
                                 Instructor:{" "}
-                                <span className="font-medium text-slate-800">
+                                <span className="font-medium text-foreground">
                                   {course.teacher
                                     ? `${course.teacher.firstName ?? ""} ${course.teacher.lastName ?? ""}`.trim() ||
                                       course.teacher.email
@@ -187,7 +187,7 @@ export function AdminCourses() {
                               </span>
                             </span>
                             <span className="inline-flex items-center gap-1.5">
-                              <Users className="h-4 w-4 text-slate-400" />
+                              <Users className="h-4 w-4 text-muted-foreground" />
                               <span>{formatEnrollmentCount(course.enrollmentCount)}</span>
                             </span>
                           </div>
@@ -198,11 +198,11 @@ export function AdminCourses() {
                         </Badge>
                       </div>
 
-                      <p className="mt-3 line-clamp-2 text-sm text-slate-600">
+                      <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
                         {course.description}
                       </p>
 
-                      <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-500">
+                      <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
                         <span>{formatPrice(course.price, course.currency)}</span>
                         <span>{course.moduleCount} modules</span>
                         <span>{course.lessonCount} lessons</span>

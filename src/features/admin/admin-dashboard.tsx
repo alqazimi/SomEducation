@@ -104,7 +104,7 @@ export function AdminDashboard() {
           <CardHeader className="flex flex-row items-center justify-between gap-4">
             <CardTitle>Setup Checklist</CardTitle>
             {!setupLoading && setup && (
-              <span className="text-sm text-slate-500">
+              <span className="text-sm text-muted-foreground">
                 {completedCount}/{setupSteps.length} complete
               </span>
             )}
@@ -118,7 +118,7 @@ export function AdminDashboard() {
               </div>
             ) : (
               <>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-muted-foreground">
                   Complete these steps to launch your learning platform.
                 </p>
                 <ul className="space-y-3">
@@ -127,9 +127,9 @@ export function AdminDashboard() {
                       {step.done ? (
                         <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
                       ) : (
-                        <Circle className="h-5 w-5 shrink-0 text-slate-400" />
+                        <Circle className="h-5 w-5 shrink-0 text-muted-foreground" />
                       )}
-                      <span className={step.done ? "text-slate-500 line-through" : ""}>
+                      <span className={step.done ? "text-muted-foreground line-through" : ""}>
                         {step.label}
                       </span>
                       {!step.done && step.action && (
@@ -150,7 +150,7 @@ export function AdminDashboard() {
                   ))}
                 </ul>
                 <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-muted-foreground">
                     Use a real payment number (not the placeholder) and save
                     instructions in Admin → Settings.
                   </p>
