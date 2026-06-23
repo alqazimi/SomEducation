@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CourseProgressBar } from "@/components/ui/course-progress-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConvexQueryGate } from "@/components/convex/convex-query-gate";
+import { LearnLightSurface } from "@/components/learn/learn-light-surface";
 import { PageEyebrow, PageLead, PageTitle } from "@/components/ui/typography";
 import { type } from "@/lib/typography";
 
@@ -28,7 +29,8 @@ export default function LearnPage() {
     return (
       <>
         <Header />
-        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <LearnLightSurface className="min-h-screen">
+          <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <ConvexQueryGate
             isLoading
             errorTitle="Could not load course"
@@ -42,6 +44,7 @@ export default function LearnPage() {
             <></>
           </ConvexQueryGate>
         </main>
+        </LearnLightSurface>
       </>
     );
   }
@@ -89,13 +92,14 @@ export default function LearnPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-muted">
-        <div className="border-b border-border bg-white">
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-            <Link
-              href="/dashboard/student"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-500 transition-colors hover:text-stone-900"
-            >
+      <LearnLightSurface className="min-h-screen">
+        <main>
+          <div className="border-b border-border bg-card">
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+              <Link
+                href="/dashboard/student"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
               <ChevronLeft className="h-4 w-4" />
               Back to my courses
             </Link>
@@ -137,11 +141,13 @@ export default function LearnPage() {
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="grid gap-8 lg:grid-cols-3">
             <div className="space-y-4 lg:col-span-2">
-              <h2 className="text-lg font-semibold">Course content</h2>
+              <h2 className="text-lg font-semibold text-foreground">
+                Course content
+              </h2>
               {course.modules.map((mod, index) => (
-                <Card key={mod._id} className="overflow-hidden shadow-sm">
-                  <CardHeader className="border-b border-border bg-slate-50/80 py-4">
-                    <CardTitle className="text-base">
+                <Card key={mod._id} className="overflow-hidden border-border bg-card shadow-sm">
+                  <CardHeader className="border-b border-border bg-muted/60 py-4">
+                    <CardTitle className="text-base text-foreground">
                       Module {index + 1}: {mod.title}
                     </CardTitle>
                   </CardHeader>
@@ -151,31 +157,31 @@ export default function LearnPage() {
                         <li key={lesson._id}>
                           <Link
                             href={`/learn/${params.slug}/lessons/${lesson._id}`}
-                            className="flex items-center gap-4 px-4 py-4 text-sm transition-colors hover:bg-slate-50 sm:px-5"
+                            className="flex items-center gap-3 px-4 py-4 text-sm transition-colors hover:bg-muted sm:gap-4 sm:px-5"
                           >
                             <PlayCircle className="h-4 w-4 shrink-0 text-brand-600" />
                             <span className="min-w-0 flex-1">
-                              <span className="block font-medium text-slate-800">
+                              <span className="block font-medium text-foreground">
                                 {lessonIndex + 1}. {lesson.title}
                               </span>
                               {lesson.durationMinutes && (
-                                <span className="mt-0.5 block text-xs text-slate-400">
+                                <span className="mt-0.5 block text-xs text-muted-foreground">
                                   {lesson.durationMinutes} min
                                 </span>
                               )}
                             </span>
-                            <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+                            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                           </Link>
                         </li>
                       ))}
                     </ul>
                     {(mod.exams ?? []).length > 0 && (
-                      <ul className="divide-y divide-border border-t border-border bg-slate-50/50">
+                      <ul className="divide-y divide-border border-t border-border bg-muted/30">
                         {mod.exams.map((exam) => (
                           <li key={exam._id}>
                             <Link
                               href={`/learn/${params.slug}/exams/${exam._id}`}
-                              className="flex items-center gap-4 px-4 py-4 text-sm transition-colors hover:bg-slate-50 sm:px-5"
+                              className="flex items-center gap-3 px-4 py-4 text-sm transition-colors hover:bg-muted sm:gap-4 sm:px-5"
                             >
                               <ClipboardCheck
                                 className={`h-4 w-4 shrink-0 ${
@@ -185,10 +191,10 @@ export default function LearnPage() {
                                 }`}
                               />
                               <span className="min-w-0 flex-1">
-                                <span className="block font-medium text-slate-800">
+                                <span className="block font-medium text-foreground">
                                   Exam: {exam.title}
                                 </span>
-                                <span className="mt-0.5 block text-xs text-slate-400">
+                                <span className="mt-0.5 block text-xs text-muted-foreground">
                                   {exam.questionCount} questions · Pass{" "}
                                   {exam.passingScore}%
                                   {exam.bestScore != null
@@ -196,7 +202,7 @@ export default function LearnPage() {
                                     : ""}
                                 </span>
                               </span>
-                              <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+                              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                             </Link>
                           </li>
                         ))}
@@ -209,7 +215,7 @@ export default function LearnPage() {
 
             <aside className="space-y-4">
               {course.thumbnailUrl && (
-                <Card className="overflow-hidden shadow-sm">
+                <Card className="overflow-hidden border-border bg-card shadow-sm">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={course.thumbnailUrl}
@@ -218,9 +224,11 @@ export default function LearnPage() {
                   />
                 </Card>
               )}
-              <Card className="shadow-sm">
+              <Card className="border-border bg-card shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-base">Your progress</CardTitle>
+                  <CardTitle className="text-base text-foreground">
+                    Your progress
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <CourseProgressBar
@@ -243,7 +251,8 @@ export default function LearnPage() {
             </aside>
           </div>
         </div>
-      </main>
+        </main>
+      </LearnLightSurface>
       <Footer />
     </>
   );

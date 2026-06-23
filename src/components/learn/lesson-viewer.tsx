@@ -17,6 +17,7 @@ import { Id } from "convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CourseProgressBar } from "@/components/ui/course-progress-bar";
+import { LearnLightSurface } from "@/components/learn/learn-light-surface";
 import { cn } from "@/lib/utils";
 import { type } from "@/lib/typography";
 
@@ -96,7 +97,7 @@ function SyllabusPanel({
     <div className={cn("flex flex-col", className)}>
       <div className="border-b border-border px-4 py-4">
         <h2 className="text-sm font-semibold text-foreground">Course content</h2>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           {modules.length} modules ·{" "}
           {modules.reduce((n, m) => n + m.lessons.length, 0)} lessons
           {modules.some((m) => (m.exams?.length ?? 0) > 0)
@@ -111,11 +112,11 @@ function SyllabusPanel({
             return (
               <div
                 key={mod._id}
-                className="overflow-hidden rounded-lg border border-border bg-white"
+                className="overflow-hidden rounded-lg border border-border bg-card"
               >
                 <button
                   type="button"
-                  className="flex w-full items-center justify-between gap-2 px-3 py-3 text-left text-sm font-medium text-slate-800 hover:bg-slate-50"
+                  className="flex w-full items-center justify-between gap-2 px-3 py-3 text-left text-sm font-medium text-foreground hover:bg-muted"
                   onClick={() =>
                     setExpanded((prev) => ({ ...prev, [mod._id]: !isOpen }))
                   }
@@ -125,7 +126,7 @@ function SyllabusPanel({
                   </span>
                   <ChevronDown
                     className={cn(
-                      "h-4 w-4 shrink-0 text-slate-400 transition-transform",
+                      "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
                       isOpen && "rotate-180"
                     )}
                   />
@@ -144,7 +145,7 @@ function SyllabusPanel({
                               "flex items-start gap-3 px-3 py-2.5 text-sm transition-colors",
                               active
                                 ? "bg-brand-50 text-brand-700"
-                                : "text-slate-600 hover:bg-slate-50"
+                                : "text-muted-foreground hover:bg-muted"
                             )}
                           >
                             {done ? (
@@ -153,7 +154,7 @@ function SyllabusPanel({
                               <PlayCircle
                                 className={cn(
                                   "mt-0.5 h-4 w-4 shrink-0",
-                                  active ? "text-brand-600" : "text-slate-400"
+                                  active ? "text-brand-600" : "text-muted-foreground"
                                 )}
                               />
                             )}
@@ -162,7 +163,7 @@ function SyllabusPanel({
                                 {lessonIndex + 1}. {lesson.title}
                               </span>
                               {lesson.durationMinutes && (
-                                <span className="mt-0.5 block text-xs text-slate-400">
+                                <span className="mt-0.5 block text-xs text-muted-foreground">
                                   {lesson.durationMinutes} min
                                 </span>
                               )}
@@ -179,7 +180,7 @@ function SyllabusPanel({
                           <Link
                             href={`/learn/${slug}/exams/${exam._id}`}
                             onClick={onLessonClick}
-                            className="flex items-start gap-3 border-t border-border px-3 py-2.5 text-sm text-slate-600 transition-colors hover:bg-slate-50"
+                            className="flex items-start gap-3 border-t border-border px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted"
                           >
                             {passed ? (
                               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
@@ -191,7 +192,7 @@ function SyllabusPanel({
                                 Exam {examIndex + 1}: {exam.title}
                               </span>
                               {exam.bestScore != null && (
-                                <span className="mt-0.5 block text-xs text-slate-400">
+                                <span className="mt-0.5 block text-xs text-muted-foreground">
                                   Best score: {exam.bestScore}%
                                 </span>
                               )}
@@ -256,20 +257,20 @@ export function LessonViewerShell({
   const passedExamSet = new Set(passedExamIds);
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <LearnLightSurface className="min-h-screen">
       {/* Coursera-style learning bar */}
-      <div className="sticky top-16 z-40 border-b border-border bg-white shadow-sm">
+      <div className="sticky top-16 z-40 border-b border-border bg-card shadow-sm">
         <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link
             href={`/learn/${slug}`}
-            className="inline-flex min-w-0 items-center gap-1.5 text-sm font-medium text-slate-600 transition-colors hover:text-brand-700"
+            className="inline-flex min-w-0 items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-brand-700"
           >
             <ChevronLeft className="h-4 w-4 shrink-0" />
             <span className="hidden truncate sm:inline">Back to course home</span>
             <span className="truncate sm:hidden">Back</span>
           </Link>
 
-          <p className="hidden min-w-0 flex-1 truncate px-4 text-center text-sm font-medium text-slate-800 md:block">
+          <p className="hidden min-w-0 flex-1 truncate px-4 text-center text-sm font-medium text-foreground md:block">
             {courseTitle}
           </p>
 
@@ -292,7 +293,7 @@ export function LessonViewerShell({
         <div className="min-w-0 flex-1">
           <div className="bg-black">{children}</div>
 
-          <div className="space-y-6 bg-white px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          <div className="space-y-6 bg-card px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
             <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
                 {nav.moduleTitle && (
@@ -360,7 +361,7 @@ export function LessonViewerShell({
         </div>
 
         {/* Desktop syllabus */}
-        <aside className="hidden w-[360px] shrink-0 border-l border-border bg-white lg:flex lg:flex-col lg:sticky lg:top-[7.25rem] lg:h-[calc(100vh-7.25rem)]">
+        <aside className="hidden w-[min(100%,360px)] shrink-0 border-l border-border bg-card lg:flex lg:flex-col lg:sticky lg:top-[7.25rem] lg:h-[calc(100vh-7.25rem)]">
           <div className="border-b border-border px-4 py-3">
             <CourseProgressBar
               percent={progressPercent}
@@ -380,19 +381,19 @@ export function LessonViewerShell({
 
       {/* Mobile syllabus drawer */}
       {mobileSyllabusOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-[60] lg:hidden">
           <button
             type="button"
             className="absolute inset-0 bg-black/50"
             aria-label="Close course content"
             onClick={() => setMobileSyllabusOpen(false)}
           />
-          <div className="absolute bottom-0 left-0 right-0 flex max-h-[85vh] flex-col rounded-t-2xl bg-white shadow-2xl">
+          <div className="absolute bottom-0 left-0 right-0 flex max-h-[85vh] flex-col rounded-t-2xl bg-card shadow-2xl">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
-              <h2 className="font-semibold">Course content</h2>
+              <h2 className="font-semibold text-foreground">Course content</h2>
               <button
                 type="button"
-                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+                className="rounded-lg p-2 text-muted-foreground hover:bg-muted"
                 onClick={() => setMobileSyllabusOpen(false)}
               >
                 <X className="h-5 w-5" />
@@ -410,21 +411,21 @@ export function LessonViewerShell({
           </div>
         </div>
       )}
-    </div>
+    </LearnLightSurface>
   );
 }
 
 export function LessonNotes({ content }: { content: string }) {
   return (
-    <Card className="border-border shadow-sm">
+    <Card className="border-border bg-card shadow-sm">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2 text-base text-foreground">
           <FileText className="h-4 w-4 text-brand-600" />
           Lesson notes
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+        <div className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
           {content}
         </div>
       </CardContent>
@@ -434,11 +435,11 @@ export function LessonNotes({ content }: { content: string }) {
 
 export function LessonDownload({ href }: { href: string }) {
   return (
-    <Card className="border-border shadow-sm">
+    <Card className="border-border bg-card shadow-sm">
       <CardContent className="flex items-center justify-between gap-4 py-4">
         <div>
-          <p className="font-medium text-slate-800">Lesson resources</p>
-          <p className="text-sm text-slate-500">Download attached file</p>
+          <p className="font-medium text-foreground">Lesson resources</p>
+          <p className="text-sm text-muted-foreground">Download attached file</p>
         </div>
         <Button asChild variant="outline" size="sm">
           <a href={href} target="_blank" rel="noopener noreferrer">

@@ -11,6 +11,7 @@ import {
   LessonNotes,
   LessonViewerShell,
 } from "@/components/learn/lesson-viewer";
+import { LearnLightSurface } from "@/components/learn/learn-light-surface";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -67,16 +68,18 @@ export default function LessonPage() {
     return (
       <>
         <Header />
-        <main className="min-h-screen bg-slate-100">
-          <div className="border-b border-border bg-white px-4 py-3">
-            <Skeleton className="h-5 w-40" />
-          </div>
-          <Skeleton className="aspect-video w-full" />
-          <div className="mx-auto max-w-3xl space-y-4 px-4 py-8">
-            <Skeleton className="h-8 w-2/3" />
-            <Skeleton className="h-32 w-full rounded-xl" />
-          </div>
-        </main>
+        <LearnLightSurface className="min-h-screen">
+          <main>
+            <div className="border-b border-border bg-card px-4 py-3">
+              <Skeleton className="h-5 w-40" />
+            </div>
+            <Skeleton className="aspect-video w-full" />
+            <div className="mx-auto max-w-3xl space-y-4 px-4 py-8">
+              <Skeleton className="h-8 w-2/3" />
+              <Skeleton className="h-32 w-full rounded-xl" />
+            </div>
+          </main>
+        </LearnLightSurface>
       </>
     );
   }
@@ -85,8 +88,9 @@ export default function LessonPage() {
     return (
       <>
         <Header />
-        <main className="flex min-h-[60vh] items-center justify-center px-4">
-          <Card className="w-full max-w-md text-center shadow-sm">
+        <LearnLightSurface className="min-h-screen">
+          <main className="flex min-h-[60vh] items-center justify-center px-4">
+            <Card className="w-full max-w-md border-border bg-card text-center shadow-sm">
             <CardContent className="py-12">
               <PageTitle>Lesson not found</PageTitle>
               <Link href={`/learn/${params.slug}`} className="mt-6 inline-block">
@@ -98,6 +102,7 @@ export default function LessonPage() {
             </CardContent>
           </Card>
         </main>
+        </LearnLightSurface>
       </>
     );
   }
@@ -106,11 +111,12 @@ export default function LessonPage() {
     return (
       <>
         <Header />
-        <main className="flex min-h-[60vh] items-center justify-center px-4">
-          <Card className="w-full max-w-md text-center shadow-sm">
-            <CardContent className="py-12">
-              <h1 className="text-xl font-medium text-stone-900">{lesson.title}</h1>
-              <p className="mt-2 text-slate-500">
+        <LearnLightSurface className="min-h-screen">
+          <main className="flex min-h-[60vh] items-center justify-center px-4">
+            <Card className="w-full max-w-md border-border bg-card text-center shadow-sm">
+              <CardContent className="py-12">
+                <h1 className="text-xl font-medium text-foreground">{lesson.title}</h1>
+                <p className="mt-2 text-muted-foreground">
                 Purchase this course to watch this lesson.
               </p>
               <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
@@ -127,6 +133,7 @@ export default function LessonPage() {
             </CardContent>
           </Card>
         </main>
+        </LearnLightSurface>
       </>
     );
   }

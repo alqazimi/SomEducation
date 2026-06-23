@@ -293,3 +293,27 @@
 .marketing-form-surface h4 {
   color: #0f172a;
 }
+
+/* Learning player — always light, readable (Continue Learning, modules, lessons) */
+[data-surface="learn-light"] {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+[data-surface="learn-light"] h1,
+[data-surface="learn-light"] h2,
+[data-surface="learn-light"] h3,
+[data-surface="learn-light"] h4 {
+  color: #0f172a;
+}
+
+[data-surface="learn-light"] .text-muted-foreground {
+  color: #64748b;
+}
