@@ -439,6 +439,21 @@ export const getBySlug = query({
     const isInstructor = isCourseInstructor(user, course);
     const canLearn = canLearnCourse(user, course, isEnrolled);
 
+    const lessonCount = modulesWithLessons.reduce(
+      (acc, mod) => acc + mod.lessons.length,
+      0
+    );
+    const totalDurationMinutes = modulesWithLessons.reduce(
+      (acc, mod) =>
+        acc +
+        mod.lessons.reduce(
+          (sum, lesson) => sum + (lesson.durationMinutes ?? 0),
+          0
+        ),
+      0
+    );
+    const enrollmentCount = await getActiveEnrollmentCount(ctx, course._id);
+
     return {
       ...course,
       teacher,
@@ -449,6 +464,9 @@ export const getBySlug = query({
       activePayment,
       isCourseInstructor: isInstructor,
       canLearn,
+      enrollmentCount,
+      lessonCount,
+      totalDurationMinutes,
     };
   },
 });
