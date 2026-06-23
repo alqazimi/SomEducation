@@ -30,7 +30,7 @@ export function MarketingCourseCard({
   durationHours,
   lessonCount,
   enrollmentCount,
-  bestseller = true,
+  bestseller = false,
   className,
 }: MarketingCourseCardProps) {
   const studentsLabel =
@@ -43,7 +43,7 @@ export function MarketingCourseCard({
   return (
     <article
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-white/10 bg-marketing-card transition-all hover:border-brand-500/40 hover:shadow-lg hover:shadow-brand-600/15",
+        "group relative overflow-hidden rounded-2xl border border-marketing-border bg-marketing-card transition-all hover:border-brand-500/40 hover:shadow-lg hover:shadow-brand-600/10",
         className
       )}
     >
@@ -74,25 +74,25 @@ export function MarketingCourseCard({
               </Badge>
             )}
             {bestseller && (
-              <Badge className="rounded-md border-0 bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-300">
+              <Badge className="rounded-md border-0 bg-brand-600 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
                 Bestseller
               </Badge>
             )}
           </div>
 
           <Link href={href}>
-            <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-white transition-colors group-hover:text-brand-300">
+            <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-marketing-fg transition-colors group-hover:text-brand-300">
               {title}
             </h3>
           </Link>
 
           {description && (
-            <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-slate-400">
+            <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-marketing-muted">
               {description}
             </p>
           )}
 
-          <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-slate-400">
+          <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-marketing-muted">
             {durationHours !== undefined && (
               <span className="inline-flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5 text-brand-400" />

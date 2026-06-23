@@ -1,11 +1,12 @@
 /** Hardcoded marketing copy — not loaded from Convex. */
 export const MARKETING_HERO = {
-  rating: "4.8",
-  studentsLabel: "500+ active students",
-  eyebrow: "Transform Your Future",
-  headline: "Learn a skill or teach!",
+  rating: "4.8/5",
+  studentsLabel: "from 500+ students",
+  eyebrow: "Online Learning",
+  headlineBefore: "Learn skills. Build your ",
+  headlineHighlight: "future.",
   subheadline:
-    "Make learning more effective with practical courses, expert instructors, and flexible study at your own pace.",
+    "Expert-led courses you can study at your own pace — practical skills, clear paths, and support when you need it.",
 } as const;
 
 export const MARKETING_HERO_DAY = {
@@ -17,6 +18,8 @@ export const MARKETING_HERO_DAY = {
   subheadline:
     "Expert-led courses you can study at your own pace — practical skills, clear paths, and support when you need it.",
 } as const;
+
+export const MARKETING_HERO_IMAGE = "/images/hero-laptop.png";
 
 export const MARKETING_STATS = [
   { icon: "users" as const, value: "500+", label: "Happy Students" },

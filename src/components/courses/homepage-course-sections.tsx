@@ -8,6 +8,7 @@ import {
   ConvexSectionErrorBoundary,
 } from "@/components/convex/convex-query-gate";
 import { HomepageCourseCard } from "@/components/courses/homepage-course-card";
+import { MarketingCourseCard } from "@/components/courses/marketing-course-card";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isConvexConfigured } from "@/lib/convex-url";
@@ -17,6 +18,7 @@ type HomepageCourse = {
   _id: string;
   slug: string;
   title: string;
+  description?: string;
   thumbnailUrl?: string | null;
   enrollmentCount: number;
   durationHours: number;
@@ -58,7 +60,17 @@ const SECTIONS = [
   },
 ];
 
-function CourseGridSkeleton() {
+function CourseGridSkeleton({ night }: { night?: boolean }) {
+  if (night) {
+    return (
+      <div className="flex flex-col gap-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-[200px] rounded-2xl bg-white/5" />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
       {Array.from({ length: 4 }).map((_, i) => (
@@ -69,12 +81,14 @@ function CourseGridSkeleton() {
 }
 
 function HomepageCourseSection({
+  sectionKey,
   eyebrow,
   title,
   description,
   href,
   courses,
 }: {
+  sectionKey: (typeof SECTIONS)[number]["key"];
   eyebrow: string;
   title: string;
   description: string;
@@ -90,11 +104,14 @@ function HomepageCourseSection({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
-            {isDay && (
-              <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-600">
-                {eyebrow}
-              </p>
-            )}
+            <p
+              className={cn(
+                "mb-1 text-[11px] font-semibold uppercase tracking-[0.14em]",
+                isNight ? "text-brand-400" : "text-brand-600"
+              )}
+            >
+              {eyebrow}
+            </p>
             <h2 className="text-lg font-semibold tracking-tight text-marketing-fg sm:text-xl">
               {title}
             </h2>
@@ -109,34 +126,54 @@ function HomepageCourseSection({
                 : "text-brand-600 hover:text-brand-500"
             )}
           >
-            {isDay ? "View all courses" : "See all"}
+            {isDay ? "View all courses" : "View all courses"}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {courses.map((course) => (
-            <HomepageCourseCard
-              key={course._id}
-              href={`/courses/${course.slug}`}
-              title={course.title}
-              thumbnailUrl={course.thumbnailUrl}
-              enrollmentCount={course.enrollmentCount}
-              durationHours={course.durationHours}
-              lessonCount={course.lessonCount}
-              price={course.price}
-              currency={course.currency}
-              compareAtPrice={course.compareAtPrice}
-              difficulty={course.difficulty}
-            />
-          ))}
-        </div>
+        {isNight ? (
+          <div className="flex flex-col gap-4">
+            {courses.map((course) => (
+              <MarketingCourseCard
+                key={course._id}
+                href={`/courses/${course.slug}`}
+                title={course.title}
+                description={course.description}
+                thumbnailUrl={course.thumbnailUrl}
+                enrollmentCount={course.enrollmentCount}
+                durationHours={course.durationHours}
+                lessonCount={course.lessonCount}
+                difficulty={course.difficulty}
+                bestseller={sectionKey === "popular"}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {courses.map((course) => (
+              <HomepageCourseCard
+                key={course._id}
+                href={`/courses/${course.slug}`}
+                title={course.title}
+                thumbnailUrl={course.thumbnailUrl}
+                enrollmentCount={course.enrollmentCount}
+                durationHours={course.durationHours}
+                lessonCount={course.lessonCount}
+                price={course.price}
+                currency={course.currency}
+                compareAtPrice={course.compareAtPrice}
+                difficulty={course.difficulty}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
 }
 
 function HomepageCourseSectionsContent() {
+  const { isNight } = useMarketingTheme();
   const queryReady = isConvexConfigured();
   const sections = useQuery(
     api.courses.listHomepageSections,
@@ -152,7 +189,7 @@ function HomepageCourseSectionsContent() {
               <Skeleton className="h-7 w-48 bg-white/10" />
               <Skeleton className="mt-2 h-4 w-64 bg-white/5" />
               <div className="mt-6">
-                <CourseGridSkeleton />
+                <CourseGridSkeleton night={isNight} />
               </div>
             </div>
           </section>
@@ -166,6 +203,7 @@ function HomepageCourseSectionsContent() {
       {SECTIONS.map((section) => (
         <HomepageCourseSection
           key={section.key}
+          sectionKey={section.key}
           eyebrow={section.eyebrow}
           title={section.title}
           description={section.description}

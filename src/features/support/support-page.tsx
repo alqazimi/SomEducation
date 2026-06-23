@@ -75,7 +75,7 @@ export function SupportPage() {
       <div className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         <Card className={cn(marketingCardClass, "shadow-none")}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white">
+            <CardTitle className="flex items-center gap-2 text-marketing-fg">
               <HelpCircle className="h-4 w-4 text-brand-400" />
               How to pay
             </CardTitle>
@@ -88,8 +88,8 @@ export function SupportPage() {
                     {index + 1}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-white">{step.title}</p>
-                    <p className="mt-1 text-sm leading-relaxed text-slate-400">
+                    <p className="text-sm font-medium text-marketing-fg">{step.title}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-marketing-muted">
                       {step.description}
                     </p>
                   </div>
@@ -104,10 +104,10 @@ export function SupportPage() {
             <Card key={method.label} className={cn(marketingCardClass, "shadow-none")}>
               <CardContent className="p-5">
                 <method.icon className="h-5 w-5 text-brand-400" />
-                <p className="mt-3 text-sm font-medium text-white">
+                <p className="mt-3 text-sm font-medium text-marketing-fg">
                   {method.label}
                 </p>
-                <p className="mt-1 text-sm text-slate-400">{method.hint}</p>
+                <p className="mt-1 text-sm text-marketing-muted">{method.hint}</p>
               </CardContent>
             </Card>
           ))}
@@ -118,8 +118,8 @@ export function SupportPage() {
             <div className="flex items-start gap-3">
               <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-400" />
               <div>
-                <p className="text-sm font-medium text-white">After you pay</p>
-                <p className="mt-1 text-sm leading-relaxed text-slate-300">
+                <p className="text-sm font-medium text-marketing-fg">After you pay</p>
+                <p className="mt-1 text-sm leading-relaxed text-marketing-fg-subtle">
                   Track your submission under Dashboard → Payments. If
                   rejected or asked for a new screenshot, fix the same
                   payment there — upload new proof or change your payment
@@ -132,7 +132,7 @@ export function SupportPage() {
                 <Button>Browse Courses</Button>
               </Link>
               <Link href="/sign-in">
-                <Button variant="outline" className="border-white/20 text-white">
+                <Button variant="outline" className="border-marketing-border text-marketing-fg">
                   Sign In
                 </Button>
               </Link>
@@ -142,10 +142,10 @@ export function SupportPage() {
 
         <Card className={cn(marketingCardClass, "shadow-none")}>
           <CardContent className="flex items-start gap-4 p-6">
-            <Mail className="mt-0.5 h-5 w-5 shrink-0 text-slate-400" />
+            <Mail className="mt-0.5 h-5 w-5 shrink-0 text-marketing-muted" />
             <div>
-              <p className="text-sm font-medium text-white">Need more help?</p>
-              <p className="mt-1 text-sm leading-relaxed text-slate-400">
+              <p className="text-sm font-medium text-marketing-fg">Need more help?</p>
+              <p className="mt-1 text-sm leading-relaxed text-marketing-muted">
                 Email us at{" "}
                 <a
                   href={`mailto:${settings?.supportEmail ?? PLATFORM_SUPPORT_EMAIL}`}

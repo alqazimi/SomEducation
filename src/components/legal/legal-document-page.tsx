@@ -15,16 +15,16 @@ function LegalSectionBlock({
   return (
     <section
       id={section.id}
-      className="scroll-mt-24 border-b border-white/10 pb-8 last:border-b-0 last:pb-0"
+      className="scroll-mt-24 border-b border-marketing-border pb-8 last:border-b-0 last:pb-0"
     >
-      <h2 className="text-base font-medium leading-snug tracking-[-0.01em] text-white">
+      <h2 className="text-base font-medium leading-snug tracking-[-0.01em] text-marketing-fg">
         {section.title}
       </h2>
       <div className="mt-3 space-y-3">
         {section.paragraphs.map((paragraph) => (
           <p
             key={paragraph.slice(0, 48)}
-            className="text-sm leading-relaxed text-slate-300 sm:text-[0.9375rem]"
+            className="text-sm leading-relaxed text-marketing-fg-subtle sm:text-[0.9375rem]"
           >
             {paragraph}
           </p>
@@ -60,11 +60,11 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
       />
 
       <article className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-marketing-muted">
           Last updated {document.lastUpdated}
         </p>
 
-        <p className="mt-6 text-sm leading-relaxed text-slate-400 sm:text-[0.9375rem]">
+        <p className="mt-6 text-sm leading-relaxed text-marketing-muted sm:text-[0.9375rem]">
           Please read this document carefully. It describes your rights and
           responsibilities when using {PLATFORM_NAME}.
         </p>
@@ -79,10 +79,10 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
           <div className="flex items-start gap-4">
             <Mail className="mt-0.5 h-5 w-5 shrink-0 text-brand-400" />
             <div>
-              <p className="text-sm font-medium text-white">
+              <p className="text-sm font-medium text-marketing-fg">
                 Questions about this document?
               </p>
-              <p className="mt-2 text-sm leading-relaxed text-slate-400">
+              <p className="mt-2 text-sm leading-relaxed text-marketing-muted">
                 Contact our team at{" "}
                 <a
                   href={`mailto:${PLATFORM_SUPPORT_EMAIL}`}
