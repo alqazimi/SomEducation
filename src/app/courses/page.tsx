@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConvexQueryGate } from "@/components/convex/convex-query-gate";
+import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 
 const difficulties = [
   { value: "all", label: "All levels" },
@@ -74,6 +75,7 @@ function CoursesPageContent() {
 
   const hasFilters =
     search.trim() || categoryId !== "all" || difficulty !== "all";
+  const { isNight } = useMarketingTheme();
 
   function clearFilters() {
     setSearch("");
@@ -83,34 +85,34 @@ function CoursesPageContent() {
 
   return (
     <MarketingShell>
-      <section className="border-b border-white/10">
+      <section className="border-b border-marketing-border bg-marketing-hero">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-400">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-600">
             Course Catalog
           </p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-marketing-fg sm:text-3xl">
             Explore our courses
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-400">
+          <p className="mt-2 max-w-2xl text-sm text-marketing-muted">
             Learn new skills with expert-led courses — structured programs you
             can study at your own pace.
           </p>
           <div className="relative mt-6 max-w-xl">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-marketing-muted" />
             <Input
               placeholder="Search courses, topics, skills..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-11 rounded-lg border-white/15 bg-[#141c30] pl-10 text-white placeholder:text-slate-500"
+              className="h-11 rounded-lg border-marketing-border bg-marketing-card pl-10 text-marketing-fg placeholder:text-marketing-muted"
             />
           </div>
         </div>
       </section>
 
-      <div className="border-b border-white/10">
+      <div className="border-b border-marketing-border">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:px-6 lg:px-8">
             <Select value={categoryId} onValueChange={setCategoryId}>
-              <SelectTrigger className="w-full border-white/15 bg-[#141c30] text-white sm:w-[200px]">
+              <SelectTrigger className="w-full border-marketing-border bg-marketing-card text-marketing-fg sm:w-[200px]">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
@@ -124,7 +126,7 @@ function CoursesPageContent() {
             </Select>
 
             <Select value={difficulty} onValueChange={setDifficulty}>
-              <SelectTrigger className="w-full border-white/15 bg-[#141c30] text-white sm:w-[180px]">
+              <SelectTrigger className="w-full border-marketing-border bg-marketing-card text-marketing-fg sm:w-[180px]">
                 <SelectValue placeholder="Difficulty" />
               </SelectTrigger>
               <SelectContent>
@@ -140,7 +142,7 @@ function CoursesPageContent() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="gap-2 text-slate-400 hover:text-white"
+                className="gap-2 text-marketing-muted hover:text-marketing-fg"
                 onClick={clearFilters}
               >
                 <X className="h-4 w-4" />
@@ -163,15 +165,15 @@ function CoursesPageContent() {
             }
           >
             {courses !== undefined && courses.length === 0 ? (
-            <div className="rounded-2xl border border-white/10 bg-[#141c30] p-10 text-center">
-              <p className="text-base font-medium text-white">No courses found</p>
-              <p className="mt-2 text-sm text-slate-400">
+            <div className="rounded-2xl border border-marketing-border bg-marketing-card p-10 text-center">
+              <p className="text-base font-medium text-marketing-fg">No courses found</p>
+              <p className="mt-2 text-sm text-marketing-muted">
                 Try different filters or check back soon for new courses.
               </p>
               {hasFilters && (
                 <Button
                   variant="outline"
-                  className="mt-4 border-white/20 text-white"
+                  className="mt-4 border-marketing-border text-marketing-fg"
                   onClick={clearFilters}
                 >
                   Clear filters
@@ -180,14 +182,14 @@ function CoursesPageContent() {
             </div>
           ) : courses !== undefined ? (
             <>
-              <p className="mb-5 text-sm text-slate-400">
+              <p className="mb-5 text-sm text-marketing-muted">
                 {courses.length} course{courses.length === 1 ? "" : "s"} found
               </p>
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 {courses.map((course) => (
                   <CourseCard
                     key={course._id}
-                    theme="dark"
+                    theme={isNight ? "dark" : "light"}
                     href={`/courses/${course.slug}`}
                     title={course.title}
                     description={course.description}

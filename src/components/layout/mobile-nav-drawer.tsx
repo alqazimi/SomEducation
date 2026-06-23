@@ -21,6 +21,7 @@ import {
 } from "@/lib/dashboard-nav";
 import { PLATFORM_TAGLINE } from "@/lib/brand";
 import { getSignInUrl, getSignUpUrl } from "@/lib/auth-urls";
+import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { cn } from "@/lib/utils";
 
 const exploreLinks = [
@@ -116,6 +117,8 @@ export function MobileNavDrawer({
   variant?: "default" | "marketing";
 }) {
   const isMarketing = variant === "marketing";
+  const { isNight } = useMarketingTheme();
+  const marketingDark = isMarketing && isNight;
   const pathname = usePathname();
   const dashboardItems = role ? getNavForRole(role) : [];
   const dashboardHref = getDashboardHref(role);
@@ -143,20 +146,20 @@ export function MobileNavDrawer({
       <div
         className={cn(
           "absolute left-0 top-0 flex h-full w-full max-w-sm flex-col shadow-xl",
-          isMarketing ? "bg-[#0d1324] text-white" : "bg-white"
+          isMarketing ? "bg-marketing-panel text-marketing-fg" : "bg-white"
         )}
       >
         <div
           className={cn(
             "flex items-center justify-between border-b px-4 py-4",
-            isMarketing ? "border-white/10" : "border-border"
+            isMarketing ? "border-marketing-border" : "border-border"
           )}
         >
           <div>
             <p
               className={cn(
                 "text-sm font-medium",
-                isMarketing ? "text-white" : "text-stone-900"
+                isMarketing ? "text-marketing-fg" : "text-stone-900"
               )}
             >
               Menu
@@ -164,7 +167,7 @@ export function MobileNavDrawer({
             <p
               className={cn(
                 "text-xs",
-                isMarketing ? "text-slate-400" : "text-stone-500"
+                isMarketing ? "text-marketing-muted" : "text-stone-500"
               )}
             >
               {PLATFORM_TAGLINE}
@@ -175,7 +178,9 @@ export function MobileNavDrawer({
             className={cn(
               "inline-flex h-10 w-10 items-center justify-center rounded-lg",
               isMarketing
-                ? "text-slate-300 hover:bg-white/10"
+                ? marketingDark
+                  ? "text-slate-300 hover:bg-white/10"
+                  : "text-stone-600 hover:bg-stone-100"
                 : "text-stone-600 hover:bg-stone-100"
             )}
             aria-label="Close menu"
@@ -205,7 +210,7 @@ export function MobileNavDrawer({
             </button>
           )}
 
-          <SectionLabel dark={isMarketing}>E-Learning</SectionLabel>
+          <SectionLabel dark={marketingDark}>E-Learning</SectionLabel>
           {exploreLinks.map((link) => (
             <DrawerLink
               key={link.label}
@@ -214,14 +219,14 @@ export function MobileNavDrawer({
               icon={link.icon}
               active={isExploreActive(pathname, link.href)}
               onNavigate={onClose}
-              dark={isMarketing}
+              dark={marketingDark}
             />
           ))}
 
           <Show when="signed-in">
             {dashboardItems.length > 0 && (
               <>
-                <SectionLabel dark={isMarketing}>Dashboard</SectionLabel>
+                <SectionLabel dark={marketingDark}>Dashboard</SectionLabel>
                 <DrawerLink
                   href={dashboardHref}
                   label="Overview"
@@ -232,7 +237,7 @@ export function MobileNavDrawer({
                       : false
                   }
                   onNavigate={onClose}
-                  dark={isMarketing}
+                  dark={marketingDark}
                 />
                 {dashboardItems
                   .filter((item) => item.href !== dashboardHref)
@@ -248,7 +253,7 @@ export function MobileNavDrawer({
                           : false
                       }
                       onNavigate={onClose}
-                      dark={isMarketing}
+                      dark={marketingDark}
                     />
                   ))}
               </>
@@ -259,7 +264,7 @@ export function MobileNavDrawer({
         <div
           className={cn(
             "border-t p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]",
-            isMarketing ? "border-white/10" : "border-border"
+            isMarketing ? "border-marketing-border" : "border-border"
           )}
         >
           <Show when="signed-out">

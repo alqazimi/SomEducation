@@ -20,7 +20,9 @@ import {
   isDashboardOverview,
 } from "@/lib/dashboard-nav";
 import { NotificationBell } from "@/features/notifications/notifications-inbox";
-import { isMarketingSitePath } from "@/lib/marketing-theme";
+import { MarketingThemeToggle } from "@/components/marketing/marketing-theme-toggle";
+import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
+import { isMarketingSitePath, marketingHeaderClass } from "@/lib/marketing-theme";
 import { HeaderSearch } from "./header-search";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
 
@@ -65,6 +67,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [navPathname, setNavPathname] = useState(pathname);
+  const { isDay, isNight } = useMarketingTheme();
 
   if (pathname !== navPathname) {
     setNavPathname(pathname);
@@ -87,7 +90,10 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
           "top-0 z-50 w-full backdrop-blur-md",
           isMarketing ? "fixed" : "sticky",
           isMarketing
-            ? "border-b border-white/10 bg-[#080c16]/95"
+            ? cn(
+                marketingHeaderClass,
+                isDay && "shadow-sm"
+              )
             : "border-b border-border/80 bg-white/95 shadow-sm"
         )}
       >
@@ -109,7 +115,9 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                 className={cn(
                   "inline-flex h-10 w-10 items-center justify-center rounded-lg lg:hidden",
                   isMarketing
-                    ? "text-slate-300 hover:bg-white/10"
+                    ? isNight
+                      ? "text-slate-300 hover:bg-white/10"
+                      : "text-stone-600 hover:bg-stone-100"
                     : "text-stone-600 hover:bg-stone-100"
                 )}
                 aria-label={mobileOpen ? "Close menu" : "Open menu"}
@@ -133,9 +141,9 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                 <SomEducationLogo size={32} className="sm:hidden" />
                 <SomEducationLogo size={36} className="hidden sm:block" />
                 <SomEducationWordmark
-                  inverted={isMarketing}
+                  inverted={isMarketing && isNight}
                   className={cn(
-                    isMarketing && "text-white",
+                    isMarketing && isNight && "text-white",
                     isMarketing && isSignedIn && "hidden min-[380px]:inline"
                   )}
                 />
@@ -153,10 +161,14 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                       "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
                       isMarketingNavActive(pathname, item.href, item.label)
                         ? isMarketing
-                          ? "text-brand-400"
+                          ? isDay
+                            ? "text-brand-600"
+                            : "text-brand-400"
                           : "text-brand-600"
                         : isMarketing
-                          ? "text-slate-300 hover:bg-white/5 hover:text-white"
+                          ? isDay
+                            ? "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+                            : "text-slate-300 hover:bg-white/5 hover:text-white"
                           : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
                     )}
                   >
@@ -175,13 +187,17 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
             )}
 
             <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+              {isMarketing && <MarketingThemeToggle />}
+
               {!isDashboard && !isSignedIn && (
                 <Link
                   href="/courses"
                   className={cn(
                     "inline-flex h-10 w-10 items-center justify-center rounded-lg",
                     isMarketing
-                      ? "text-slate-300 hover:bg-white/10"
+                      ? isNight
+                        ? "text-slate-300 hover:bg-white/10"
+                        : "text-stone-600 hover:bg-stone-100"
                       : "text-stone-600 hover:bg-stone-100"
                   )}
                   aria-label="Search courses"
@@ -215,16 +231,20 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                     "hidden rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:inline-flex",
                     isDashboardOverview(pathname)
                       ? isMarketing
-                        ? "text-brand-400"
+                        ? isDay
+                          ? "text-brand-600"
+                          : "text-brand-400"
                         : "text-brand-600"
                       : isMarketing
-                        ? "text-slate-300 hover:bg-white/5 hover:text-white"
+                        ? isDay
+                          ? "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+                          : "text-slate-300 hover:bg-white/5 hover:text-white"
                         : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
                   )}
                 >
                   Dashboard
                 </Link>
-                <NotificationBell dark={isMarketing} />
+                <NotificationBell dark={isMarketing && isNight} />
               </Show>
 
               <Show when="signed-out">

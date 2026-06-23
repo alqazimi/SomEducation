@@ -65,7 +65,7 @@ export function CourseCard({
       className={cn(
         "group flex h-full flex-col overflow-hidden rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-lg",
         isDark
-          ? "border-white/10 bg-[#141c30] hover:border-brand-500/30"
+          ? "border-marketing-border bg-marketing-card hover:border-brand-500/30"
           : "border-border bg-white shadow-sm",
         className
       )}
@@ -109,7 +109,7 @@ export function CourseCard({
             className={cn(
               "line-clamp-2 text-[0.9375rem] font-medium leading-snug transition-colors sm:text-base",
               isDark
-                ? "text-white group-hover:text-brand-300"
+                ? "text-marketing-fg group-hover:text-brand-300"
                 : "text-stone-900 group-hover:text-brand-700"
             )}
           >
@@ -121,7 +121,7 @@ export function CourseCard({
           <p
             className={cn(
               "mt-2 flex items-center gap-1.5 text-xs sm:text-sm",
-              isDark ? "text-slate-400" : "text-stone-500"
+              isDark ? "text-marketing-muted" : "text-stone-500"
             )}
           >
             <User className="h-3.5 w-3.5 shrink-0" />
@@ -133,7 +133,7 @@ export function CourseCard({
           <p
             className={cn(
               "mt-2 line-clamp-2 flex-1 text-sm leading-relaxed",
-              isDark ? "text-slate-400" : "text-stone-600"
+              isDark ? "text-marketing-muted" : "text-stone-600"
             )}
           >
             {description}
@@ -144,7 +144,7 @@ export function CourseCard({
           <p
             className={cn(
               "mt-3 text-xs leading-normal",
-              isDark ? "text-slate-500" : type.caption
+              isDark ? "text-marketing-muted" : type.caption
             )}
           >
             {moduleCount ?? 0} modules · {lessonCount ?? 0} lessons
@@ -164,7 +164,7 @@ export function CourseCard({
         <div
           className={cn(
             "mt-4 flex items-center justify-between gap-3 border-t pt-4",
-            isDark ? "border-white/10" : "border-border"
+            isDark ? "border-marketing-border" : "border-border"
           )}
         >
           {!isEnrolled && price !== undefined ? (
@@ -173,7 +173,7 @@ export function CourseCard({
                 <span
                   className={cn(
                     "text-xs line-through",
-                    isDark ? "text-slate-500" : "text-stone-500"
+                    isDark ? "text-marketing-muted" : "text-stone-500"
                   )}
                 >
                   {formatPrice(compareAtPrice!, currency)}

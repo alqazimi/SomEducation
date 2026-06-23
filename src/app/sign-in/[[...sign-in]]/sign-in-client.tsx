@@ -16,7 +16,7 @@ export default function SignInClient() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#080c16] px-4 py-8">
+    <div className="flex min-h-screen items-center justify-center bg-marketing-bg px-4 py-8">
       <div className="w-full max-w-[min(100%,24rem)] text-stone-900">
         <SignIn
           path="/sign-in"

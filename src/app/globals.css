@@ -7,10 +7,24 @@
   --border: #e8e6e3;
   --brand-50: #e8f1fd;
   --brand-100: #cce0fa;
-  --brand-500: #1a6fe8;
-  --brand-600: #0056d2;
-  --brand-700: #004bb8;
-  --brand-800: #003d96;
+  --brand-500: #1a66ff;
+  --brand-600: #0052ff;
+  --brand-700: #0046d9;
+  --brand-800: #0038b0;
+  --marketing-bg: #020617;
+  --marketing-bg-footer: #01040f;
+  --marketing-bg-card: #0f172a;
+  --marketing-bg-card-hover: #151f3d;
+  --marketing-bg-elevated: #0b1224;
+  --marketing-bg-panel: #0c1328;
+  --marketing-bg-hero: transparent;
+  --marketing-bg-cta: #0052ff;
+  --marketing-fg: #ffffff;
+  --marketing-fg-subtle: #cbd5e1;
+  --marketing-muted: #94a3b8;
+  --marketing-border: rgba(255, 255, 255, 0.1);
+  --marketing-badge-bg: #00000080;
+  --marketing-badge-fg: #ffffff;
   --success: #047857;
   --warning: #b45309;
   --danger: #b91c1c;
@@ -27,6 +41,20 @@
   --color-brand-600: var(--brand-600);
   --color-brand-700: var(--brand-700);
   --color-brand-800: var(--brand-800);
+  --color-marketing-bg: var(--marketing-bg);
+  --color-marketing-bg-footer: var(--marketing-bg-footer);
+  --color-marketing-card: var(--marketing-bg-card);
+  --color-marketing-card-hover: var(--marketing-bg-card-hover);
+  --color-marketing-elevated: var(--marketing-bg-elevated);
+  --color-marketing-panel: var(--marketing-bg-panel);
+  --color-marketing-hero: var(--marketing-bg-hero);
+  --color-marketing-cta: var(--marketing-bg-cta);
+  --color-marketing-fg: var(--marketing-fg);
+  --color-marketing-fg-subtle: var(--marketing-fg-subtle);
+  --color-marketing-muted: var(--marketing-muted);
+  --color-marketing-border: var(--marketing-border);
+  --color-marketing-badge: var(--marketing-badge-bg);
+  --color-marketing-badge-fg: var(--marketing-badge-fg);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
@@ -81,4 +109,36 @@
     background: var(--brand-100);
     color: var(--brand-800);
   }
+}
+
+.marketing-dot-grid {
+  background-image: radial-gradient(
+    rgba(148, 163, 184, 0.18) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+}
+
+[data-marketing-theme="day"] {
+  --marketing-bg: #ffffff;
+  --marketing-bg-footer: #ffffff;
+  --marketing-bg-card: #ffffff;
+  --marketing-bg-card-hover: #f8fafc;
+  --marketing-bg-elevated: #f1f5f9;
+  --marketing-bg-panel: #ffffff;
+  --marketing-bg-hero: #f8fafc;
+  --marketing-bg-cta: #eff6ff;
+  --marketing-fg: #0f172a;
+  --marketing-fg-subtle: #334155;
+  --marketing-muted: #64748b;
+  --marketing-border: #e2e8f0;
+  --marketing-badge-bg: #dbeafe;
+  --marketing-badge-fg: #1d4ed8;
+}
+
+[data-marketing-theme="day"] .marketing-dot-grid {
+  background-image: radial-gradient(
+    rgba(100, 116, 139, 0.12) 1px,
+    transparent 1px
+  );
 }

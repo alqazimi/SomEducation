@@ -51,13 +51,13 @@ export function HomepageCourseCard({
   return (
     <article
       className={cn(
-        "group flex h-full flex-col overflow-hidden rounded-xl border border-white/10 bg-[#111827] shadow-sm transition-all duration-300",
-        "hover:-translate-y-1 hover:border-brand-500/50 hover:bg-[#161f35] hover:shadow-xl hover:shadow-brand-600/10",
+        "group flex h-full flex-col overflow-hidden rounded-xl border border-marketing-border bg-marketing-card shadow-sm transition-all duration-300",
+        "hover:-translate-y-1 hover:border-brand-500/50 hover:bg-marketing-card-hover hover:shadow-lg",
         className
       )}
     >
       <Link href={href} className="block p-2.5 pb-0">
-        <div className="relative h-[170px] overflow-hidden rounded-lg bg-[#0d1324] sm:h-[180px]">
+        <div className="relative h-[170px] overflow-hidden rounded-lg bg-marketing-elevated sm:h-[180px]">
           {thumbnailUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -84,7 +84,7 @@ export function HomepageCourseCard({
           )}
 
           {difficulty && (
-            <Badge className="absolute right-2 top-2 border-0 bg-black/50 px-2 py-0.5 text-[10px] font-semibold capitalize text-white backdrop-blur-sm">
+            <Badge className="absolute right-2 top-2 border-0 bg-marketing-badge px-2 py-0.5 text-[10px] font-semibold capitalize text-marketing-badge-fg backdrop-blur-sm">
               {difficulty}
             </Badge>
           )}
@@ -92,7 +92,7 @@ export function HomepageCourseCard({
       </Link>
 
       <div className="flex flex-1 flex-col p-4 pt-3">
-        <div className="mb-2 flex items-center gap-3 text-[11px] text-slate-500">
+        <div className="mb-2 flex items-center gap-3 text-[11px] text-marketing-muted">
           <span className="inline-flex items-center gap-1">
             <Users className="h-3 w-3 text-brand-400" />
             {studentsLabel} students
@@ -112,14 +112,14 @@ export function HomepageCourseCard({
         </div>
 
         <Link href={href}>
-          <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-semibold leading-snug text-white transition-colors group-hover:text-brand-300">
+          <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-semibold leading-snug text-marketing-fg transition-colors group-hover:text-brand-600">
             {title}
           </h3>
         </Link>
 
-        <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
+        <div className="mt-2 flex items-center gap-1.5 text-xs text-marketing-muted">
           <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-          <span className="font-medium text-slate-300">
+          <span className="font-medium text-marketing-fg-subtle">
             {rating.toFixed(1)}
           </span>
         </div>
@@ -131,11 +131,11 @@ export function HomepageCourseCard({
             ) : (
               <div className="flex flex-col gap-0.5">
                 {hasDiscount && (
-                  <span className="text-xs text-slate-500 line-through">
+                  <span className="text-xs text-marketing-muted line-through">
                     {formatPrice(compareAtPrice!, currency)}
                   </span>
                 )}
-                <span className="text-base font-bold text-white">
+                <span className="text-base font-bold text-marketing-fg">
                   {formatPrice(price, currency)}
                 </span>
               </div>
@@ -146,7 +146,7 @@ export function HomepageCourseCard({
             asChild
             size="sm"
             variant="outline"
-            className="h-8 shrink-0 rounded-lg border-white/15 bg-transparent px-3 text-xs text-slate-300 transition-colors group-hover:border-brand-500 group-hover:bg-brand-600 group-hover:text-white"
+            className="h-8 shrink-0 rounded-lg border-marketing-border bg-transparent px-3 text-xs text-marketing-fg-subtle transition-colors group-hover:border-brand-500 group-hover:bg-brand-600 group-hover:text-white"
           >
             <Link href={href}>View</Link>
           </Button>

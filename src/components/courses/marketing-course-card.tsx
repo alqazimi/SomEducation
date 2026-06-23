@@ -43,14 +43,14 @@ export function MarketingCourseCard({
   return (
     <article
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-white/10 bg-[#141c30] transition-all hover:border-brand-500/40 hover:shadow-lg hover:shadow-brand-600/10",
+        "group relative overflow-hidden rounded-2xl border border-white/10 bg-marketing-card transition-all hover:border-brand-500/40 hover:shadow-lg hover:shadow-brand-600/15",
         className
       )}
     >
       <div className="flex flex-col sm:flex-row">
         <Link
           href={href}
-          className="relative aspect-[16/10] w-full shrink-0 overflow-hidden bg-[#0d1324] sm:aspect-auto sm:w-44 md:w-52 lg:w-56"
+          className="relative aspect-[16/10] w-full shrink-0 overflow-hidden bg-marketing-elevated sm:aspect-auto sm:w-44 md:w-52 lg:w-56"
         >
           {thumbnailUrl ? (
             // eslint-disable-next-line @next/next/no-img-element

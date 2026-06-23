@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/components/providers";
 import { ClerkSetupRequired } from "@/components/auth/clerk-setup-required";
 import { PwaShell } from "@/components/pwa/pwa-shell";
+import { MarketingThemeProvider } from "@/components/marketing/marketing-theme-provider";
 import { SiteJsonLd } from "@/components/seo/site-json-ld";
 import {
   absoluteUrl,
@@ -99,26 +100,41 @@ export default function RootLayout({
   const clerkConfigured = isClerkConfigured();
 
   return (
-    <html lang="en" className={`${dmSans.variable} h-full`} data-scroll-behavior="smooth">
+    <html
+      lang="en"
+      className={`${dmSans.variable} h-full`}
+      data-scroll-behavior="smooth"
+      data-marketing-theme="night"
+      suppressHydrationWarning
+    >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("someducation-marketing-theme");if(t==="day"||t==="night")document.documentElement.setAttribute("data-marketing-theme",t)}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="flex min-h-full flex-col overflow-x-hidden antialiased">
-        <SiteJsonLd />
-        <PwaShell />
-        {clerkConfigured ? (
-          <ClerkProvider
-            signInUrl="/sign-in"
-            signUpUrl="/sign-up"
-            signInFallbackRedirectUrl="/dashboard"
-            signUpFallbackRedirectUrl="/dashboard"
-            appearance={clerkAppearance}
-            publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-          >
-            <Providers convexUrl={process.env.NEXT_PUBLIC_CONVEX_URL ?? ""}>
-              {children}
-            </Providers>
-          </ClerkProvider>
-        ) : (
-          <ClerkSetupRequired />
-        )}
+        <MarketingThemeProvider>
+          <SiteJsonLd />
+          <PwaShell />
+          {clerkConfigured ? (
+            <ClerkProvider
+              signInUrl="/sign-in"
+              signUpUrl="/sign-up"
+              signInFallbackRedirectUrl="/dashboard"
+              signUpFallbackRedirectUrl="/dashboard"
+              appearance={clerkAppearance}
+              publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+            >
+              <Providers convexUrl={process.env.NEXT_PUBLIC_CONVEX_URL ?? ""}>
+                {children}
+              </Providers>
+            </ClerkProvider>
+          ) : (
+            <ClerkSetupRequired />
+          )}
+        </MarketingThemeProvider>
       </body>
     </html>
   );

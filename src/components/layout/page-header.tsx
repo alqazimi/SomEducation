@@ -1,5 +1,6 @@
-import { cn } from "@/lib/utils";
+import { marketingBackgroundClass } from "@/lib/marketing-theme";
 import { type } from "@/lib/typography";
+import { cn } from "@/lib/utils";
 
 type PageHeaderProps = {
   title: string;
@@ -25,7 +26,7 @@ export function PageHeader({
       className={cn(
         "border-b",
         isMarketing
-          ? "border-white/10 bg-[#080c16]"
+          ? `border-marketing-border ${marketingBackgroundClass}`
           : "border-border bg-white",
         className
       )}
@@ -37,7 +38,7 @@ export function PageHeader({
               <p
                 className={cn(
                   type.eyebrow,
-                  isMarketing && "text-brand-400"
+                  isMarketing && "text-brand-600"
                 )}
               >
                 {eyebrow}
@@ -46,7 +47,7 @@ export function PageHeader({
             <h1
               className={cn(
                 type.pageTitle,
-                isMarketing && "text-white",
+                isMarketing && "text-marketing-fg",
                 eyebrow ? "mt-2" : undefined
               )}
             >
@@ -57,7 +58,7 @@ export function PageHeader({
                 className={cn(
                   type.lead,
                   "mt-2 max-w-xl",
-                  isMarketing && "text-slate-400"
+                  isMarketing && "text-marketing-muted"
                 )}
               >
                 {description}

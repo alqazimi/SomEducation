@@ -8,8 +8,10 @@ import {
   ConvexSectionErrorBoundary,
 } from "@/components/convex/convex-query-gate";
 import { HomepageCourseCard } from "@/components/courses/homepage-course-card";
+import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isConvexConfigured } from "@/lib/convex-url";
+import { cn } from "@/lib/utils";
 
 type HomepageCourse = {
   _id: string;
@@ -28,24 +30,28 @@ type HomepageCourse = {
 const SECTIONS = [
   {
     key: "discounted" as const,
+    eyebrow: "Special Offers",
     title: "Discounted Courses",
     description: "Great courses at special prices",
     href: "/courses",
   },
   {
     key: "recent" as const,
+    eyebrow: "New Arrivals",
     title: "Recently Added Courses",
     description: "Explore our latest courses",
     href: "/courses",
   },
   {
     key: "popular" as const,
-    title: "Popular Courses",
+    eyebrow: "Popular Courses",
+    title: "Start with our most popular courses",
     description: "Most loved by students on SomEducation",
     href: "/courses",
   },
   {
     key: "free" as const,
+    eyebrow: "Free Learning",
     title: "Free Courses",
     description: "Start learning for free",
     href: "/courses",
@@ -63,16 +69,20 @@ function CourseGridSkeleton() {
 }
 
 function HomepageCourseSection({
+  eyebrow,
   title,
   description,
   href,
   courses,
 }: {
+  eyebrow: string;
   title: string;
   description: string;
   href: string;
   courses: HomepageCourse[];
 }) {
+  const { isDay, isNight } = useMarketingTheme();
+
   if (courses.length === 0) return null;
 
   return (
@@ -80,16 +90,26 @@ function HomepageCourseSection({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight text-white sm:text-xl">
+            {isDay && (
+              <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-600">
+                {eyebrow}
+              </p>
+            )}
+            <h2 className="text-lg font-semibold tracking-tight text-marketing-fg sm:text-xl">
               {title}
             </h2>
-            <p className="mt-1 text-sm text-slate-400">{description}</p>
+            <p className="mt-1 text-sm text-marketing-muted">{description}</p>
           </div>
           <Link
             href={href}
-            className="inline-flex items-center gap-1 text-sm font-medium text-brand-400 transition-colors hover:text-brand-300"
+            className={cn(
+              "inline-flex items-center gap-1 text-sm font-medium transition-colors",
+              isNight
+                ? "text-brand-400 hover:text-brand-300"
+                : "text-brand-600 hover:text-brand-500"
+            )}
           >
-            See all
+            {isDay ? "View all courses" : "See all"}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -146,6 +166,7 @@ function HomepageCourseSectionsContent() {
       {SECTIONS.map((section) => (
         <HomepageCourseSection
           key={section.key}
+          eyebrow={section.eyebrow}
           title={section.title}
           description={section.description}
           href={section.href}

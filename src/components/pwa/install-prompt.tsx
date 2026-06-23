@@ -87,7 +87,7 @@ export function InstallPrompt() {
       role="dialog"
       aria-label={`Install ${PLATFORM_NAME}`}
     >
-      <div className="mx-auto flex max-w-lg items-start gap-3 rounded-2xl border border-white/10 bg-[#121a2e] p-4 shadow-xl">
+      <div className="mx-auto flex max-w-lg items-start gap-3 rounded-2xl border border-white/10 bg-marketing-panel p-4 shadow-xl shadow-black/40">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white">
           {mode === "android" ? (
             <Download className="h-5 w-5" />
