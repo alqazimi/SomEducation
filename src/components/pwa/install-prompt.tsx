@@ -52,7 +52,7 @@ export function InstallPrompt() {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-[100] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+      className="fixed inset-x-0 bottom-0 z-[100] p-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden"
       role="dialog"
       aria-label={`Install ${PLATFORM_NAME}`}
     >

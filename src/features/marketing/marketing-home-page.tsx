@@ -1,11 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ArrowRight, GraduationCap } from "lucide-react";
 import { MarketingCoursesSurface } from "@/components/marketing/marketing-courses-surface";
 import { MarketingHeroZone } from "@/components/marketing/marketing-hero-zone";
 import { MarketingShell } from "@/components/layout/marketing-shell";
-import { HomepageCourseSections } from "@/components/courses/homepage-course-sections";
+import { HomepageCourseSectionsFallback } from "@/components/courses/homepage-course-sections";
 import { MarketingHeroImage } from "@/components/marketing/marketing-hero-image";
 import { MarketingStatsBar } from "@/components/marketing/marketing-stats-bar";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
@@ -15,6 +16,14 @@ import {
   MARKETING_HERO_DAY,
 } from "@/lib/marketing-content";
 import { cn } from "@/lib/utils";
+
+const HomepageCourseSections = dynamic(
+  () =>
+    import("@/components/courses/homepage-course-sections").then((mod) => ({
+      default: mod.HomepageCourseSections,
+    })),
+  { loading: () => <HomepageCourseSectionsFallback /> }
+);
 
 function MarketingHero() {
   const { isDay } = useMarketingTheme();

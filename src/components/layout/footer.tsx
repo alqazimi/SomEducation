@@ -8,6 +8,7 @@ import {
 } from "@/components/brand/som-education-logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { PLATFORM_NAME } from "@/lib/brand";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { isMarketingSitePath, marketingFooterClass } from "@/lib/marketing-theme";
@@ -119,6 +120,21 @@ export function Footer({ variant = "default" }: { variant?: "default" | "marketi
                   </Link>
                 </li>
               ))}
+              {isMarketing && (
+                <li className="hidden lg:block">
+                  <InstallAppButton
+                    variant="ghost"
+                    size="sm"
+                    showIcon={false}
+                    className={cn(
+                      "h-auto p-0 text-sm font-normal",
+                      isDay
+                        ? "text-marketing-muted hover:bg-transparent hover:text-brand-600"
+                        : "text-marketing-muted hover:bg-transparent hover:text-brand-400"
+                    )}
+                  />
+                </li>
+              )}
             </ul>
           </div>
 

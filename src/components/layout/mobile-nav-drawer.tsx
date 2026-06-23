@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Show } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import {
   BookOpen,
   HelpCircle,
@@ -14,7 +14,6 @@ import {
   X,
 } from "lucide-react";
 import { useEffect } from "react";
-import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { Button } from "@/components/ui/button";
 import {
   DashboardRole,
@@ -131,6 +130,7 @@ export function MobileNavDrawer({
   const dashboardHref = getDashboardHref(role);
   const signInUrl = getSignInUrl(pathname || "/dashboard");
   const signUpUrl = getSignUpUrl(pathname || "/dashboard");
+  const { isSignedIn, isLoaded: clerkLoaded } = useAuth();
 
   useEffect(() => {
     if (!open) return;
@@ -236,8 +236,7 @@ export function MobileNavDrawer({
             />
           ))}
 
-          <Show when="signed-in">
-            {dashboardItems.length > 0 && (
+          {clerkLoaded && isSignedIn && dashboardItems.length > 0 && (
               <>
                 <SectionLabel dark={drawerDark}>Dashboard</SectionLabel>
                 <DrawerLink
@@ -271,7 +270,6 @@ export function MobileNavDrawer({
                   ))}
               </>
             )}
-          </Show>
         </nav>
 
         <div
@@ -280,16 +278,7 @@ export function MobileNavDrawer({
             isMarketing || drawerDark ? "border-marketing-border" : "border-border"
           )}
         >
-          <InstallAppButton
-            className={cn(
-              "mb-3 w-full",
-              isMarketing &&
-                "border-white/20 bg-brand-600 text-white hover:bg-brand-500"
-            )}
-            variant={isMarketing ? "default" : "outline"}
-            size="default"
-          />
-          <Show when="signed-out">
+          {!(clerkLoaded && isSignedIn) && (
             <div className="flex flex-col gap-2">
               <Link href={signInUrl} className="w-full" onClick={onClose}>
                 <Button
@@ -307,7 +296,7 @@ export function MobileNavDrawer({
                 <Button className="w-full">Sign up</Button>
               </Link>
             </div>
-          </Show>
+          )}
         </div>
       </div>
     </div>

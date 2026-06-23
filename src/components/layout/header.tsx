@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Show, UserButton, useAuth } from "@clerk/nextjs";
+import { UserButton, useAuth } from "@clerk/nextjs";
 import { useConvexAuth, useQuery } from "convex/react";
 import { Menu, Search, X } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
@@ -20,7 +20,6 @@ import {
   isDashboardOverview,
 } from "@/lib/dashboard-nav";
 import { NotificationBell } from "@/features/notifications/notifications-inbox";
-import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { MarketingThemeToggle } from "@/components/marketing/marketing-theme-toggle";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { isMarketingSitePath, marketingHeaderClass, marketingHeaderClassNight } from "@/lib/marketing-theme";
@@ -187,10 +186,12 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
               </div>
             )}
 
-            <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1.5 md:gap-2">
-              {(isMarketing || isDashboard) && <MarketingThemeToggle />}
+            <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5">
+              {(isMarketing || isDashboard) && (
+                <MarketingThemeToggle className="h-9 w-9 sm:h-10 sm:w-10" />
+              )}
 
-              {!isDashboard && !isSignedIn && (
+              {!isDashboard && !(clerkLoaded && isSignedIn) && (
                 <Link
                   href="/courses"
                   className={cn(
@@ -228,77 +229,82 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                 </button>
               )}
 
-              <Show when="signed-in">
-                <Link
-                  href={dashboardHref}
-                  className={cn(
-                    "hidden rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:inline-flex",
-                    isDashboardOverview(pathname)
-                      ? useDarkChrome
-                        ? "text-brand-400"
-                        : "text-brand-600"
-                      : useDarkChrome
-                        ? "text-slate-300 hover:bg-white/5 hover:text-white"
-                        : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
-                  )}
-                >
-                  Dashboard
-                </Link>
-                <NotificationBell dark={useDarkChrome} />
-              </Show>
-
-              <Show when="signed-out">
-                {isMarketing && (
-                  <InstallAppButton
+              {clerkLoaded && isSignedIn ? (
+                <>
+                  <Link
+                    href={dashboardHref}
                     className={cn(
-                      "h-9 border-white/20 bg-transparent text-white hover:bg-white/10 sm:h-10",
-                      !useDarkChrome &&
-                        "border-border text-foreground hover:bg-muted"
+                      "hidden rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:inline-flex",
+                      isDashboardOverview(pathname)
+                        ? useDarkChrome
+                          ? "text-brand-400"
+                          : "text-brand-600"
+                        : useDarkChrome
+                          ? "text-slate-300 hover:bg-white/5 hover:text-white"
+                          : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
                     )}
-                    variant="outline"
-                  />
-                )}
-                {isMarketing ? (
-                  <Link href={signInUrl}>
-                    <Button
-                      size="sm"
-                      className="h-9 rounded-lg bg-brand-600 px-3.5 text-xs font-semibold hover:bg-brand-500 min-[400px]:px-5 min-[400px]:text-sm sm:h-10 sm:px-6"
-                    >
-                      Login
-                    </Button>
+                  >
+                    Dashboard
                   </Link>
-                ) : (
-                  <>
-                    <Link href={signInUrl} className="hidden sm:inline-flex">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-stone-700"
-                      >
-                        Log in
-                      </Button>
-                    </Link>
-                    <Link href={signUpUrl} className="hidden sm:inline-flex">
-                      <Button size="sm">Join for free</Button>
-                    </Link>
-                    <Link href={signUpUrl} className="sm:hidden">
-                      <Button size="sm" className="h-9 px-3 text-xs">
-                        Join
-                      </Button>
-                    </Link>
-                  </>
-                )}
-              </Show>
-
-              <Show when="signed-in">
-                <UserButton
-                  appearance={{
-                    elements: {
-                      avatarBox: "h-9 w-9",
-                    },
-                  }}
-                />
-              </Show>
+                  <NotificationBell dark={useDarkChrome} />
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        avatarBox: "h-9 w-9",
+                      },
+                    }}
+                  />
+                </>
+              ) : (
+                <>
+                  {isMarketing ? (
+                    <>
+                      <Link href={signInUrl} className="inline-flex">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={cn(
+                            "h-9 px-2 text-xs sm:px-2.5 sm:text-sm",
+                            useDarkChrome
+                              ? "text-slate-200 hover:bg-white/10 hover:text-white"
+                              : "text-stone-700"
+                          )}
+                        >
+                          Log in
+                        </Button>
+                      </Link>
+                      <Link href={signUpUrl} className="inline-flex">
+                        <Button
+                          size="sm"
+                          className="h-9 rounded-lg bg-brand-600 px-2.5 text-xs font-semibold hover:bg-brand-500 sm:px-5 sm:text-sm"
+                        >
+                          Sign up
+                        </Button>
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link href={signInUrl} className="hidden sm:inline-flex">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-stone-700"
+                        >
+                          Log in
+                        </Button>
+                      </Link>
+                      <Link href={signUpUrl} className="hidden sm:inline-flex">
+                        <Button size="sm">Join for free</Button>
+                      </Link>
+                      <Link href={signUpUrl} className="sm:hidden">
+                        <Button size="sm" className="h-9 px-3 text-xs">
+                          Join
+                        </Button>
+                      </Link>
+                    </>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
