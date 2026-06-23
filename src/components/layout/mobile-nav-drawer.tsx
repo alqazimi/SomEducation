@@ -27,16 +27,12 @@ const exploreLinks = [
   { href: "/", label: "Home", icon: Home },
   { href: "/courses", label: "Courses", icon: BookOpen },
   { href: "/support", label: "Help & Contact", icon: HelpCircle },
-  { href: "/terms", label: "Terms", icon: Home },
-  { href: "/privacy", label: "Privacy", icon: HelpCircle },
 ] as const;
 
 function isExploreActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
   if (href === "/courses") return pathname.startsWith("/courses");
   if (href === "/support") return pathname === "/support";
-  if (href === "/terms") return pathname === "/terms";
-  if (href === "/privacy") return pathname === "/privacy";
   return pathname === href;
 }
 
@@ -269,7 +265,14 @@ export function MobileNavDrawer({
           <Show when="signed-out">
             <div className="flex flex-col gap-2">
               <Link href={signInUrl} className="w-full" onClick={onClose}>
-                <Button variant="outline" className="w-full">
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full",
+                    isMarketing &&
+                      "border-white/20 bg-transparent text-white hover:bg-white/10"
+                  )}
+                >
                   Sign In
                 </Button>
               </Link>

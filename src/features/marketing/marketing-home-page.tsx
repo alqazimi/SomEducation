@@ -2,13 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  GraduationCap,
-  List,
-  Play,
-  Star,
-} from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
 import { MarketingShell } from "@/components/layout/marketing-shell";
 import { HomepageCourseSections } from "@/components/courses/homepage-course-sections";
 import { Button } from "@/components/ui/button";
@@ -41,90 +35,84 @@ function MarketingStatsBar() {
 export function MarketingHomePage() {
   return (
     <MarketingShell className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <section className="relative mx-4 overflow-hidden rounded-2xl border border-white/10 bg-[#0d1324]/60 sm:mx-6 lg:mx-8">
-        <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <div className="absolute -right-16 top-8 h-56 w-56 rounded-full bg-brand-600/15 blur-3xl" />
-          <div className="absolute bottom-0 left-1/4 h-40 w-40 rounded-full bg-brand-500/10 blur-3xl" />
-        </div>
+      <section className="relative overflow-hidden">
+        <div className="mx-auto max-w-7xl px-4 pb-10 pt-16 sm:px-6 sm:pt-20 lg:px-8">
+          <div className="flex flex-col items-center justify-between gap-12 md:flex-row md:items-center md:gap-8 lg:gap-12">
+            <div className="relative w-full md:max-w-[480px]">
+              <div
+                className="pointer-events-none absolute -right-20 top-0 h-[240px] w-[240px] rounded-full bg-brand-600/35 blur-[120px]"
+                aria-hidden
+              />
 
-        <div className="relative grid max-w-7xl items-center gap-8 px-4 py-10 sm:px-6 lg:mx-auto lg:grid-cols-2 lg:gap-10 lg:px-8 lg:py-12">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-400">
-              Online Learning
-            </p>
-            <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
-              {MARKETING_HERO.headline}{" "}
-              <span className="text-brand-400">
-                {MARKETING_HERO.headlineAccent}
-              </span>
-            </h1>
-            <p className="mt-3 max-w-lg text-sm leading-relaxed text-slate-400 sm:text-base">
-              {MARKETING_HERO.subheadline}
-            </p>
-            <div className="mt-6">
-              <Link href="/courses">
-                <Button
-                  size="default"
-                  className="h-11 rounded-lg bg-brand-600 px-6 text-sm shadow-md transition-colors hover:bg-brand-500"
-                >
-                  Browse Courses
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <div className="flex -space-x-2">
-                {MARKETING_AVATAR_COLORS.map((color, index) => (
-                  <div
-                    key={color}
-                    className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#0d1324] text-[10px] font-semibold text-white ${color}`}
-                  >
-                    {String.fromCharCode(65 + index)}
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-400 sm:text-sm">
-                <div className="flex text-amber-400">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-3.5 w-3.5 fill-current sm:h-4 sm:w-4"
-                    />
-                  ))}
+              <div className="relative z-10">
+                <p className="mb-2 text-lg font-medium text-slate-300">
+                  {MARKETING_HERO.eyebrow}
+                </p>
+                <h1 className="text-3xl font-bold leading-tight tracking-tight text-white md:text-4xl lg:text-[42px] lg:leading-[3.5rem]">
+                  {MARKETING_HERO.headline}
+                </h1>
+                <p className="mt-4 max-w-lg text-base leading-relaxed text-slate-400 sm:text-lg">
+                  {MARKETING_HERO.subheadline}
+                </p>
+
+                <div className="mt-8">
+                  <Link href="/courses">
+                    <Button
+                      size="lg"
+                      className="h-12 rounded-lg bg-brand-600 px-8 text-base font-medium shadow-lg shadow-brand-600/25 transition-colors hover:bg-brand-500"
+                    >
+                      Browse Courses
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
                 </div>
-                <span className="font-medium text-white">
-                  {MARKETING_HERO.rating}
-                </span>
-                <span>from {MARKETING_HERO.studentsLabel}</span>
+
+                <div className="mt-10 flex items-center gap-3 md:mt-14">
+                  <div className="flex -space-x-3">
+                    {MARKETING_AVATAR_COLORS.map((color, index) => (
+                      <div
+                        key={color}
+                        className={`flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#080c16] text-xs font-semibold text-white ring-2 ring-[#080c16] ${color}`}
+                      >
+                        {String.fromCharCode(65 + index)}
+                      </div>
+                    ))}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex text-amber-400">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className="h-4 w-4 fill-current"
+                          />
+                        ))}
+                      </div>
+                      <p className="font-medium text-white">
+                        {MARKETING_HERO.rating}
+                      </p>
+                    </div>
+                    <p className="text-sm text-slate-400">
+                      {MARKETING_HERO.studentsLabel}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#080c16] shadow-xl">
-              <div className="relative aspect-[1024/827] w-full">
-                <Image
-                  src="/images/hero-student.png"
-                  alt="Student learning with a laptop in a modern campus"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover object-center transition-transform duration-700 hover:scale-[1.02]"
-                  priority
-                />
-                <div
-                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#080c16]/70 via-transparent to-[#080c16]/20"
-                  aria-hidden
-                />
-              </div>
-              <div className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600 text-white shadow-md">
-                <GraduationCap className="h-5 w-5" />
-              </div>
-              <div className="absolute right-5 top-10 flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white shadow-md">
-                <Play className="h-4 w-4 fill-current" />
-              </div>
-              <div className="absolute bottom-6 left-6 flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white shadow-md">
-                <List className="h-4 w-4" />
-              </div>
+            <div className="relative w-full max-w-[640px]">
+              <div
+                className="pointer-events-none absolute bottom-20 right-0 h-[240px] w-[240px] rounded-full bg-emerald-500/25 blur-[120px]"
+                aria-hidden
+              />
+              <Image
+                src="/images/hero-student.png"
+                alt="Student learning with a laptop"
+                width={640}
+                height={520}
+                className="relative z-10 h-auto w-full object-contain"
+                priority
+              />
             </div>
           </div>
         </div>
@@ -139,7 +127,7 @@ export function MarketingHomePage() {
           <div className="flex flex-col items-center gap-5 rounded-2xl bg-brand-600 px-5 py-8 sm:flex-row sm:justify-between sm:px-8">
             <div className="flex items-center gap-4 text-center sm:text-left">
               <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15 sm:flex">
-                <GraduationCap className="h-6 w-6 text-white" />
+                <ArrowRight className="h-6 w-6 text-white" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-white sm:text-xl">

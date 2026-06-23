@@ -28,7 +28,6 @@ const marketingNav = [
   { href: "/", label: "Home" },
   { href: "/courses", label: "Courses" },
   { href: "/support", label: "How It Works" },
-  { href: "/privacy", label: "About Us" },
   { href: "/support", label: "Contact" },
 ] as const;
 
@@ -47,8 +46,6 @@ function isMarketingNavActive(pathname: string, href: string, label: string) {
   if (href === "/") return pathname === "/";
   if (href === "/courses") return pathname.startsWith("/courses");
   if (label === "Contact" || label === "How It Works") return pathname === "/support";
-  if (href === "/privacy") return pathname === "/privacy";
-  if (href === "/terms") return pathname === "/terms";
   return pathname === href;
 }
 
