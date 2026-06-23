@@ -11,7 +11,7 @@
   --brand-600: #0052ff;
   --brand-700: #0046d9;
   --brand-800: #0038b0;
-  --marketing-bg: #020617;
+  --marketing-bg: #0a0e1a;
   --marketing-bg-footer: #01040f;
   --marketing-bg-card: #0f172a;
   --marketing-bg-card-hover: #151f3d;
@@ -141,4 +141,37 @@
     rgba(100, 116, 139, 0.12) 1px,
     transparent 1px
   );
+}
+
+/* Night mockup: white courses band (sheerxirfad-style) */
+[data-marketing-theme="night"] [data-surface="courses-light"] {
+  --marketing-bg: #ffffff;
+  --marketing-bg-card: #ffffff;
+  --marketing-bg-card-hover: #f8fafc;
+  --marketing-fg: #0f172a;
+  --marketing-fg-subtle: #334155;
+  --marketing-muted: #64748b;
+  --marketing-border: #e2e8f0;
+  --marketing-badge-bg: #dbeafe;
+  --marketing-badge-fg: #1d4ed8;
+  --marketing-accent: #0052ff;
+  --marketing-accent-muted: #1d4ed8;
+  --marketing-icon-tint: #0052ff;
+  --marketing-card-icon-bg: #eff6ff;
+}
+
+[data-marketing-theme="night"] [data-surface="courses-light"] .marketing-course-card {
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+[data-marketing-theme="night"] [data-surface="courses-light"] .marketing-course-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 82, 255, 0.12);
+}
+
+.marketing-course-card-icon {
+  background-color: rgb(0 82 255 / 0.1);
+}
+
+[data-marketing-theme="night"] [data-surface="courses-light"] .marketing-course-card-icon {
+  background-color: var(--marketing-card-icon-bg);
 }

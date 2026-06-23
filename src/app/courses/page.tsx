@@ -6,8 +6,9 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
-import { CourseCard } from "@/components/courses/course-card";
+import { HomepageCourseCard } from "@/components/courses/homepage-course-card";
 import { MarketingShell } from "@/components/layout/marketing-shell";
+import { MarketingCoursesSurface } from "@/components/marketing/marketing-courses-surface";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,7 +20,6 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConvexQueryGate } from "@/components/convex/convex-query-gate";
-import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 
 const difficulties = [
   { value: "all", label: "All levels" },
@@ -35,9 +35,9 @@ export default function CoursesPage() {
         <MarketingShell>
           <div className="mx-auto max-w-7xl px-4 py-8">
             <Skeleton className="h-8 w-64 bg-white/10" />
-            <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-72 rounded-xl bg-white/5" />
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Skeleton key={i} className="h-[300px] rounded-2xl bg-white/5" />
               ))}
             </div>
           </div>
@@ -75,7 +75,6 @@ function CoursesPageContent() {
 
   const hasFilters =
     search.trim() || categoryId !== "all" || difficulty !== "all";
-  const { isNight } = useMarketingTheme();
 
   function clearFilters() {
     setSearch("");
@@ -87,7 +86,7 @@ function CoursesPageContent() {
     <MarketingShell>
       <section className="border-b border-marketing-border bg-marketing-hero">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-600">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-400">
             Course Catalog
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-marketing-fg sm:text-3xl">
@@ -109,8 +108,9 @@ function CoursesPageContent() {
         </div>
       </section>
 
-      <div className="border-b border-marketing-border">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:px-6 lg:px-8">
+      <MarketingCoursesSurface>
+        <div className="border-b border-marketing-border">
+          <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:px-6 lg:px-8">
             <Select value={categoryId} onValueChange={setCategoryId}>
               <SelectTrigger className="w-full border-marketing-border bg-marketing-card text-marketing-fg sm:w-[200px]">
                 <SelectValue placeholder="Category" />
@@ -157,9 +157,9 @@ function CoursesPageContent() {
             isLoading={courses === undefined}
             errorTitle="Could not load courses"
             fallback={
-              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-72 rounded-xl bg-white/5" />
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <Skeleton key={i} className="h-[300px] rounded-2xl bg-white/5" />
                 ))}
               </div>
             }
@@ -185,25 +185,19 @@ function CoursesPageContent() {
               <p className="mb-5 text-sm text-marketing-muted">
                 {courses.length} course{courses.length === 1 ? "" : "s"} found
               </p>
-              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {courses.map((course) => (
-                  <CourseCard
+                  <HomepageCourseCard
                     key={course._id}
-                    theme={isNight ? "dark" : "light"}
                     href={`/courses/${course.slug}`}
                     title={course.title}
                     description={course.description}
                     thumbnailUrl={course.thumbnailUrl}
                     difficulty={course.difficulty}
-                    categoryName={course.category?.name}
                     price={course.price}
                     compareAtPrice={course.compareAtPrice}
                     currency={course.currency}
-                    teacherName={
-                      course.teacher
-                        ? `${course.teacher.firstName} ${course.teacher.lastName}`
-                        : undefined
-                    }
+                    showPrice
                   />
                 ))}
               </div>
@@ -211,6 +205,7 @@ function CoursesPageContent() {
           ) : null}
           </ConvexQueryGate>
         </div>
+        </MarketingCoursesSurface>
     </MarketingShell>
   );
 }

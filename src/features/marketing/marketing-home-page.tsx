@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, GraduationCap, Star } from "lucide-react";
+import { ArrowRight, GraduationCap } from "lucide-react";
+import { MarketingCoursesSurface } from "@/components/marketing/marketing-courses-surface";
 import { MarketingShell } from "@/components/layout/marketing-shell";
 import { HomepageCourseSections } from "@/components/courses/homepage-course-sections";
 import { MarketingHeroImage } from "@/components/marketing/marketing-hero-image";
@@ -12,30 +13,7 @@ import {
   MARKETING_HERO,
   MARKETING_HERO_DAY,
 } from "@/lib/marketing-content";
-import { marketingCtaDarkButtonClass } from "@/lib/marketing-theme";
 import { cn } from "@/lib/utils";
-
-function HeroSocialProof({
-  rating,
-  studentsLabel,
-}: {
-  rating: string;
-  studentsLabel: string;
-}) {
-  return (
-    <div className="relative z-10 flex flex-col items-center gap-1 md:items-start">
-      <div className="flex items-center gap-2">
-        <div className="flex text-amber-400">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} className="h-4 w-4 fill-current" />
-          ))}
-        </div>
-        <p className="font-medium text-marketing-fg">{rating}</p>
-      </div>
-      <p className="text-sm text-marketing-muted">{studentsLabel}</p>
-    </div>
-  );
-}
 
 function MarketingHero() {
   const { isDay } = useMarketingTheme();
@@ -44,8 +22,8 @@ function MarketingHero() {
   return (
     <section
       className={cn(
-        "relative overflow-hidden",
-        isDay ? "bg-marketing-hero" : "pb-2"
+        "relative overflow-hidden border-b border-marketing-border",
+        isDay ? "bg-marketing-hero" : "bg-marketing-bg"
       )}
     >
       <div className="mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6 lg:px-8">
@@ -54,7 +32,7 @@ function MarketingHero() {
             <div className="relative z-10 mb-6 md:mb-8">
               <p
                 className={cn(
-                  "mb-3 text-sm font-semibold uppercase tracking-[0.12em]",
+                  "mb-3 text-[11px] font-semibold uppercase tracking-[0.14em]",
                   isDay ? "text-brand-600" : "text-brand-400"
                 )}
               >
@@ -71,7 +49,7 @@ function MarketingHero() {
               </p>
             </div>
 
-            <div className="relative z-10 mb-8 flex justify-center md:mb-10 md:justify-start">
+            <div className="relative z-10 flex justify-center md:justify-start">
               <Link href="/courses">
                 <Button
                   size="default"
@@ -82,11 +60,6 @@ function MarketingHero() {
                 </Button>
               </Link>
             </div>
-
-            <HeroSocialProof
-              rating={hero.rating}
-              studentsLabel={hero.studentsLabel}
-            />
           </div>
 
           <MarketingHeroImage />
@@ -153,11 +126,10 @@ function MarketingCtaBanner() {
             <Button
               size="default"
               className={cn(
-                "h-10 rounded-lg px-5 text-sm text-white",
-                marketingCtaDarkButtonClass
+                "h-10 rounded-lg bg-white px-5 text-sm text-brand-600 hover:bg-blue-50"
               )}
             >
-              Browse All Courses
+              Browse Courses
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -172,7 +144,9 @@ export function MarketingHomePage() {
     <MarketingShell className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <MarketingHero />
       <MarketingStatsBar />
-      <HomepageCourseSections />
+      <MarketingCoursesSurface>
+        <HomepageCourseSections />
+      </MarketingCoursesSurface>
       <MarketingCtaBanner />
     </MarketingShell>
   );

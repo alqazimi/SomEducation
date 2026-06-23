@@ -7,7 +7,7 @@ export function isMarketingSitePath(pathname: string) {
 
 /** Mockup-aligned marketing palette — deep navy + electric blue (night). */
 export const MARKETING_COLORS = {
-  background: "#020617",
+  background: "#0a0e1a",
   backgroundFooter: "#01040f",
   backgroundCard: "#0f172a",
   backgroundCardHover: "#151f3d",
