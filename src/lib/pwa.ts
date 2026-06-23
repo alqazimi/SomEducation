@@ -20,6 +20,49 @@ export function isIosInstallable(): boolean {
   );
 }
 
+/** True when iOS Safari can add to home screen (not Chrome/Firefox on iOS). */
+export function isIosSafari(): boolean {
+  if (typeof window === "undefined" || !isIosInstallable()) return false;
+  const ua = window.navigator.userAgent;
+  return /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua);
+}
+
+export function isAndroid(): boolean {
+  if (typeof window === "undefined") return false;
+  return /Android/i.test(window.navigator.userAgent);
+}
+
+export function canUseWebShare(): boolean {
+  if (typeof window === "undefined") return false;
+  return typeof navigator.share === "function";
+}
+
+export function getPwaShareUrl(): string {
+  if (typeof window === "undefined") return "/";
+  return window.location.origin + "/";
+}
+
+export async function openInstallShareSheet(
+  title: string
+): Promise<"shared" | "cancelled" | "unavailable"> {
+  if (!canUseWebShare()) return "unavailable";
+
+  try {
+    await navigator.share({
+      title,
+      text: `Add ${title} to your home screen for quick access.`,
+      url: getPwaShareUrl(),
+    });
+    return "shared";
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      return "cancelled";
+    }
+    console.warn("[SomEducation] Web Share failed:", error);
+    return "unavailable";
+  }
+}
+
 export function isInstallPromptDismissed(): boolean {
   if (typeof window === "undefined") return true;
   try {
@@ -45,9 +88,22 @@ export async function registerServiceWorker(): Promise<void> {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
   if (process.env.NODE_ENV === "development") return;
 
-  try {
-    await navigator.serviceWorker.register("/sw.js", { scope: "/" });
-  } catch (error) {
-    console.warn("[SomEducation] Service worker registration failed:", error);
-  }
+  const register = async () => {
+    try {
+      await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+    } catch (error) {
+      console.warn("[SomEducation] Service worker registration failed:", error);
+    }
+  };
+
+  await register();
+
+  // Retry once after load — helps Android Chrome pick up installability.
+  window.addEventListener(
+    "load",
+    () => {
+      void register();
+    },
+    { once: true }
+  );
 }

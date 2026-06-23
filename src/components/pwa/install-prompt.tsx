@@ -1,15 +1,19 @@
 "use client";
 
 import { Download, Share, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { Button } from "@/components/ui/button";
 import { PLATFORM_NAME } from "@/lib/brand";
 import {
+  canUseWebShare,
   dismissInstallPrompt,
+  isAndroid,
   isInstallPromptDismissed,
   isIosInstallable,
+  isIosSafari,
   isStandaloneDisplay,
+  openInstallShareSheet,
 } from "@/lib/pwa";
 import { cn } from "@/lib/utils";
 
@@ -18,15 +22,38 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
+type InstallMode = "android" | "android-manual" | "ios";
+
 const SHOW_DELAY_MS = 2500;
+const ANDROID_FALLBACK_MS = 7000;
+
+function subscribeClientReady(listener: () => void) {
+  listener();
+  return () => undefined;
+}
+
+function getClientReadySnapshot() {
+  return true;
+}
+
+function getClientReadyServerSnapshot() {
+  return false;
+}
 
 export function InstallPrompt() {
   const { isNight } = useMarketingTheme();
+  const ready = useSyncExternalStore(
+    subscribeClientReady,
+    getClientReadySnapshot,
+    getClientReadyServerSnapshot
+  );
   const [visible, setVisible] = useState(false);
-  const [mode, setMode] = useState<"android" | "ios" | null>(null);
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
+  const [androidFallback, setAndroidFallback] = useState(false);
   const [installing, setInstalling] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [showIosSteps, setShowIosSteps] = useState(false);
 
   useEffect(() => {
     if (isStandaloneDisplay() || isInstallPromptDismissed()) return;
@@ -34,7 +61,6 @@ export function InstallPrompt() {
     const onBeforeInstall = (event: Event) => {
       event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
-      setMode("android");
     };
 
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
@@ -44,45 +70,94 @@ export function InstallPrompt() {
   }, []);
 
   useEffect(() => {
-    if (isStandaloneDisplay() || isInstallPromptDismissed()) return;
+    if (!ready || isStandaloneDisplay() || isInstallPromptDismissed()) return;
+    if (isIosInstallable() || deferredPrompt) return;
+    if (!isAndroid()) return;
 
-    if (deferredPrompt) {
-      const timer = window.setTimeout(() => setVisible(true), SHOW_DELAY_MS);
-      return () => window.clearTimeout(timer);
-    }
+    const timer = window.setTimeout(() => {
+      setAndroidFallback(true);
+    }, ANDROID_FALLBACK_MS);
 
-    if (isIosInstallable()) {
-      const timer = window.setTimeout(() => {
-        setMode("ios");
-        setVisible(true);
-      }, SHOW_DELAY_MS);
-      return () => window.clearTimeout(timer);
-    }
-  }, [deferredPrompt]);
+    return () => window.clearTimeout(timer);
+  }, [ready, deferredPrompt]);
+
+  const installMode: InstallMode | null = ready
+    ? deferredPrompt
+      ? "android"
+      : isIosInstallable()
+        ? "ios"
+        : androidFallback && isAndroid()
+          ? "android-manual"
+          : null
+    : null;
+
+  const blocked =
+    !ready || isStandaloneDisplay() || isInstallPromptDismissed();
+
+  useEffect(() => {
+    if (blocked || !installMode) return;
+
+    const timer = window.setTimeout(() => setVisible(true), SHOW_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [blocked, installMode]);
 
   const handleDismiss = useCallback(() => {
     dismissInstallPrompt();
     setVisible(false);
   }, []);
 
-  const handleInstall = useCallback(async () => {
+  const handleInstall = useCallback(() => {
     if (!deferredPrompt) return;
+
+    const promptEvent = deferredPrompt;
     setInstalling(true);
+
     try {
-      await deferredPrompt.prompt();
-      const choice = await deferredPrompt.userChoice;
-      if (choice.outcome === "accepted") {
-        setVisible(false);
-      }
+      void promptEvent
+        .prompt()
+        .then(() => promptEvent.userChoice)
+        .then(({ outcome }) => {
+          if (outcome === "accepted") {
+            setVisible(false);
+          }
+        })
+        .catch((error) => {
+          console.warn("[SomEducation] PWA install prompt failed:", error);
+        })
+        .finally(() => {
+          setInstalling(false);
+          setDeferredPrompt(null);
+        });
     } catch (error) {
       console.warn("[SomEducation] PWA install prompt failed:", error);
-    } finally {
       setInstalling(false);
       setDeferredPrompt(null);
     }
   }, [deferredPrompt]);
 
-  if (!visible || !mode) return null;
+  const handleIosShare = useCallback(() => {
+    if (!canUseWebShare()) {
+      setShowIosSteps(true);
+      return;
+    }
+
+    setSharing(true);
+    void openInstallShareSheet(PLATFORM_NAME)
+      .then((result) => {
+        if (result === "unavailable") {
+          setShowIosSteps(true);
+        }
+      })
+      .finally(() => {
+        setSharing(false);
+      });
+  }, []);
+
+  if (!visible || !installMode) return null;
+
+  const isIos = installMode === "ios";
+  const isAndroidNative = installMode === "android";
+  const isAndroidManual = installMode === "android-manual";
 
   return (
     <div
@@ -99,10 +174,10 @@ export function InstallPrompt() {
         )}
       >
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white">
-          {mode === "android" ? (
-            <Download className="h-5 w-5" />
+          {isIos ? (
+            <Share className="h-5 w-5" aria-hidden />
           ) : (
-            <Share className="h-5 w-5" />
+            <Download className="h-5 w-5" aria-hidden />
           )}
         </div>
 
@@ -115,7 +190,22 @@ export function InstallPrompt() {
           >
             Install {PLATFORM_NAME}
           </p>
-          {mode === "android" ? (
+
+          {isIos && !isIosSafari() && (
+            <p
+              className={cn(
+                "mt-2 rounded-lg border px-3 py-2 text-xs leading-relaxed",
+                isNight
+                  ? "border-amber-400/30 bg-amber-500/10 text-amber-100"
+                  : "border-amber-200 bg-amber-50 text-amber-900"
+              )}
+            >
+              Open this page in <strong>Safari</strong> to install on your home
+              screen.
+            </p>
+          )}
+
+          {isAndroidNative && (
             <p
               className={cn(
                 "mt-1 text-sm leading-relaxed",
@@ -124,30 +214,98 @@ export function InstallPrompt() {
             >
               Add the app to your home screen for quick access to your courses.
             </p>
-          ) : (
+          )}
+
+          {isAndroidManual && (
             <p
               className={cn(
                 "mt-1 text-sm leading-relaxed",
                 isNight ? "text-slate-300" : "text-muted-foreground"
               )}
             >
-              Tap <strong className={isNight ? "text-white" : "text-foreground"}>Share</strong>, then{" "}
-              <strong className={isNight ? "text-white" : "text-foreground"}>Add to Home Screen</strong>.
+              Tap the browser menu{" "}
+              <strong className={isNight ? "text-white" : "text-foreground"}>
+                (⋮)
+              </strong>
+              , then choose{" "}
+              <strong className={isNight ? "text-white" : "text-foreground"}>
+                Install app
+              </strong>{" "}
+              or{" "}
+              <strong className={isNight ? "text-white" : "text-foreground"}>
+                Add to Home screen
+              </strong>
+              .
             </p>
           )}
 
+          {isIos && (
+            <>
+              <p
+                className={cn(
+                  "mt-1 text-sm leading-relaxed",
+                  isNight ? "text-slate-300" : "text-muted-foreground"
+                )}
+              >
+                Tap the button below, then choose{" "}
+                <strong className={isNight ? "text-white" : "text-foreground"}>
+                  Add to Home Screen
+                </strong>{" "}
+                in the share menu.
+              </p>
+              {(showIosSteps || !canUseWebShare()) && (
+                <ol
+                  className={cn(
+                    "mt-2 list-decimal space-y-1 pl-4 text-xs leading-relaxed",
+                    isNight ? "text-slate-300" : "text-muted-foreground"
+                  )}
+                >
+                  <li>
+                    Tap{" "}
+                    <strong className={isNight ? "text-white" : "text-foreground"}>
+                      Share
+                    </strong>{" "}
+                    at the bottom of Safari (square with arrow).
+                  </li>
+                  <li>
+                    Scroll and tap{" "}
+                    <strong className={isNight ? "text-white" : "text-foreground"}>
+                      Add to Home Screen
+                    </strong>
+                    .
+                  </li>
+                  <li>Tap Add in the top-right corner.</li>
+                </ol>
+              )}
+            </>
+          )}
+
           <div className="mt-3 flex flex-wrap gap-2">
-            {mode === "android" && (
+            {isAndroidNative && (
               <Button
+                type="button"
                 size="sm"
                 className="h-9 rounded-lg"
-                onClick={() => void handleInstall()}
-                disabled={installing}
+                onClick={handleInstall}
+                disabled={installing || !deferredPrompt}
               >
                 {installing ? "Installing…" : "Install app"}
               </Button>
             )}
+            {isIos && (
+              <Button
+                type="button"
+                size="sm"
+                className="h-9 rounded-lg"
+                onClick={handleIosShare}
+                disabled={sharing}
+              >
+                <Share className="h-4 w-4" />
+                {sharing ? "Opening…" : "Open Share menu"}
+              </Button>
+            )}
             <Button
+              type="button"
               size="sm"
               variant="outline"
               className={cn(
