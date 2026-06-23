@@ -22,8 +22,8 @@ function MarketingHero() {
 
   return (
     <section className="relative">
-      <div className="mx-auto max-w-7xl px-4 pb-6 pt-4 sm:px-6 sm:pb-10 sm:pt-6 lg:px-8 lg:pb-12">
-        <div className="flex flex-col gap-10 sm:gap-12 md:flex-row md:items-center md:justify-between md:gap-12 lg:gap-16">
+      <div className="mx-auto max-w-7xl px-4 pb-4 pt-0 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8">
+        <div className="flex flex-col gap-8 sm:gap-10 md:flex-row md:items-center md:justify-between md:gap-12 lg:gap-16">
           <div className="relative w-full md:max-w-xl">
             <div className="relative z-10">
               <p

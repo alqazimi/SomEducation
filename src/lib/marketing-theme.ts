@@ -30,6 +30,9 @@ export const marketingCardClass =
 export const marketingHeaderClass =
   "border-b border-marketing-border bg-marketing-bg/95";
 
+export const marketingHeaderClassNight =
+  "border-transparent bg-marketing-bg";
+
 export const marketingFooterClass =
   "border-marketing-border bg-marketing-bg-footer text-marketing-muted";
 

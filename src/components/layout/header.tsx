@@ -22,7 +22,7 @@ import {
 import { NotificationBell } from "@/features/notifications/notifications-inbox";
 import { MarketingThemeToggle } from "@/components/marketing/marketing-theme-toggle";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
-import { isMarketingSitePath, marketingHeaderClass } from "@/lib/marketing-theme";
+import { isMarketingSitePath, marketingHeaderClass, marketingHeaderClassNight } from "@/lib/marketing-theme";
 import { HeaderSearch } from "./header-search";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
 
@@ -88,11 +88,15 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
     <>
       <header
         className={cn(
-          "top-0 z-50 w-full backdrop-blur-md",
+          "top-0 z-50 w-full",
+          isMarketing && useDarkChrome ? "" : "backdrop-blur-md",
           isMarketing ? "fixed" : "sticky",
           (isMarketing || isDashboard) && "pt-[env(safe-area-inset-top,0px)]",
           useDarkChrome
-            ? cn(marketingHeaderClass, isDay && isMarketing && "shadow-sm")
+            ? cn(
+                isMarketing ? marketingHeaderClassNight : marketingHeaderClass,
+                isDay && isMarketing && "shadow-sm"
+              )
             : "border-b border-border/80 bg-background/95 shadow-sm"
         )}
       >

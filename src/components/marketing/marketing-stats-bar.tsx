@@ -18,18 +18,18 @@ export function MarketingStatsBar({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        "relative z-10 px-4 pb-8 sm:px-6 sm:pb-10 lg:px-8 lg:pb-12",
+        "relative z-10 px-4 sm:px-6 lg:px-8",
         className
       )}
     >
       <div
         className={cn(
-          "mx-auto max-w-7xl rounded-2xl border border-marketing-border bg-marketing-card px-4 py-6 sm:px-6 sm:py-7 lg:px-8",
+          "mx-auto max-w-7xl rounded-2xl border border-marketing-border bg-marketing-card px-4 py-5 sm:px-6 sm:py-6 lg:px-8",
           isNight && "shadow-[0_8px_32px_rgba(0,82,255,0.12)]",
-          "-mt-4 sm:-mt-6 lg:-mt-8"
+          isNight && "-mb-6 sm:-mb-8"
         )}
       >
-        <div className="mx-auto grid w-full max-w-[18.5rem] grid-cols-2 place-items-center gap-x-10 gap-y-6 min-[400px]:max-w-[20rem] sm:max-w-none sm:grid-cols-4 sm:place-items-stretch sm:gap-6">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4 sm:gap-6">
           {MARKETING_STATS.map((stat) => {
             const Icon = ICONS[stat.icon];
             return (
