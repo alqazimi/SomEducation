@@ -3,7 +3,7 @@
 import { useQuery } from "convex/react";
 import { Search, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
 import { CourseCard } from "@/components/courses/course-card";
@@ -50,17 +50,16 @@ export default function CoursesPage() {
 
 function CoursesPageContent() {
   const searchParams = useSearchParams();
-  const initialSearch = searchParams.get("search") ?? "";
-  const [search, setSearch] = useState(initialSearch);
+  const urlSearch = searchParams.get("search") ?? "";
+  const [search, setSearch] = useState(urlSearch);
+  const [syncedUrlSearch, setSyncedUrlSearch] = useState(urlSearch);
   const [categoryId, setCategoryId] = useState<string>("all");
   const [difficulty, setDifficulty] = useState<string>("all");
 
-  useEffect(() => {
-    const query = searchParams.get("search");
-    if (query !== null) {
-      setSearch(query);
-    }
-  }, [searchParams]);
+  if (urlSearch !== syncedUrlSearch) {
+    setSyncedUrlSearch(urlSearch);
+    setSearch(urlSearch);
+  }
 
   const categories = useQuery(api.categories.list, { activeOnly: true });
   const courses = useQuery(api.courses.listPublished, {

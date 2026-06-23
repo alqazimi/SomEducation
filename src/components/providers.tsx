@@ -10,6 +10,18 @@ import { ConvexAuthBanner } from "@/components/auth/convex-auth-banner";
 import { UserSync } from "@/components/auth/user-sync";
 import { getConvexClientUrl, isConvexConfigured } from "@/lib/convex-url";
 
+function ConvexConfigBanner({ configured }: { configured: boolean }) {
+  if (configured || process.env.NODE_ENV === "production") return null;
+
+  return (
+    <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900">
+      Backend URL is not configured. Set{" "}
+      <code className="font-mono text-xs">NEXT_PUBLIC_CONVEX_URL</code> in{" "}
+      <code className="font-mono text-xs">.env.local</code> and restart dev.
+    </div>
+  );
+}
+
 export function Providers({
   children,
   convexUrl = "",
@@ -41,13 +53,7 @@ export function Providers({
       <QueryClientProvider client={queryClient}>
         <UserSync />
         <ConvexAuthBanner />
-        {!configured && typeof window !== "undefined" && (
-          <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900">
-            Backend URL is not configured. Set{" "}
-            <code className="font-mono text-xs">NEXT_PUBLIC_CONVEX_URL</code> on
-            Vercel and redeploy.
-          </div>
-        )}
+        <ConvexConfigBanner configured={configured} />
         {children}
         <Toaster position="top-right" richColors closeButton />
       </QueryClientProvider>

@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export function HeaderSearch({
@@ -20,10 +20,12 @@ export function HeaderSearch({
   const searchParams = useSearchParams();
   const urlSearch = searchParams.get("search") ?? "";
   const [query, setQuery] = useState(urlSearch);
+  const [syncedUrlSearch, setSyncedUrlSearch] = useState(urlSearch);
 
-  useEffect(() => {
+  if (urlSearch !== syncedUrlSearch) {
+    setSyncedUrlSearch(urlSearch);
     setQuery(urlSearch);
-  }, [urlSearch]);
+  }
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { Building2, Pencil, Plus, Smartphone, Sparkles, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
@@ -60,7 +60,10 @@ function ProviderForm({
     },
   });
 
-  const selectedType = form.watch("type");
+  const selectedType = useWatch({
+    control: form.control,
+    name: "type",
+  });
 
   return (
     <form

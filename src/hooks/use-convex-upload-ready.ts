@@ -1,7 +1,7 @@
 "use client";
 
 import { useConvexAuth } from "convex/react";
-import { useRef } from "react";
+import { useState } from "react";
 
 /**
  * Keeps uploads enabled during brief Convex auth reconnects so the payment
@@ -9,14 +9,13 @@ import { useRef } from "react";
  */
 export function useConvexUploadReady() {
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
-  const wasReadyRef = useRef(false);
+  const [wasReady, setWasReady] = useState(false);
 
-  if (isAuthenticated && !authLoading) {
-    wasReadyRef.current = true;
+  if (isAuthenticated && !authLoading && !wasReady) {
+    setWasReady(true);
   }
 
-  const canUpload =
-    isAuthenticated || (wasReadyRef.current && authLoading);
+  const canUpload = isAuthenticated || (wasReady && authLoading);
 
   const statusMessage =
     authLoading && !isAuthenticated

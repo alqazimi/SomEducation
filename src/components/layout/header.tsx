@@ -64,11 +64,13 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
   const signUpUrl = getSignUpUrl(pathname || "/dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [navPathname, setNavPathname] = useState(pathname);
 
-  useEffect(() => {
+  if (pathname !== navPathname) {
+    setNavPathname(pathname);
     setMobileOpen(false);
     setMobileSearchOpen(false);
-  }, [pathname]);
+  }
 
   useEffect(() => {
     if (!mobileOpen && !mobileSearchOpen) return;

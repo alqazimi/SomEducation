@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2, Smartphone } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "convex/_generated/api";
@@ -60,8 +60,8 @@ export function PurchaseCourseForm() {
   const { canUpload, statusMessage } = useConvexUploadReady();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const draftRestoredRef = useRef(false);
-  const courseReadyRef = useRef(false);
-  const openPaymentReadyRef = useRef(false);
+  const [courseReady, setCourseReady] = useState(false);
+  const [openPaymentReady, setOpenPaymentReady] = useState(false);
   const [step, setStep] = useState(1);
   const [uploading, setUploading] = useState(false);
   const [screenshotId, setScreenshotId] = useState<Id<"_storage"> | null>(null);
@@ -97,30 +97,34 @@ export function PurchaseCourseForm() {
     },
   });
 
-  const formValues = form.watch();
+  const formValues = useWatch({ control: form.control });
 
   useEffect(() => {
     if (draftRestoredRef.current) return;
-    const draft = readPaymentDraft<PurchaseDraft>(draftKey);
     draftRestoredRef.current = true;
+    const draft = readPaymentDraft<PurchaseDraft>(draftKey);
     if (!draft) return;
 
-    if (draft.step && draft.step >= 1 && draft.step <= 4) {
-      setStep(draft.step);
-    }
-    if (draft.paymentType) setPaymentType(draft.paymentType);
-    if (draft.selectedProviderId) {
-      setSelectedProviderId(draft.selectedProviderId as Id<"paymentProviders">);
-    }
-    if (draft.screenshotId) {
-      setScreenshotId(draft.screenshotId as Id<"_storage">);
-    }
-    form.reset({
-      fullName: draft.fullName ?? "",
-      phone: draft.phone ?? "",
-      transactionReference: draft.transactionReference ?? "",
-      notes: draft.notes ?? "",
-      paymentProviderId: draft.paymentProviderId ?? "",
+    queueMicrotask(() => {
+      if (draft.step && draft.step >= 1 && draft.step <= 4) {
+        setStep(draft.step);
+      }
+      if (draft.paymentType) setPaymentType(draft.paymentType);
+      if (draft.selectedProviderId) {
+        setSelectedProviderId(
+          draft.selectedProviderId as Id<"paymentProviders">
+        );
+      }
+      if (draft.screenshotId) {
+        setScreenshotId(draft.screenshotId as Id<"_storage">);
+      }
+      form.reset({
+        fullName: draft.fullName ?? "",
+        phone: draft.phone ?? "",
+        transactionReference: draft.transactionReference ?? "",
+        notes: draft.notes ?? "",
+        paymentProviderId: draft.paymentProviderId ?? "",
+      });
     });
   }, [draftKey, form]);
 
@@ -142,11 +146,11 @@ export function PurchaseCourseForm() {
     formValues,
   ]);
 
-  if (course !== undefined) {
-    courseReadyRef.current = true;
+  if (course !== undefined && !courseReady) {
+    setCourseReady(true);
   }
-  if (openPayment !== undefined) {
-    openPaymentReadyRef.current = true;
+  if (openPayment !== undefined && !openPaymentReady) {
+    setOpenPaymentReady(true);
   }
 
   function handleTypeChange(nextType: PaymentType) {
@@ -211,7 +215,7 @@ export function PurchaseCourseForm() {
     }
   }
 
-  if (course === undefined && !courseReadyRef.current) {
+  if (course === undefined && !courseReady) {
     return <p className="text-sm text-slate-500">Loading course...</p>;
   }
 
@@ -262,7 +266,7 @@ export function PurchaseCourseForm() {
     );
   }
 
-  if (openPayment === undefined && !openPaymentReadyRef.current) {
+  if (openPayment === undefined && !openPaymentReady) {
     return <p className="text-sm text-slate-500">Loading payment status...</p>;
   }
 

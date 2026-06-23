@@ -9,7 +9,7 @@ import {
   Rocket,
   Settings2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
@@ -66,9 +66,12 @@ export default function EditCoursePage() {
   >("beginner");
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [learningOutcomes, setLearningOutcomes] = useState<string[]>([""]);
+  const [loadedCourseId, setLoadedCourseId] = useState<Id<"courses"> | null>(
+    null
+  );
 
-  useEffect(() => {
-    if (!course) return;
+  if (course && course._id !== loadedCourseId) {
+    setLoadedCourseId(course._id);
     setTitle(course.title);
     setDescription(course.description);
     setSalePrice(String(course.price));
@@ -81,11 +84,9 @@ export default function EditCoursePage() {
     setDifficulty(course.difficulty);
     setThumbnailPreview(course.thumbnailUrl ?? null);
     setLearningOutcomes(
-      course.learningOutcomes?.length
-        ? course.learningOutcomes
-        : [""]
+      course.learningOutcomes?.length ? course.learningOutcomes : [""]
     );
-  }, [course?._id]);
+  }
 
   const isManagingAsStaff =
     me &&

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
@@ -48,6 +48,10 @@ export function MessageComposeForm({
   const isAdmin = me?.role === "admin" || me?.role === "owner";
   const singleRecipient =
     recipients?.length === 1 && !isAdmin ? recipients[0] : null;
+  const recipientId = useWatch({
+    control: form.control,
+    name: "recipientId",
+  });
 
   useEffect(() => {
     if (singleRecipient) {
@@ -100,7 +104,7 @@ export function MessageComposeForm({
           </p>
         ) : (
           <Select
-            value={form.watch("recipientId")}
+            value={recipientId}
             onValueChange={(value) => form.setValue("recipientId", value)}
           >
             <SelectTrigger id="recipient" className="mt-1">

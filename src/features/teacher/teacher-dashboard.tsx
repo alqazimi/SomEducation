@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { DashboardPageHeader } from "@/components/layout/dashboard-page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SectionTitle } from "@/components/ui/typography";
 import { formatEnrollmentCount } from "@/lib/enrollment";
 import { type } from "@/lib/typography";
 import { formatPrice } from "@/lib/utils";

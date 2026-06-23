@@ -6,27 +6,7 @@ import { ArrowRight, Star } from "lucide-react";
 import { MarketingShell } from "@/components/layout/marketing-shell";
 import { HomepageCourseSections } from "@/components/courses/homepage-course-sections";
 import { Button } from "@/components/ui/button";
-import { MARKETING_HERO, MARKETING_STATS } from "@/lib/marketing-content";
-
-function MarketingStatsBar() {
-  return (
-    <section className="border-y border-white/10 bg-[#0d1324]/80 py-7 sm:py-8">
-      <div className="mx-auto grid max-w-7xl gap-5 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
-        {MARKETING_STATS.map((item) => (
-          <div key={item.label} className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-600/20 text-brand-400">
-              <item.icon className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-lg font-semibold text-white">{item.value}</p>
-              <p className="text-xs text-slate-400">{item.label}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
+import { MARKETING_HERO } from "@/lib/marketing-content";
 
 export function MarketingHomePage() {
   return (
@@ -77,25 +57,7 @@ export function MarketingHomePage() {
             </div>
 
             <div className="relative mx-auto w-full max-w-[300px] sm:max-w-[360px] md:mx-0 md:max-w-[420px] lg:max-w-[460px]">
-              <svg
-                className="pointer-events-none absolute -right-4 -top-4 z-0 h-[calc(100%+2rem)] w-[calc(100%+2rem)] text-brand-600 md:-right-6 md:-top-6"
-                viewBox="0 0 400 400"
-                fill="none"
-                aria-hidden
-              >
-                <circle
-                  cx="210"
-                  cy="220"
-                  r="170"
-                  stroke="currentColor"
-                  strokeWidth="18"
-                  strokeLinecap="round"
-                  strokeDasharray="520 520"
-                  opacity="0.5"
-                />
-              </svg>
-
-              <div className="relative z-10 aspect-[3/4] w-full">
+              <div className="relative aspect-[3/4] w-full">
                 <Image
                   src="/images/hero-student.png"
                   alt="Smiling student with backpack ready to learn"
@@ -109,8 +71,6 @@ export function MarketingHomePage() {
           </div>
         </div>
       </section>
-
-      <MarketingStatsBar />
 
       <HomepageCourseSections />
 

@@ -49,8 +49,10 @@ export function InstallPrompt() {
     }
 
     if (isIosInstallable()) {
-      setMode("ios");
-      const timer = window.setTimeout(() => setVisible(true), SHOW_DELAY_MS);
+      const timer = window.setTimeout(() => {
+        setMode("ios");
+        setVisible(true);
+      }, SHOW_DELAY_MS);
       return () => window.clearTimeout(timer);
     }
   }, [deferredPrompt]);

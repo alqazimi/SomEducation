@@ -2,7 +2,7 @@
  * Generates PNG logos for Clerk dashboard upload from SVG sources.
  * Run: node scripts/generate-clerk-logos.mjs
  */
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";

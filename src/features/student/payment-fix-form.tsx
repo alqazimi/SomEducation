@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2, Smartphone } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
@@ -82,6 +82,7 @@ export function PaymentFixForm({
   const [uploading, setUploading] = useState(false);
   const [screenshotId, setScreenshotId] = useState<Id<"_storage"> | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [providerPrefilled, setProviderPrefilled] = useState(false);
 
   const providers = useQuery(
     api.paymentProviders.list,
@@ -104,27 +105,32 @@ export function PaymentFixForm({
     [providers, selectedProviderId]
   );
 
-  const formValues = form.watch();
+  const formValues = useWatch({ control: form.control });
 
   useEffect(() => {
     if (draftRestoredRef.current) return;
-    const draft = readPaymentDraft<PaymentFixDraft>(draftKey);
     draftRestoredRef.current = true;
+    const draft = readPaymentDraft<PaymentFixDraft>(draftKey);
     if (!draft) return;
 
-    if (draft.step === 1 || draft.step === 2) setStep(draft.step);
-    if (draft.paymentType) setPaymentType(draft.paymentType);
-    if (draft.selectedProviderId) {
-      setSelectedProviderId(draft.selectedProviderId as Id<"paymentProviders">);
-    }
-    if (draft.screenshotId) {
-      setScreenshotId(draft.screenshotId as Id<"_storage">);
-    }
-    form.reset({
-      paymentProviderId: draft.paymentProviderId ?? payment.paymentProviderId ?? "",
-      transactionReference:
-        draft.transactionReference ?? payment.transactionReference,
-      notes: draft.notes ?? payment.notes ?? "",
+    queueMicrotask(() => {
+      if (draft.step === 1 || draft.step === 2) setStep(draft.step);
+      if (draft.paymentType) setPaymentType(draft.paymentType);
+      if (draft.selectedProviderId) {
+        setSelectedProviderId(
+          draft.selectedProviderId as Id<"paymentProviders">
+        );
+      }
+      if (draft.screenshotId) {
+        setScreenshotId(draft.screenshotId as Id<"_storage">);
+      }
+      form.reset({
+        paymentProviderId:
+          draft.paymentProviderId ?? payment.paymentProviderId ?? "",
+        transactionReference:
+          draft.transactionReference ?? payment.transactionReference,
+        notes: draft.notes ?? payment.notes ?? "",
+      });
     });
   }, [draftKey, form, payment]);
 
@@ -145,8 +151,10 @@ export function PaymentFixForm({
       (provider) => provider._id === selectedProviderId
     );
     if (!stillValid) {
-      setSelectedProviderId(null);
-      form.setValue("paymentProviderId", "");
+      queueMicrotask(() => {
+        setSelectedProviderId(null);
+        form.setValue("paymentProviderId", "");
+      });
     }
   }, [providers, selectedProviderId, form]);
 
@@ -156,31 +164,22 @@ export function PaymentFixForm({
     }
   }, [selectedProviderId, form]);
 
-  useEffect(() => {
-    if (
-      paymentType !== payment.method ||
-      !payment.paymentProviderId ||
-      !providers ||
-      selectedProviderId
-    ) {
-      return;
-    }
-
+  if (
+    !providerPrefilled &&
+    paymentType === payment.method &&
+    payment.paymentProviderId &&
+    providers &&
+    !selectedProviderId
+  ) {
     const original = providers.find(
       (provider) => provider._id === payment.paymentProviderId
     );
     if (original) {
+      setProviderPrefilled(true);
       setSelectedProviderId(original._id);
       form.setValue("paymentProviderId", original._id);
     }
-  }, [
-    paymentType,
-    payment.method,
-    payment.paymentProviderId,
-    providers,
-    selectedProviderId,
-    form,
-  ]);
+  }
 
   function handleTypeChange(nextType: PaymentType) {
     setPaymentType(nextType);

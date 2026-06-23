@@ -88,11 +88,17 @@ export function useEnsureConvexUser() {
   const waitingForConvexAuth =
     clerkSignedIn && !authLoading && !isAuthenticated && !authError;
 
-  useEffect(() => {
+  const [waitingSnapshot, setWaitingSnapshot] = useState(waitingForConvexAuth);
+
+  if (waitingForConvexAuth !== waitingSnapshot) {
+    setWaitingSnapshot(waitingForConvexAuth);
     if (!waitingForConvexAuth) {
       setAuthTimedOut(false);
-      return;
     }
+  }
+
+  useEffect(() => {
+    if (!waitingForConvexAuth) return;
 
     const id = window.setTimeout(() => setAuthTimedOut(true), 12_000);
     return () => window.clearTimeout(id);

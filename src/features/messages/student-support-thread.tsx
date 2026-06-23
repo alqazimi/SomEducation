@@ -137,10 +137,11 @@ export function StudentSupportThread() {
 
   const thread = data?.thread;
   const messages = data?.messages ?? [];
+  const threadId = thread?._id;
 
   useEffect(() => {
-    void markThreadRead(thread ? { threadId: thread._id } : {});
-  }, [thread?._id, markThreadRead]);
+    void markThreadRead(threadId ? { threadId } : {});
+  }, [threadId, markThreadRead]);
 
   async function handleNewMessage(values: SupportMessageFormValues) {
     try {

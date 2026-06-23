@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { getCurrentUser, requireCurrentUser } from "./lib/auth";
+import { getCurrentUser } from "./lib/auth";
 
 export const list = query({
   args: { unreadOnly: v.optional(v.boolean()) },

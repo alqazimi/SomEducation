@@ -6,10 +6,10 @@ import { useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import {
   ConvexSectionErrorBoundary,
-  useConvexQueryReady,
 } from "@/components/convex/convex-query-gate";
 import { HomepageCourseCard } from "@/components/courses/homepage-course-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { isConvexConfigured } from "@/lib/convex-url";
 
 type HomepageCourse = {
   _id: string;
@@ -117,7 +117,7 @@ function HomepageCourseSection({
 }
 
 function HomepageCourseSectionsContent() {
-  const queryReady = useConvexQueryReady();
+  const queryReady = isConvexConfigured();
   const sections = useQuery(
     api.courses.listHomepageSections,
     queryReady ? {} : "skip"

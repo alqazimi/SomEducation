@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
@@ -53,6 +53,7 @@ export function CreateCourseForm() {
   });
   const [regularPrice, setRegularPrice] = useState("");
   const [learningOutcomes, setLearningOutcomes] = useState(["", "", ""]);
+  const salePrice = useWatch({ control: form.control, name: "price" });
 
   async function onSubmit(data: CourseFormValues) {
     if (!moduleTitle.trim()) {
@@ -193,7 +194,7 @@ export function CreateCourseForm() {
 
             <CoursePricingFields
               regularPrice={regularPrice}
-              salePrice={String(form.watch("price") ?? "")}
+              salePrice={String(salePrice ?? "")}
               onRegularPriceChange={(value) => {
                 setRegularPrice(value);
                 form.setValue(

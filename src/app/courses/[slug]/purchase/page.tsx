@@ -22,17 +22,17 @@ export default function PurchasePage() {
     `/courses/${params.slug}/purchase`
   )}`;
 
+  const isReadyNow =
+    !isLoading && clerkSignedIn && !!user && !isSuspended;
+  if (isReadyNow && !accountReady) {
+    setAccountReady(true);
+  }
+
   useEffect(() => {
     if (!isLoading && !clerkSignedIn) {
       router.replace(signInUrl);
     }
   }, [isLoading, clerkSignedIn, router, signInUrl]);
-
-  useEffect(() => {
-    if (!isLoading && clerkSignedIn && user && !isSuspended) {
-      setAccountReady(true);
-    }
-  }, [isLoading, clerkSignedIn, user, isSuspended]);
 
   const showInitialSetup =
     !accountReady && (isLoading || !clerkSignedIn || !user);
