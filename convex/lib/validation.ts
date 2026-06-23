@@ -51,6 +51,19 @@ export function validatePrice(price: number): boolean {
   return Number.isFinite(price) && price >= 0 && price <= 1_000_000;
 }
 
+/** Regular price must be above sale price to count as a discount. */
+export function resolveCompareAtPrice(
+  compareAtPrice: number | undefined,
+  salePrice: number
+): number | undefined {
+  if (compareAtPrice === undefined) return undefined;
+  if (!validatePrice(compareAtPrice)) {
+    throw new Error("Invalid regular price");
+  }
+  if (compareAtPrice <= salePrice) return undefined;
+  return compareAtPrice;
+}
+
 export function validateImageUrl(url: string): boolean {
   try {
     const parsed = new URL(url.trim());

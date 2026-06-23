@@ -129,8 +129,34 @@ export function CourseDetailClient({ slug }: { slug: string }) {
                 </div>
               )}
               <CardContent className="space-y-4 p-6">
-                <div className="text-xl font-medium tabular-nums tracking-tight text-white">
-                  {formatPrice(course.price, course.currency)}
+                <div>
+                  {course.price === 0 ? (
+                    <p className="text-xl font-bold text-emerald-400">FREE</p>
+                  ) : (
+                    <div className="flex flex-col gap-1">
+                      {course.compareAtPrice &&
+                        course.compareAtPrice > course.price && (
+                          <span className="text-sm text-slate-500 line-through">
+                            {formatPrice(
+                              course.compareAtPrice,
+                              course.currency
+                            )}
+                          </span>
+                        )}
+                      <div className="text-xl font-medium tabular-nums tracking-tight text-white">
+                        {formatPrice(course.price, course.currency)}
+                      </div>
+                      {course.compareAtPrice &&
+                        course.compareAtPrice > course.price && (
+                          <span className="text-xs font-medium text-red-400">
+                            {Math.round(
+                              (1 - course.price / course.compareAtPrice) * 100
+                            )}
+                            % off
+                          </span>
+                        )}
+                    </div>
+                  )}
                 </div>
                 <ul className="space-y-2 text-sm text-slate-300">
                   <li className="flex items-center gap-2">

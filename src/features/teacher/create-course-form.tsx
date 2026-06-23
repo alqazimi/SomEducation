@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { courseFormSchema, type CourseFormValues } from "@/schemas";
 import { useState } from "react";
 import { ImageUploadField } from "@/components/ui/image-upload-field";
+import { CoursePricingFields } from "@/components/courses/course-pricing-fields";
 
 export function CreateCourseForm() {
   const router = useRouter();
@@ -40,8 +41,13 @@ export function CreateCourseForm() {
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema) as Resolver<CourseFormValues>,
-    defaultValues: { difficulty: "beginner", price: 0 },
+    defaultValues: {
+      difficulty: "beginner",
+      price: 0,
+      compareAtPrice: undefined,
+    },
   });
+  const [regularPrice, setRegularPrice] = useState("");
 
   async function onSubmit(data: CourseFormValues) {
     if (!moduleTitle.trim()) {
@@ -56,6 +62,7 @@ export function CreateCourseForm() {
         categoryId: data.categoryId as Id<"categories">,
         difficulty: data.difficulty,
         price: data.price,
+        compareAtPrice: data.compareAtPrice,
         thumbnailStorageId: thumbnailStorageId ?? undefined,
       });
 
@@ -178,18 +185,27 @@ export function CreateCourseForm() {
               </div>
             </div>
 
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="price">Price (USD)</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  {...form.register("price")}
-                  className="mt-2"
-                />
-              </div>
-            </div>
+            <CoursePricingFields
+              regularPrice={regularPrice}
+              salePrice={String(form.watch("price") ?? "")}
+              onRegularPriceChange={(value) => {
+                setRegularPrice(value);
+                form.setValue(
+                  "compareAtPrice",
+                  value.trim() === "" ? undefined : Number(value),
+                  { shouldValidate: true }
+                );
+              }}
+              onSalePriceChange={(value) => {
+                form.setValue("price", value === "" ? 0 : Number(value), {
+                  shouldValidate: true,
+                });
+              }}
+              regularPriceError={
+                form.formState.errors.compareAtPrice?.message
+              }
+              salePriceError={form.formState.errors.price?.message}
+            />
 
             <ImageUploadField
               onUploaded={(storageId) => setThumbnailStorageId(storageId)}

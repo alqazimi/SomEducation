@@ -58,7 +58,8 @@ export default function EditCoursePage() {
   const [activeTab, setActiveTab] = useState("curriculum");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
+  const [regularPrice, setRegularPrice] = useState("");
+  const [salePrice, setSalePrice] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [difficulty, setDifficulty] = useState<
     "beginner" | "intermediate" | "advanced"
@@ -69,7 +70,12 @@ export default function EditCoursePage() {
     if (!course) return;
     setTitle(course.title);
     setDescription(course.description);
-    setPrice(String(course.price));
+    setSalePrice(String(course.price));
+    setRegularPrice(
+      course.compareAtPrice && course.compareAtPrice > course.price
+        ? String(course.compareAtPrice)
+        : ""
+    );
     setCategoryId(course.categoryId);
     setDifficulty(course.difficulty);
     setThumbnailPreview(course.thumbnailUrl ?? null);
@@ -191,13 +197,15 @@ export default function EditCoursePage() {
             categories={categories}
             title={title}
             description={description}
-            price={price}
+            regularPrice={regularPrice}
+            salePrice={salePrice}
             categoryId={categoryId}
             difficulty={difficulty}
             thumbnailPreview={thumbnailPreview}
             onTitleChange={setTitle}
             onDescriptionChange={setDescription}
-            onPriceChange={setPrice}
+            onRegularPriceChange={setRegularPrice}
+            onSalePriceChange={setSalePrice}
             onCategoryIdChange={setCategoryId}
             onDifficultyChange={setDifficulty}
             onThumbnailPreviewChange={setThumbnailPreview}

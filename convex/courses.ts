@@ -12,7 +12,7 @@ import { deleteExamsForCourse } from "./exams";
 import { logAudit } from "./lib/audit";
 import { createNotification } from "./lib/notifications";
 import { validateImageStorageFile } from "./lib/files";
-import { sanitizeText, validateImageUrl, validatePrice } from "./lib/validation";
+import { sanitizeText, validateImageUrl, validatePrice, resolveCompareAtPrice } from "./lib/validation";
 import {
   assertCanManageCourse,
   canLearnCourse,
@@ -95,9 +95,7 @@ async function enrichHomepageCourse(ctx: QueryCtx, course: Doc<"courses">) {
   const compareAtPrice =
     course.compareAtPrice && course.compareAtPrice > course.price
       ? course.compareAtPrice
-      : course.price > 0
-        ? Math.ceil(course.price * 1.25)
-        : undefined;
+      : undefined;
 
   return {
     ...enriched,
@@ -182,10 +180,15 @@ export const listHomepageSections = query({
 
     const discounted = takeFour(
       [...enriched]
-        .filter((course) => course.price > 0)
+        .filter(
+          (course) =>
+            course.price > 0 &&
+            course.compareAtPrice !== undefined &&
+            course.compareAtPrice > course.price
+        )
         .sort((a, b) => {
-          const savingsA = (a.compareAtPrice ?? a.price) - a.price;
-          const savingsB = (b.compareAtPrice ?? b.price) - b.price;
+          const savingsA = a.compareAtPrice! - a.price;
+          const savingsB = b.compareAtPrice! - b.price;
           return savingsB - savingsA || b.price - a.price;
         })
     );
@@ -510,12 +513,14 @@ export const create = mutation({
     categoryId: v.id("categories"),
     difficulty: courseDifficulty,
     price: v.number(),
+    compareAtPrice: v.optional(v.number()),
     thumbnailStorageId: v.optional(v.id("_storage")),
     thumbnailUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const user = await requireTeacherOrAdmin(ctx);
     if (!validatePrice(args.price)) throw new Error("Invalid price");
+    const compareAtPrice = resolveCompareAtPrice(args.compareAtPrice, args.price);
 
     if (args.thumbnailStorageId) {
       await validateImageStorageFile(ctx, args.thumbnailStorageId);
@@ -544,6 +549,7 @@ export const create = mutation({
       categoryId: args.categoryId,
       difficulty: args.difficulty,
       price: args.price,
+      compareAtPrice,
       currency: "USD",
       teacherId: user._id,
       status: "draft",
@@ -562,6 +568,7 @@ export const update = mutation({
     categoryId: v.optional(v.id("categories")),
     difficulty: v.optional(courseDifficulty),
     price: v.optional(v.number()),
+    compareAtPrice: v.optional(v.union(v.number(), v.null())),
     thumbnailStorageId: v.optional(v.id("_storage")),
     thumbnailUrl: v.optional(v.string()),
   },
@@ -578,6 +585,18 @@ export const update = mutation({
     if (args.price !== undefined) {
       if (!validatePrice(args.price)) throw new Error("Invalid price");
       updates.price = args.price;
+    }
+    if (args.compareAtPrice !== undefined) {
+      const salePrice = (updates.price as number) ?? course.price;
+      updates.compareAtPrice =
+        args.compareAtPrice === null
+          ? undefined
+          : resolveCompareAtPrice(args.compareAtPrice, salePrice);
+    } else if (args.price !== undefined && course.compareAtPrice !== undefined) {
+      updates.compareAtPrice = resolveCompareAtPrice(
+        course.compareAtPrice,
+        args.price
+      );
     }
     if (args.thumbnailStorageId) {
       await validateImageStorageFile(ctx, args.thumbnailStorageId);

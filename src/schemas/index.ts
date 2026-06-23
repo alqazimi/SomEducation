@@ -28,13 +28,26 @@ export const paymentFixSchema = z.object({
 
 export type PaymentFixValues = z.infer<typeof paymentFixSchema>;
 
-export const courseFormSchema = z.object({
-  title: z.string().min(3).max(200),
-  description: z.string().min(10).max(10000),
-  categoryId: z.string().min(1, "Category is required"),
-  difficulty: z.enum(["beginner", "intermediate", "advanced"]),
-  price: z.coerce.number().min(0).max(1_000_000),
-});
+export const courseFormSchema = z
+  .object({
+    title: z.string().min(3).max(200),
+    description: z.string().min(10).max(10000),
+    categoryId: z.string().min(1, "Category is required"),
+    difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+    price: z.coerce.number().min(0).max(1_000_000),
+    compareAtPrice: z.preprocess(
+      (value) => (value === "" || value === undefined ? undefined : value),
+      z.coerce.number().min(0).max(1_000_000).optional()
+    ),
+  })
+  .refine(
+    (data) =>
+      data.compareAtPrice === undefined || data.compareAtPrice > data.price,
+    {
+      message: "Regular price must be higher than sale price",
+      path: ["compareAtPrice"],
+    }
+  );
 
 export type CourseFormValues = z.infer<typeof courseFormSchema>;
 

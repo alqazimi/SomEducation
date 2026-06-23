@@ -196,6 +196,7 @@ function CoursesPageContent() {
                     difficulty={course.difficulty}
                     categoryName={course.category?.name}
                     price={course.price}
+                    compareAtPrice={course.compareAtPrice}
                     currency={course.currency}
                     teacherName={
                       course.teacher

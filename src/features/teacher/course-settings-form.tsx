@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  CoursePricingFields,
+  parseCoursePricing,
+} from "@/components/courses/course-pricing-fields";
 import { ImageUploadField } from "@/components/ui/image-upload-field";
 import { SectionTitle } from "@/components/ui/typography";
 
@@ -23,13 +27,15 @@ type CourseSettingsFormProps = {
   categories: Category[] | undefined;
   title: string;
   description: string;
-  price: string;
+  regularPrice: string;
+  salePrice: string;
   categoryId: string;
   difficulty: CourseDifficulty;
   thumbnailPreview: string | null;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
-  onPriceChange: (value: string) => void;
+  onRegularPriceChange: (value: string) => void;
+  onSalePriceChange: (value: string) => void;
   onCategoryIdChange: (value: string) => void;
   onDifficultyChange: (value: CourseDifficulty) => void;
   onThumbnailPreviewChange: (value: string | null) => void;
@@ -40,13 +46,15 @@ export function CourseSettingsForm({
   categories,
   title,
   description,
-  price,
+  regularPrice,
+  salePrice,
   categoryId,
   difficulty,
   thumbnailPreview,
   onTitleChange,
   onDescriptionChange,
-  onPriceChange,
+  onRegularPriceChange,
+  onSalePriceChange,
   onCategoryIdChange,
   onDifficultyChange,
   onThumbnailPreviewChange,
@@ -71,12 +79,21 @@ export function CourseSettingsForm({
       toast.error("Title and description (10+ chars) are required");
       return;
     }
+
+    const pricing = parseCoursePricing(regularPrice, salePrice);
+    if ("error" in pricing) {
+      toast.error(pricing.error);
+      return;
+    }
+
     try {
       await updateCourse({
         courseId,
         title: title.trim(),
         description: description.trim(),
-        price: Number(price),
+        price: pricing.price,
+        compareAtPrice:
+          pricing.compareAtPrice === undefined ? null : pricing.compareAtPrice,
         categoryId: categoryId as Id<"categories">,
         difficulty,
       });
@@ -140,14 +157,12 @@ export function CourseSettingsForm({
             <option value="advanced">Advanced</option>
           </select>
         </div>
-        <div>
-          <Label>Price (USD)</Label>
-          <Input
-            type="number"
-            step="0.01"
-            value={price}
-            onChange={(e) => onPriceChange(e.target.value)}
-            className="mt-2"
+        <div className="sm:col-span-2">
+          <CoursePricingFields
+            regularPrice={regularPrice}
+            salePrice={salePrice}
+            onRegularPriceChange={onRegularPriceChange}
+            onSalePriceChange={onSalePriceChange}
           />
         </div>
         <div className="sm:col-span-2">

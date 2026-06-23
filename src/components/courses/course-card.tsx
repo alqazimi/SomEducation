@@ -15,6 +15,7 @@ type CourseCardProps = {
   difficulty?: string;
   categoryName?: string;
   price?: number;
+  compareAtPrice?: number;
   currency?: string;
   teacherName?: string;
   moduleCount?: number;
@@ -37,6 +38,7 @@ export function CourseCard({
   difficulty,
   categoryName,
   price,
+  compareAtPrice,
   currency = "USD",
   teacherName,
   moduleCount,
@@ -52,6 +54,11 @@ export function CourseCard({
 }: CourseCardProps) {
   const isEnrolled = variant === "enrolled";
   const isDark = theme === "dark";
+  const hasDiscount =
+    price !== undefined &&
+    compareAtPrice !== undefined &&
+    compareAtPrice > price &&
+    price > 0;
 
   return (
     <Card
@@ -161,14 +168,30 @@ export function CourseCard({
           )}
         >
           {!isEnrolled && price !== undefined ? (
-            <span
-              className={cn(
-                "text-[0.9375rem] font-medium",
-                isDark ? "text-white" : "text-stone-900"
+            <div className="flex flex-col gap-0.5">
+              {hasDiscount && (
+                <span
+                  className={cn(
+                    "text-xs line-through",
+                    isDark ? "text-slate-500" : "text-stone-500"
+                  )}
+                >
+                  {formatPrice(compareAtPrice!, currency)}
+                </span>
               )}
-            >
-              {formatPrice(price, currency)}
-            </span>
+              <span
+                className={cn(
+                  "text-[0.9375rem] font-medium",
+                  price === 0
+                    ? "text-emerald-500"
+                    : isDark
+                      ? "text-white"
+                      : "text-stone-900"
+                )}
+              >
+                {price === 0 ? "FREE" : formatPrice(price, currency)}
+              </span>
+            </div>
           ) : (
             <span className={type.muted}>
               {progressPercent !== undefined && progressPercent >= 100
