@@ -85,10 +85,10 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
     <>
       <header
         className={cn(
-          "sticky top-0 z-50 w-full border-b backdrop-blur-md",
+          "sticky top-0 z-50 w-full backdrop-blur-md",
           isMarketing
-            ? "border-white/10 bg-[#080c16]/95"
-            : "border-border/80 bg-white/95 shadow-sm"
+            ? "border-b border-white/10 bg-[#080c16]/95"
+            : "border-b border-border/80 bg-white/95 shadow-sm"
         )}
       >
         <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">

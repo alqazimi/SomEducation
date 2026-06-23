@@ -70,6 +70,44 @@ async function enrichManagedCourse(ctx: QueryCtx, course: Doc<"courses">) {
   };
 }
 
+async function enrichHomepageCourse(ctx: QueryCtx, course: Doc<"courses">) {
+  const enriched = await enrichManagedCourse(ctx, course);
+  const [teacher, category, lessons] = await Promise.all([
+    ctx.db.get(course.teacherId),
+    ctx.db.get(course.categoryId),
+    ctx.db
+      .query("lessons")
+      .withIndex("by_courseId", (q) => q.eq("courseId", course._id))
+      .collect(),
+  ]);
+
+  const durationMinutes = lessons.reduce(
+    (sum, lesson) => sum + (lesson.durationMinutes ?? 0),
+    0
+  );
+  const durationHours = Math.max(
+    1,
+    durationMinutes > 0
+      ? Math.round(durationMinutes / 60)
+      : Math.max(1, Math.ceil(enriched.lessonCount / 2))
+  );
+
+  const compareAtPrice =
+    course.compareAtPrice && course.compareAtPrice > course.price
+      ? course.compareAtPrice
+      : course.price > 0
+        ? Math.ceil(course.price * 1.25)
+        : undefined;
+
+  return {
+    ...enriched,
+    teacher,
+    category,
+    durationHours,
+    compareAtPrice,
+  };
+}
+
 export const listPublished = query({
   args: {
     search: v.optional(v.string()),
@@ -125,6 +163,48 @@ export const listPublished = query({
         return { ...course, teacher, category, thumbnailUrl };
       })
     );
+  },
+});
+
+export const listHomepageSections = query({
+  args: {},
+  handler: async (ctx) => {
+    const courses = await ctx.db
+      .query("courses")
+      .withIndex("by_status", (q) => q.eq("status", "published"))
+      .collect();
+
+    const enriched = await Promise.all(
+      courses.map((course) => enrichHomepageCourse(ctx, course))
+    );
+
+    const takeFour = <T,>(items: T[]) => items.slice(0, 4);
+
+    const discounted = takeFour(
+      [...enriched]
+        .filter((course) => course.price > 0)
+        .sort((a, b) => {
+          const savingsA = (a.compareAtPrice ?? a.price) - a.price;
+          const savingsB = (b.compareAtPrice ?? b.price) - b.price;
+          return savingsB - savingsA || b.price - a.price;
+        })
+    );
+
+    const recent = takeFour(
+      [...enriched].sort((a, b) => b.createdAt - a.createdAt)
+    );
+
+    const popular = takeFour(
+      [...enriched].sort((a, b) => b.enrollmentCount - a.enrollmentCount)
+    );
+
+    const free = takeFour(
+      enriched
+        .filter((course) => course.price === 0)
+        .sort((a, b) => b.createdAt - a.createdAt)
+    );
+
+    return { discounted, recent, popular, free };
   },
 });
 
