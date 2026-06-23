@@ -8,6 +8,8 @@ import {
   HelpCircle,
   Home,
   LayoutDashboard,
+  Mail,
+  Route,
   Search,
   X,
 } from "lucide-react";
@@ -28,13 +30,14 @@ import { cn } from "@/lib/utils";
 const exploreLinks = [
   { href: "/", label: "Home", icon: Home },
   { href: "/courses", label: "Courses", icon: BookOpen },
-  { href: "/support", label: "Help & Contact", icon: HelpCircle },
+  { href: "/how-it-works", label: "How It Works", icon: Route },
+  { href: "/contact", label: "Contact", icon: Mail },
+  { href: "/support", label: "Help Center", icon: HelpCircle },
 ] as const;
 
 function isExploreActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
   if (href === "/courses") return pathname.startsWith("/courses");
-  if (href === "/support") return pathname === "/support";
   return pathname === href;
 }
 

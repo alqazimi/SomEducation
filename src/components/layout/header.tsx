@@ -28,10 +28,9 @@ import { HeaderSearch } from "./header-search";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
 
 const marketingNav = [
-  { href: "/", label: "Home" },
   { href: "/courses", label: "Courses" },
-  { href: "/support", label: "How It Works" },
-  { href: "/support", label: "Contact" },
+  { href: "/how-it-works", label: "How It Works" },
+  { href: "/contact", label: "Contact" },
 ] as const;
 
 function HeaderSearchFallback({ dark }: { dark?: boolean }) {
@@ -45,10 +44,8 @@ function HeaderSearchFallback({ dark }: { dark?: boolean }) {
   );
 }
 
-function isMarketingNavActive(pathname: string, href: string, label: string) {
-  if (href === "/") return pathname === "/";
+function isMarketingNavActive(pathname: string, href: string) {
   if (href === "/courses") return pathname.startsWith("/courses");
-  if (label === "Contact" || label === "How It Works") return pathname === "/support";
   return pathname === href;
 }
 
@@ -163,7 +160,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                     href={item.href}
                     className={cn(
                       "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-                      isMarketingNavActive(pathname, item.href, item.label)
+                      isMarketingNavActive(pathname, item.href)
                         ? isMarketing
                           ? isDay
                             ? "text-brand-600"

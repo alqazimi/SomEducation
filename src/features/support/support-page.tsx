@@ -68,8 +68,9 @@ export function SupportPage() {
     <MarketingShell>
       <PageHeader
         variant="marketing"
-        title="Support"
-        description={`Payment steps and help for ${PLATFORM_NAME} courses.`}
+        eyebrow="Help Center"
+        title="Payment help"
+        description={`How to pay for ${PLATFORM_NAME} courses and get access after approval.`}
       />
 
       <div className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
@@ -144,16 +145,20 @@ export function SupportPage() {
           <CardContent className="flex items-start gap-4 p-6">
             <Mail className="mt-0.5 h-5 w-5 shrink-0 text-marketing-muted" />
             <div>
-              <p className="text-sm font-medium text-marketing-fg">Need more help?</p>
+              <p className="text-sm font-medium text-marketing-fg">Still need help?</p>
               <p className="mt-1 text-sm leading-relaxed text-marketing-muted">
-                Email us at{" "}
+                Visit our{" "}
+                <Link href="/contact" className="font-medium text-brand-400 hover:underline">
+                  contact page
+                </Link>{" "}
+                or email{" "}
                 <a
                   href={`mailto:${settings?.supportEmail ?? PLATFORM_SUPPORT_EMAIL}`}
                   className="font-medium text-brand-400 hover:underline"
                 >
                   {settings?.supportEmail ?? PLATFORM_SUPPORT_EMAIL}
-                </a>{" "}
-                or message an admin from your dashboard after signing in.
+                </a>
+                .
               </p>
             </div>
           </CardContent>

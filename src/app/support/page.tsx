@@ -4,14 +4,14 @@ import { absoluteUrl, buildPageTitle } from "@/lib/seo";
 import { PLATFORM_NAME } from "@/lib/brand";
 
 export const metadata: Metadata = {
-  title: buildPageTitle("Support"),
-  description: `Get help with ${PLATFORM_NAME} — how to pay for courses, payment methods, and support contact.`,
+  title: buildPageTitle("Help Center"),
+  description: `Payment help for ${PLATFORM_NAME} — how to pay, upload proof, and get course access.`,
   alternates: {
     canonical: absoluteUrl("/support"),
   },
   openGraph: {
-    title: buildPageTitle("Support"),
-    description: `Payment help and support for ${PLATFORM_NAME} online courses.`,
+    title: buildPageTitle("Help Center"),
+    description: `Payment help for ${PLATFORM_NAME} — how to pay, upload proof, and get course access.`,
     url: absoluteUrl("/support"),
   },
 };

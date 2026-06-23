@@ -23,10 +23,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: absoluteUrl("/support"),
+      url: absoluteUrl("/how-it-works"),
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
+    },
+    {
+      url: absoluteUrl("/contact"),
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: absoluteUrl("/support"),
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
     },
     {
       url: absoluteUrl("/privacy"),

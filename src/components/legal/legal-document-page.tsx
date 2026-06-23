@@ -92,12 +92,19 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
                 </a>
                 . You can also visit our{" "}
                 <Link
+                  href="/contact"
+                  className="font-medium text-brand-400 hover:underline"
+                >
+                  contact page
+                </Link>{" "}
+                or{" "}
+                <Link
                   href="/support"
                   className="font-medium text-brand-400 hover:underline"
                 >
-                  Support page
+                  Help Center
                 </Link>{" "}
-                for help with payments and account issues.
+                for payment and account help.
               </p>
             </div>
           </div>
