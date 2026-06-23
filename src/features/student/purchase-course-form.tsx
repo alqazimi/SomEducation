@@ -301,7 +301,7 @@ export function PurchaseCourseForm() {
         <p className={`mt-1 ${type.muted}`}>
           Amount: {formatPrice(course.price, course.currency)}
         </p>
-        <Card className="mt-8">
+        <Card className="mt-8 border-border bg-card shadow-sm">
           <CardContent className="pt-6">
             <PaymentFixFormFromRecord
               payment={openPayment}
@@ -339,30 +339,42 @@ export function PurchaseCourseForm() {
       </div>
 
       {step === 1 && (
-        <Card className="mt-8">
+        <Card className="mt-8 border-border bg-card shadow-sm">
           <CardHeader>
             <CardTitle>Your details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="fullName">Full Name</Label>
-              <Input id="fullName" {...form.register("fullName")} className="mt-1" />
+              <Input
+                id="fullName"
+                {...form.register("fullName")}
+                className="mt-1 bg-background"
+              />
             </div>
             <div>
               <Label htmlFor="phone">Phone Number</Label>
-              <Input id="phone" {...form.register("phone")} className="mt-1" />
+              <Input
+                id="phone"
+                {...form.register("phone")}
+                className="mt-1 bg-background"
+              />
             </div>
             <div>
               <Label htmlFor="ref">Transaction Reference</Label>
               <Input
                 id="ref"
                 {...form.register("transactionReference")}
-                className="mt-1"
+                className="mt-1 bg-background"
               />
             </div>
             <div>
               <Label htmlFor="notes">Notes (optional)</Label>
-              <Textarea id="notes" {...form.register("notes")} className="mt-1" />
+              <Textarea
+                id="notes"
+                {...form.register("notes")}
+                className="mt-1 bg-background"
+              />
             </div>
             <Button onClick={() => setStep(2)} className="w-full">
               Continue
@@ -372,7 +384,7 @@ export function PurchaseCourseForm() {
       )}
 
       {step === 2 && (
-        <Card className="mt-8">
+        <Card className="mt-8 border-border bg-card shadow-sm">
           <CardHeader>
             <CardTitle>Choose payment method</CardTitle>
           </CardHeader>
@@ -389,8 +401,8 @@ export function PurchaseCourseForm() {
                     className={cn(
                       "rounded-xl border p-4 text-left transition-colors",
                       active
-                        ? "border-brand-600 bg-brand-50"
-                        : "border-border hover:bg-muted"
+                        ? "border-brand-600 bg-brand-50 text-brand-900"
+                        : "border-border bg-background text-foreground hover:bg-muted"
                     )}
                   >
                     <Icon
@@ -432,7 +444,7 @@ export function PurchaseCourseForm() {
                             "rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors",
                             active
                               ? "border-brand-600 bg-brand-50 text-brand-800"
-                              : "border-border text-foreground/90 hover:bg-muted"
+                              : "border-border bg-background text-foreground hover:bg-muted"
                           )}
                         >
                           {provider.name}
@@ -445,7 +457,7 @@ export function PurchaseCourseForm() {
             )}
 
             {selectedProvider && (
-              <div className="rounded-lg border border-brand-200 bg-brand-50/60 p-4">
+              <div className="rounded-lg border border-brand-200 bg-brand-50 p-4 text-brand-950">
                 <p className={type.cardTitle}>Send payment to {selectedProvider.name}</p>
                 <p className={`mt-2 font-mono text-lg ${type.price}`}>
                   {selectedProvider.accountNumber}
@@ -474,7 +486,7 @@ export function PurchaseCourseForm() {
       )}
 
       {step === 3 && (
-        <Card className="mt-8">
+        <Card className="mt-8 border-border bg-card shadow-sm">
           <CardHeader>
             <CardTitle>Upload payment screenshot</CardTitle>
           </CardHeader>
@@ -511,7 +523,7 @@ export function PurchaseCourseForm() {
       )}
 
       {step === 4 && (
-        <Card className="mt-8">
+        <Card className="mt-8 border-border bg-card shadow-sm">
           <CardHeader>
             <CardTitle>Review & submit</CardTitle>
           </CardHeader>

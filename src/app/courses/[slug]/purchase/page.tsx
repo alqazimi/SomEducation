@@ -41,21 +41,25 @@ export default function PurchasePage() {
     <MarketingShell>
       <div className="mx-auto max-w-2xl px-4 py-10">
         {showInitialSetup ? (
-          <AccountSetupState
-            syncError={syncError}
-            onRetry={() => void retrySync()}
-          />
+          <div className="marketing-form-surface p-6 sm:p-8">
+            <AccountSetupState
+              syncError={syncError}
+              onRetry={() => void retrySync()}
+            />
+          </div>
         ) : isSuspended ? (
-          <SuspendedAccountState />
+          <div className="marketing-form-surface p-6 sm:p-8">
+            <SuspendedAccountState />
+          </div>
         ) : (
-          <>
+          <div className="marketing-form-surface p-6 sm:p-8">
             {isLoading && (
-              <p className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+              <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                 Reconnecting to your account… You can keep filling the form.
               </p>
             )}
             <PurchaseCourseForm />
-          </>
+          </div>
         )}
       </div>
     </MarketingShell>

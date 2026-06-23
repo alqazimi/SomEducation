@@ -61,9 +61,9 @@ const SECTIONS = [
 
 function CourseGridSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
       {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} className="h-[7.5rem] rounded-2xl bg-slate-200/80 sm:h-[8.5rem] lg:h-[300px]" />
+        <Skeleton key={i} className="h-[280px] rounded-2xl bg-marketing-border/40 sm:h-[320px]" />
       ))}
     </div>
   );
@@ -117,8 +117,8 @@ function HomepageCourseSection({
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
-          {courses.map((course) => (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
+          {courses.slice(0, 4).map((course) => (
             <HomepageCourseCard
               key={course._id}
               href={`/courses/${course.slug}`}
@@ -133,6 +133,7 @@ function HomepageCourseSection({
               compareAtPrice={course.compareAtPrice}
               difficulty={course.difficulty}
               bestseller={sectionKey === "popular"}
+              showPrice
             />
           ))}
         </div>

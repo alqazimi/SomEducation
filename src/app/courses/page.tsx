@@ -157,9 +157,9 @@ function CoursesPageContent() {
             isLoading={courses === undefined}
             errorTitle="Could not load courses"
             fallback={
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <Skeleton key={i} className="h-[300px] rounded-2xl bg-white/5" />
+              <div className="grid gap-5 sm:grid-cols-2 sm:gap-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-[280px] rounded-2xl bg-marketing-border/40 sm:h-[320px]" />
                 ))}
               </div>
             }
@@ -185,7 +185,7 @@ function CoursesPageContent() {
               <p className="mb-5 text-sm text-marketing-muted">
                 {courses.length} course{courses.length === 1 ? "" : "s"} found
               </p>
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-5 sm:grid-cols-2 sm:gap-6">
                 {courses.map((course) => (
                   <HomepageCourseCard
                     key={course._id}

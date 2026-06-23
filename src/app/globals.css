@@ -199,6 +199,55 @@
   background-color: rgb(6 78 59 / 0.2);
 }
 
+/* Dashboard notification unread rows in night mode */
+[data-marketing-theme="night"] .dashboard-main .notification-unread {
+  border-color: rgb(0 82 255 / 0.35);
+  background-color: rgb(0 82 255 / 0.1);
+}
+
+[data-marketing-theme="night"] .dashboard-main .bg-brand-50\/30,
+[data-marketing-theme="night"] .dashboard-main .bg-brand-50\/70 {
+  background-color: rgb(0 82 255 / 0.1);
+}
+
+[data-marketing-theme="night"] .dashboard-main .border-brand-100,
+[data-marketing-theme="night"] .dashboard-main .border-brand-200 {
+  border-color: rgb(0 82 255 / 0.35);
+}
+
+/* Courses band — light surface for readable cards (day + night) */
+[data-surface="courses-light"] {
+  --marketing-bg: #f8fafc;
+  --marketing-bg-card: #ffffff;
+  --marketing-bg-card-hover: #f8fafc;
+  --marketing-bg-elevated: #f1f5f9;
+  --marketing-fg: #0f172a;
+  --marketing-fg-subtle: #334155;
+  --marketing-muted: #64748b;
+  --marketing-border: #e2e8f0;
+  --marketing-badge-bg: #eff6ff;
+  --marketing-badge-fg: #1d4ed8;
+  --marketing-card-icon-bg: #eff6ff;
+  background-color: var(--marketing-bg);
+  color: var(--marketing-fg);
+}
+
+[data-surface="courses-light"] .marketing-course-card {
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+[data-surface="courses-light"] .marketing-course-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 82, 255, 0.1);
+}
+
+.marketing-course-card-icon {
+  background-color: var(--marketing-card-icon-bg, rgb(0 82 255 / 0.08));
+}
+
+[data-surface="courses-light"] .marketing-course-card-icon {
+  background-color: var(--marketing-card-icon-bg);
+}
+
 /* Night mockup: white courses band (sheerxirfad-style) */
 [data-marketing-theme="night"] [data-surface="courses-light"] {
   --marketing-bg: #ffffff;
@@ -208,7 +257,7 @@
   --marketing-fg-subtle: #334155;
   --marketing-muted: #64748b;
   --marketing-border: #e2e8f0;
-  --marketing-badge-bg: #dbeafe;
+  --marketing-badge-bg: #eff6ff;
   --marketing-badge-fg: #1d4ed8;
   --marketing-accent: #0052ff;
   --marketing-accent-muted: #1d4ed8;
@@ -216,18 +265,31 @@
   --marketing-card-icon-bg: #eff6ff;
 }
 
-[data-marketing-theme="night"] [data-surface="courses-light"] .marketing-course-card {
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+/* Payment / purchase forms on marketing pages */
+.marketing-form-surface {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --input: #ffffff;
+  --ring: #0052ff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
 }
 
-[data-marketing-theme="night"] [data-surface="courses-light"] .marketing-course-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 82, 255, 0.12);
+.marketing-form-surface .text-muted-foreground {
+  color: #64748b;
 }
 
-.marketing-course-card-icon {
-  background-color: rgb(0 82 255 / 0.1);
-}
-
-[data-marketing-theme="night"] [data-surface="courses-light"] .marketing-course-card-icon {
-  background-color: var(--marketing-card-icon-bg);
+.marketing-form-surface h1,
+.marketing-form-surface h2,
+.marketing-form-surface h3,
+.marketing-form-surface h4 {
+  color: #0f172a;
 }
