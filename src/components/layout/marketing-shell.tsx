@@ -13,7 +13,7 @@ export function MarketingShell({
   return (
     <div className={cn(marketingPageClass, className)}>
       <Header />
-      <main className="pb-8">{children}</main>
+      <main className="pb-8 pt-16">{children}</main>
       <Footer />
     </div>
   );

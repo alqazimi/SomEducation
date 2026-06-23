@@ -82,14 +82,25 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
     <>
       <header
         className={cn(
-          "sticky top-0 z-50 w-full backdrop-blur-md",
+          "top-0 z-50 w-full backdrop-blur-md",
+          isMarketing ? "fixed" : "sticky",
           isMarketing
             ? "border-b border-white/10 bg-[#080c16]/95"
             : "border-b border-border/80 bg-white/95 shadow-sm"
         )}
       >
-        <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center gap-3">
+        <div
+          className={cn(
+            "mx-auto max-w-7xl",
+            isMarketing ? "px-4 lg:px-8" : "px-3 sm:px-6 lg:px-8"
+          )}
+        >
+          <div
+            className={cn(
+              "flex h-16 items-center",
+              isMarketing ? "gap-2 md:gap-6" : "gap-3"
+            )}
+          >
             <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2">
               <button
                 type="button"

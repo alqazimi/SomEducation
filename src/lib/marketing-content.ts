@@ -16,10 +16,3 @@ export const MARKETING_STATS = [
   { icon: GraduationCap, value: "10+", label: "Expert Instructors" },
   { icon: ShieldCheck, value: "100%", label: "Trusted Platform" },
 ] as const;
-
-export const MARKETING_AVATAR_COLORS = [
-  "bg-brand-600",
-  "bg-emerald-500",
-  "bg-violet-500",
-  "bg-amber-500",
-] as const;
