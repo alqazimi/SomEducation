@@ -30,8 +30,8 @@ function MarketingHero() {
 
   return (
     <section className="relative">
-      <div className="mx-auto max-w-7xl px-4 pb-10 pt-6 sm:px-6 sm:pt-8 lg:px-8">
-        <div className="flex flex-col items-center justify-between gap-12 md:flex-row md:items-center md:gap-3">
+      <div className="mx-auto max-w-7xl px-4 pb-10 pt-10 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-stretch justify-between gap-8 md:flex-row md:items-center md:gap-3">
           <div className="relative w-full md:max-w-[480px]">
             <div className="relative z-10 mb-6">
               <p
@@ -42,13 +42,13 @@ function MarketingHero() {
               >
                 {hero.eyebrow}
               </p>
-              <h1 className="text-3xl font-bold leading-tight tracking-tight text-marketing-fg md:text-4xl lg:text-[42px] lg:leading-[3.5rem]">
+              <h1 className="text-[42px] font-bold leading-[3.5rem] tracking-tight text-marketing-fg">
                 {hero.headlineBefore}
                 <span className={isDay ? "text-brand-600" : "text-brand-500"}>
                   {hero.headlineHighlight}
                 </span>
               </h1>
-              <p className="mt-4 text-lg leading-relaxed text-marketing-muted">
+              <p className="mt-4 max-w-lg text-lg leading-relaxed text-marketing-muted">
                 {hero.subheadline}
               </p>
             </div>

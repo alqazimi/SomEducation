@@ -17,7 +17,7 @@ export function MarketingHeroZone({
     <div
       className={cn(
         "relative overflow-hidden",
-        isDay ? "bg-marketing-hero pb-5 sm:pb-7" : "bg-marketing-bg pb-6 sm:pb-8",
+        isDay ? "bg-marketing-hero pb-8 sm:pb-10" : "bg-marketing-bg pb-8 sm:pb-10",
         className
       )}
     >

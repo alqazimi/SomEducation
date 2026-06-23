@@ -39,7 +39,7 @@ export function MarketingShell({
       <MarketingAmbientBackground />
       <div className="relative z-[1]">
         <Header />
-        <main className="pb-8 pt-[calc(3.5rem+env(safe-area-inset-top,0px))] sm:pt-16">
+        <main className="pb-8 pt-[calc(4rem+env(safe-area-inset-top,0px))]">
           {children}
         </main>
         <Footer />
