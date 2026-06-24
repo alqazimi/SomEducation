@@ -25,7 +25,10 @@ export function useConvexUploadReady() {
         : null;
 
   return {
+    /** File uploads (keeps working across brief auth reconnects). */
     canUpload,
+    /** Stripe checkout + payment mutations — same reconnect behavior. */
+    canTransact: canUpload,
     statusMessage,
     isAuthenticated,
     authLoading,

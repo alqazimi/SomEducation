@@ -32,9 +32,13 @@ export async function validateStorageFile(
 
   const contentType = metadata.contentType ?? "";
   const normalizedType =
-    contentType === "application/octet-stream" ? "" : contentType;
+    contentType === "application/octet-stream" ? "" : contentType.toLowerCase();
 
-  if (normalizedType && !ALLOWED_MIME_TYPES.has(normalizedType)) {
+  if (
+    normalizedType &&
+    !ALLOWED_MIME_TYPES.has(normalizedType) &&
+    !normalizedType.startsWith("image/")
+  ) {
     throwError(
       "Invalid file type. Only PNG, JPG, JPEG, WEBP, and PDF are allowed.",
       "VALIDATION"

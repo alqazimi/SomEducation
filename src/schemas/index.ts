@@ -16,10 +16,13 @@ export const paymentFormSchema = z
       .max(100),
     notes: z.string().max(500).optional(),
   })
-  .refine((data) => data.paymentProviderId || data.method, {
-    message: "Choose a payment method",
-    path: ["paymentProviderId"],
-  });
+  .refine(
+    (data) => Boolean(data.paymentProviderId?.trim()) || Boolean(data.method),
+    {
+      message: "Choose a payment method",
+      path: ["paymentProviderId"],
+    }
+  );
 
 export type PaymentFormValues = z.infer<typeof paymentFormSchema>;
 

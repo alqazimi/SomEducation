@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowRight, GraduationCap } from "lucide-react";
 import { MarketingCoursesSurface } from "@/components/marketing/marketing-courses-surface";
 import { MarketingHeroZone } from "@/components/marketing/marketing-hero-zone";
-import { MarketingStatsBar } from "@/components/marketing/marketing-stats-bar";
 import { MarketingShell } from "@/components/layout/marketing-shell";
 import { HomepageCourseSectionsFallback } from "@/components/courses/homepage-course-sections";
 import { MarketingHeroImage } from "@/components/marketing/marketing-hero-image";
@@ -149,7 +148,6 @@ export function MarketingHomePage() {
     <MarketingShell className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <MarketingHeroZone>
         <MarketingHero />
-        <MarketingStatsBar className="relative z-10 -mb-4 sm:-mb-6 lg:-mb-8" />
       </MarketingHeroZone>
       <MarketingCoursesSurface>
         <HomepageCourseSections />

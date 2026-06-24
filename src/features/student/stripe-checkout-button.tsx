@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
+import { useConvexUploadReady } from "@/hooks/use-convex-upload-ready";
 
 export function StripeCheckoutButton({
   courseId,
@@ -16,9 +17,15 @@ export function StripeCheckoutButton({
   className?: string;
 }) {
   const createCheckout = useAction(api.stripe.createCheckoutSession);
+  const { canTransact, statusMessage } = useConvexUploadReady();
   const [loading, setLoading] = useState(false);
 
   async function handlePay() {
+    if (!canTransact) {
+      toast.error("Please wait until your account is connected, then try again.");
+      return;
+    }
+
     setLoading(true);
     try {
       const result = await createCheckout({ courseId });
@@ -37,19 +44,24 @@ export function StripeCheckoutButton({
   }
 
   return (
-    <Button
-      type="button"
-      size="lg"
-      className={className}
-      disabled={loading}
-      onClick={() => void handlePay()}
-    >
-      {loading ? (
-        <Loader2 className="h-5 w-5 animate-spin" />
-      ) : (
-        <CreditCard className="h-5 w-5" />
+    <div className="relative z-10 space-y-2">
+      <Button
+        type="button"
+        size="lg"
+        className={className}
+        disabled={loading || !canTransact}
+        onClick={() => void handlePay()}
+      >
+        {loading ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <CreditCard className="h-5 w-5" />
+        )}
+        Pay with card (Stripe)
+      </Button>
+      {!canTransact && statusMessage && (
+        <p className="text-sm text-muted-foreground">{statusMessage}</p>
       )}
-      Pay with card (Stripe)
-    </Button>
+    </div>
   );
 }

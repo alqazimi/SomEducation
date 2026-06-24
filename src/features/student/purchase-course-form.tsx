@@ -43,6 +43,7 @@ type PurchaseDraft = {
   transactionReference?: string;
   notes?: string;
   paymentProviderId?: string;
+  method?: PaymentType;
 };
 
 const typeOptions: Array<{
@@ -59,13 +60,14 @@ export function PurchaseCourseForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const draftKey = `purchase-draft:${params.slug}`;
-  const { canUpload, statusMessage } = useConvexUploadReady();
+  const { canUpload, canTransact, statusMessage } = useConvexUploadReady();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const draftRestoredRef = useRef(false);
   const [courseReady, setCourseReady] = useState(false);
   const [openPaymentReady, setOpenPaymentReady] = useState(false);
   const [step, setStep] = useState(1);
   const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [screenshotId, setScreenshotId] = useState<Id<"_storage"> | null>(null);
   const [paymentType, setPaymentType] = useState<PaymentType | null>(null);
   const [selectedProviderId, setSelectedProviderId] =
@@ -97,7 +99,12 @@ export function PurchaseCourseForm() {
   const form = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentFormSchema),
     defaultValues: {
+      fullName: "",
+      phone: "",
+      transactionReference: "",
+      notes: "",
       paymentProviderId: "",
+      method: undefined,
     },
   });
 
@@ -131,20 +138,23 @@ export function PurchaseCourseForm() {
         setStep(draft.step);
       }
       if (draft.paymentType) setPaymentType(draft.paymentType);
-      if (draft.selectedProviderId) {
-        setSelectedProviderId(
-          draft.selectedProviderId as Id<"paymentProviders">
-        );
-      }
       if (draft.screenshotId) {
         setScreenshotId(draft.screenshotId as Id<"_storage">);
+      }
+      const restoredProviderId = draft.selectedProviderId ?? draft.paymentProviderId;
+      if (restoredProviderId) {
+        setSelectedProviderId(restoredProviderId as Id<"paymentProviders">);
       }
       form.reset({
         fullName: draft.fullName ?? "",
         phone: draft.phone ?? "",
         transactionReference: draft.transactionReference ?? "",
         notes: draft.notes ?? "",
-        paymentProviderId: draft.paymentProviderId ?? "",
+        paymentProviderId: restoredProviderId ?? "",
+        method:
+          restoredProviderId || !draft.paymentType
+            ? undefined
+            : draft.paymentType,
       });
     });
   }, [draftKey, form]);
@@ -172,6 +182,18 @@ export function PurchaseCourseForm() {
   }
   if (openPayment !== undefined && !openPaymentReady) {
     setOpenPaymentReady(true);
+  }
+
+  function syncPaymentFields() {
+    if (selectedProviderId) {
+      form.setValue("paymentProviderId", selectedProviderId);
+      form.setValue("method", undefined);
+      return;
+    }
+    if (paymentType) {
+      form.setValue("method", paymentType);
+      form.setValue("paymentProviderId", "");
+    }
   }
 
   function handleTypeChange(nextType: PaymentType) {
@@ -230,26 +252,46 @@ export function PurchaseCourseForm() {
     }
   }
 
-  async function onSubmit(data: PaymentFormValues) {
+  async function handleSubmitPayment() {
     if (!course || !screenshotId) {
       toast.error("Please upload a payment screenshot");
       return;
     }
 
-    if (!data.paymentProviderId && !data.method) {
-      toast.error("Choose a payment method");
+    if (!canTransact) {
+      toast.error("Please wait until your account is connected, then try again.");
       return;
     }
 
+    syncPaymentFields();
+
+    const valid = await form.trigger();
+    if (!valid) {
+      const firstError = Object.values(form.formState.errors)[0];
+      toast.error(
+        firstError?.message?.toString() ?? "Please check your details and try again"
+      );
+      return;
+    }
+
+    const data = form.getValues();
+    const providerId = data.paymentProviderId?.trim();
+    if (!providerId && !data.method) {
+      toast.error("Choose a payment method");
+      setStep(2);
+      return;
+    }
+
+    setSubmitting(true);
     try {
       await submitPayment({
         courseId: course._id,
         fullName: data.fullName,
         phone: data.phone,
-        paymentProviderId: data.paymentProviderId
-          ? (data.paymentProviderId as Id<"paymentProviders">)
+        paymentProviderId: providerId
+          ? (providerId as Id<"paymentProviders">)
           : undefined,
-        method: data.paymentProviderId ? undefined : data.method,
+        method: providerId ? undefined : data.method,
         transactionReference: data.transactionReference,
         notes: data.notes,
         screenshotStorageId: screenshotId,
@@ -259,6 +301,8 @@ export function PurchaseCourseForm() {
       router.push("/dashboard/student/payments");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Submission failed");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -395,7 +439,7 @@ export function PurchaseCourseForm() {
       </p>
 
       {course.price > 0 && (
-        <Card className="mt-8 border-brand-200 bg-brand-50/40 shadow-sm">
+        <Card className="relative z-10 mt-8 border-brand-200 bg-brand-50/40 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-brand-600" />
@@ -503,7 +547,7 @@ export function PurchaseCourseForm() {
                 className="mt-1 bg-background"
               />
             </div>
-            <Button onClick={() => void goToStep2()} className="w-full">
+            <Button type="button" onClick={() => void goToStep2()} className="w-full">
               Continue
             </Button>
           </CardContent>
@@ -611,6 +655,7 @@ export function PurchaseCourseForm() {
             )}
 
             <Button
+              type="button"
               onClick={() => setStep(3)}
               className="w-full"
               disabled={!canContinueStep2}
@@ -640,7 +685,7 @@ export function PurchaseCourseForm() {
             <Input
               ref={fileInputRef}
               type="file"
-              accept={PAYMENT_PROOF_ACCEPT}
+              accept={`${PAYMENT_PROOF_ACCEPT},image/*`}
               disabled={uploading || !canUpload}
               onChange={(e) => {
                 const file = e.target.files?.[0];
@@ -656,7 +701,15 @@ export function PurchaseCourseForm() {
             {screenshotId && (
               <p className="text-sm text-green-600">Screenshot uploaded successfully</p>
             )}
-            <Button onClick={() => setStep(4)} disabled={!screenshotId} className="w-full">
+            <Button
+              type="button"
+              onClick={() => {
+                syncPaymentFields();
+                setStep(4);
+              }}
+              disabled={!screenshotId || uploading}
+              className="w-full"
+            >
               Continue
             </Button>
           </CardContent>
@@ -686,23 +739,21 @@ export function PurchaseCourseForm() {
                 </p>
               </div>
             ) : null}
+            <p className="text-sm text-green-600">Payment screenshot uploaded</p>
             <p className="text-sm text-muted-foreground">
               Your payment will be reviewed by our admin team. You&apos;ll receive a
               notification once approved.
             </p>
+            {!canTransact && statusMessage && (
+              <p className="text-sm text-amber-800">{statusMessage}</p>
+            )}
             <Button
-              onClick={() =>
-                void form.handleSubmit(onSubmit, (errors) => {
-                  const firstError = Object.values(errors)[0];
-                  toast.error(
-                    firstError?.message?.toString() ??
-                      "Please check your details and try again"
-                  );
-                })()
-              }
+              type="button"
+              onClick={() => void handleSubmitPayment()}
               className="w-full"
+              disabled={submitting || !canTransact}
             >
-              Submit payment request
+              {submitting ? "Submitting…" : "Submit payment request"}
             </Button>
           </CardContent>
         </Card>
