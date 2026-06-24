@@ -21,6 +21,7 @@ import {
 } from "@/lib/dashboard-nav";
 import { NotificationBell } from "@/features/notifications/notifications-inbox";
 import { MarketingThemeToggle } from "@/components/marketing/marketing-theme-toggle";
+import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { isMarketingSitePath, isLearnPath, marketingHeaderClassDay, marketingHeaderClassNight, dashboardHeaderClass } from "@/lib/marketing-theme";
 import { HeaderSearch } from "./header-search";
@@ -193,6 +194,15 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
             )}
 
             <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1.5">
+              {(isMarketing || isLearn) && (
+                <InstallAppButton
+                  className={cn(
+                    useDarkChrome
+                      ? "text-brand-400 hover:bg-white/10"
+                      : "text-brand-600 hover:bg-brand-600/10"
+                  )}
+                />
+              )}
               {(isMarketing || isDashboard || isLearn) && (
                 <MarketingThemeToggle className="h-8 w-8 sm:h-10 sm:w-10" />
               )}

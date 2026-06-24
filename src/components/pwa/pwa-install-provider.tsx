@@ -10,12 +10,13 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { PLATFORM_NAME } from "@/lib/brand";
 import {
   isAndroid,
-  isInstallBannerDismissed,
   isIosInstallable,
   isIosSafari,
   isStandaloneDisplay,
+  openInstallShareSheet,
   PWA_INSTALLED_EVENT,
   PWA_INSTALL_AVAILABLE_EVENT,
   registerServiceWorker,
@@ -26,25 +27,15 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
-export type PwaInstallPlatform =
-  | "native"
-  | "android-manual"
-  | "ios"
-  | "none";
+export type PwaInstallPlatform = "native" | "ios" | "android" | "none";
 
 type PwaInstallContextValue = {
   ready: boolean;
   platform: PwaInstallPlatform;
   canInstall: boolean;
-  canShowBanner: boolean;
   installing: boolean;
-  iosGuideOpen: boolean;
-  manualGuideOpen: boolean;
-  /** Call directly from a click handler — keeps the browser install prompt in the user gesture. */
+  /** Call directly from a click handler — prompt() must run in the same user gesture. */
   installFromClick: () => void;
-  dismissBanner: () => void;
-  closeIosGuide: () => void;
-  closeManualGuide: () => void;
   isIosSafari: boolean;
   isStandalone: boolean;
 };
@@ -78,6 +69,14 @@ function clearDeferredInstallEvent() {
   ).__pwaDeferredInstall = undefined;
 }
 
+function captureDeferredInstallEvent(event: Event): BeforeInstallPromptEvent {
+  const promptEvent = event as BeforeInstallPromptEvent;
+  (
+    window as Window & { __pwaDeferredInstall?: BeforeInstallPromptEvent }
+  ).__pwaDeferredInstall = promptEvent;
+  return promptEvent;
+}
+
 export function PwaInstallProvider({ children }: { children: React.ReactNode }) {
   const ready = useSyncExternalStore(
     subscribeClientReady,
@@ -86,10 +85,7 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
   );
   const deferredRef = useRef<BeforeInstallPromptEvent | null>(null);
   const [hasNativePrompt, setHasNativePrompt] = useState(false);
-  const [bannerDismissed, setBannerDismissed] = useState(false);
   const [installing, setInstalling] = useState(false);
-  const [iosGuideOpen, setIosGuideOpen] = useState(false);
-  const [manualGuideOpen, setManualGuideOpen] = useState(false);
   const [installed, setInstalled] = useState(false);
 
   const syncDeferredPrompt = useCallback(() => {
@@ -112,10 +108,7 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
 
     const onBeforeInstall = (event: Event) => {
       event.preventDefault();
-      deferredRef.current = event as BeforeInstallPromptEvent;
-      (
-        window as Window & { __pwaDeferredInstall?: BeforeInstallPromptEvent }
-      ).__pwaDeferredInstall = event as BeforeInstallPromptEvent;
+      deferredRef.current = captureDeferredInstallEvent(event);
       setHasNativePrompt(true);
     };
 
@@ -128,9 +121,6 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
       clearDeferredInstallEvent();
       setHasNativePrompt(false);
       setInstalled(true);
-      setIosGuideOpen(false);
-      setManualGuideOpen(false);
-      setBannerDismissed(true);
       setInstalling(false);
     };
 
@@ -139,11 +129,26 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
     window.addEventListener(PWA_INSTALLED_EVENT, onInstalled);
     window.addEventListener("appinstalled", onInstalled);
 
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener(
+        "controllerchange",
+        onInstallAvailable
+      );
+    }
+
+    syncDeferredPrompt();
+
     return () => {
       window.removeEventListener("beforeinstallprompt", onBeforeInstall);
       window.removeEventListener(PWA_INSTALL_AVAILABLE_EVENT, onInstallAvailable);
       window.removeEventListener(PWA_INSTALLED_EVENT, onInstalled);
       window.removeEventListener("appinstalled", onInstalled);
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.removeEventListener(
+          "controllerchange",
+          onInstallAvailable
+        );
+      }
     };
   }, [ready, syncDeferredPrompt]);
 
@@ -153,38 +158,27 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
     if (!ready || isStandalone) return "none";
     if (hasNativePrompt) return "native";
     if (isIosInstallable()) return "ios";
-    if (isAndroid()) return "android-manual";
+    if (isAndroid()) return "android";
     return "none";
   }, [ready, isStandalone, hasNativePrompt]);
 
-  const canInstall = platform !== "none" && !isStandalone;
-
-  const canShowBanner =
-    canInstall && !bannerDismissed && !isInstallBannerDismissed();
-
-  const dismissBanner = useCallback(() => {
-    setBannerDismissed(true);
-  }, []);
-
-  const closeIosGuide = useCallback(() => {
-    setIosGuideOpen(false);
-  }, []);
-
-  const closeManualGuide = useCallback(() => {
-    setManualGuideOpen(false);
-  }, []);
+  const canInstall =
+    !isStandalone &&
+    ready &&
+    (hasNativePrompt || isIosInstallable() || isAndroid());
 
   const installFromClick = useCallback(() => {
-    const promptEvent = syncDeferredPrompt();
+    let promptEvent = readDeferredInstallEvent() ?? deferredRef.current;
+
+    if (!promptEvent) {
+      syncDeferredPrompt();
+      promptEvent = readDeferredInstallEvent() ?? deferredRef.current;
+    }
 
     if (promptEvent) {
-      setInstalling(true);
-      setIosGuideOpen(false);
-      setManualGuideOpen(false);
-
       try {
-        const promptPromise = promptEvent.prompt();
-        void promptPromise
+        void promptEvent
+          .prompt()
           .then(() => promptEvent.userChoice)
           .then(({ outcome }) => {
             if (outcome === "accepted") {
@@ -192,39 +186,24 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
               clearDeferredInstallEvent();
               setHasNativePrompt(false);
               setInstalled(true);
-              setBannerDismissed(true);
             }
           })
           .catch((error) => {
             console.warn("[SomEducation] PWA install failed:", error);
-            if (isIosInstallable()) {
-              setIosGuideOpen(true);
-            } else {
-              setManualGuideOpen(true);
-            }
           })
           .finally(() => {
             setInstalling(false);
           });
+        setInstalling(true);
       } catch (error) {
         console.warn("[SomEducation] PWA install failed:", error);
         setInstalling(false);
-        if (isIosInstallable()) {
-          setIosGuideOpen(true);
-        } else {
-          setManualGuideOpen(true);
-        }
       }
       return;
     }
 
     if (isIosInstallable()) {
-      setIosGuideOpen(true);
-      return;
-    }
-
-    if (isAndroid()) {
-      setManualGuideOpen(true);
+      openInstallShareSheet(PLATFORM_NAME);
     }
   }, [syncDeferredPrompt]);
 
@@ -233,31 +212,12 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
       ready,
       platform,
       canInstall,
-      canShowBanner,
       installing,
-      iosGuideOpen,
-      manualGuideOpen,
       installFromClick,
-      dismissBanner,
-      closeIosGuide,
-      closeManualGuide,
       isIosSafari: isIosSafari(),
       isStandalone,
     }),
-    [
-      ready,
-      platform,
-      canInstall,
-      canShowBanner,
-      installing,
-      iosGuideOpen,
-      manualGuideOpen,
-      installFromClick,
-      dismissBanner,
-      closeIosGuide,
-      closeManualGuide,
-      isStandalone,
-    ]
+    [ready, platform, canInstall, installing, installFromClick, isStandalone]
   );
 
   return (

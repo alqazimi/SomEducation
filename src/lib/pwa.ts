@@ -2,20 +2,36 @@ export const PWA_BANNER_DISMISS_KEY = "someducation-pwa-banner-dismissed";
 export const PWA_INSTALL_AVAILABLE_EVENT = "pwa-install-available";
 export const PWA_INSTALLED_EVENT = "pwa-installed";
 
-/** Capture install prompt before React hydrates (Android one-tap install). */
+function canRegisterServiceWorkerInBrowser(): boolean {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
+    return false;
+  }
+  return window.location.protocol === "https:";
+}
+
+/** Capture install prompt + register SW before React hydrates. */
 export const PWA_EARLY_INSTALL_CAPTURE = `
 (function(){
   if(typeof window==="undefined")return;
-  window.__pwaDeferredInstall=null;
-  window.addEventListener("beforeinstallprompt",function(e){
+  if(window.__pwaBootstrap)return;
+  window.__pwaBootstrap=true;
+  if(!window.__pwaDeferredInstall)window.__pwaDeferredInstall=null;
+  function storeInstall(e){
     e.preventDefault();
     window.__pwaDeferredInstall=e;
     window.dispatchEvent(new Event("${PWA_INSTALL_AVAILABLE_EVENT}"));
-  });
+  }
+  window.addEventListener("beforeinstallprompt",storeInstall);
   window.addEventListener("appinstalled",function(){
     window.__pwaDeferredInstall=null;
     window.dispatchEvent(new Event("${PWA_INSTALLED_EVENT}"));
   });
+  if("serviceWorker"in navigator&&location.protocol==="https:"){
+    navigator.serviceWorker.register("/sw.js",{scope:"/",updateViaCache:"none"}).catch(function(){});
+    navigator.serviceWorker.addEventListener("controllerchange",function(){
+      window.dispatchEvent(new Event("${PWA_INSTALL_AVAILABLE_EVENT}"));
+    });
+  }
 })();
 `;
 
@@ -49,6 +65,10 @@ export function isAndroid(): boolean {
   return /Android/i.test(window.navigator.userAgent);
 }
 
+export function isMobileInstallable(): boolean {
+  return isIosInstallable() || isAndroid();
+}
+
 export function canUseWebShare(): boolean {
   if (typeof window === "undefined") return false;
   return typeof navigator.share === "function";
@@ -59,25 +79,18 @@ export function getPwaShareUrl(): string {
   return window.location.origin + "/";
 }
 
-export async function openInstallShareSheet(
-  title: string
-): Promise<"shared" | "cancelled" | "unavailable"> {
-  if (!canUseWebShare()) return "unavailable";
+export function openInstallShareSheet(title: string): void {
+  if (!canUseWebShare()) return;
 
-  try {
-    await navigator.share({
+  void navigator
+    .share({
       title,
-      text: `Install ${title} on your home screen.`,
       url: getPwaShareUrl(),
+    })
+    .catch((error) => {
+      if (error instanceof Error && error.name === "AbortError") return;
+      console.warn("[SomEducation] Web Share failed:", error);
     });
-    return "shared";
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      return "cancelled";
-    }
-    console.warn("[SomEducation] Web Share failed:", error);
-    return "unavailable";
-  }
 }
 
 /** Banner hidden for current browser tab/session only — resets on next visit. */
@@ -99,14 +112,7 @@ export function dismissInstallBanner(): void {
 }
 
 function shouldRegisterServiceWorker(): boolean {
-  if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
-    return false;
-  }
-  const host = window.location.hostname;
-  if (host === "localhost" || host === "127.0.0.1") {
-    return window.location.protocol === "https:";
-  }
-  return window.location.protocol === "https:" || host.endsWith(".vercel.app");
+  return canRegisterServiceWorkerInBrowser();
 }
 
 export function registerServiceWorker(): void {

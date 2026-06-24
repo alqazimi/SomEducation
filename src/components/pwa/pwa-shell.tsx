@@ -8,28 +8,6 @@ const InstallPrompt = dynamic(
   { ssr: false }
 );
 
-const IosInstallGuide = dynamic(
-  () =>
-    import("./ios-install-guide").then((mod) => ({
-      default: mod.IosInstallGuide,
-    })),
-  { ssr: false }
-);
-
-const ManualInstallGuide = dynamic(
-  () =>
-    import("./manual-install-guide").then((mod) => ({
-      default: mod.ManualInstallGuide,
-    })),
-  { ssr: false }
-);
-
 export function PwaShell() {
-  return (
-    <>
-      <InstallPrompt />
-      <IosInstallGuide />
-      <ManualInstallGuide />
-    </>
-  );
+  return <InstallPrompt />;
 }

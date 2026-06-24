@@ -127,11 +127,8 @@ export function Footer({ variant = "default" }: { variant?: "default" | "marketi
               {usesThemedFooter && (
                 <li>
                   <InstallAppButton
-                    variant="ghost"
-                    size="sm"
                     showIcon={false}
                     className={cn(
-                      "pointer-events-auto h-auto min-h-9 p-0 text-sm font-normal",
                       isDay
                         ? "text-marketing-muted hover:bg-transparent hover:text-brand-600"
                         : "text-marketing-muted hover:bg-transparent hover:text-brand-400"
