@@ -201,15 +201,21 @@
 }
 
 .marketing-hero-night {
+  --marketing-fg: #ffffff;
+  --marketing-fg-subtle: #cbd5e1;
+  --marketing-muted: #94a3b8;
   background-color: #0a0e1a;
   background-image:
     radial-gradient(ellipse 80% 60% at 100% 0%, rgba(0, 82, 255, 0.22), transparent 55%),
     radial-gradient(ellipse 50% 40% at 0% 100%, rgba(0, 51, 255, 0.08), transparent 50%);
+  color: #ffffff;
 }
 
-[data-marketing-theme="day"] .marketing-hero-night {
-  background-color: var(--marketing-bg-hero);
-  background-image: none;
+.marketing-hero-night h1,
+.marketing-hero-night h2,
+.marketing-hero-night h3,
+.marketing-hero-night h4 {
+  color: #ffffff;
 }
 
 .marketing-courses-band {

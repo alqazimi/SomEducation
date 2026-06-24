@@ -24,29 +24,20 @@ const HomepageCourseSections = dynamic(
 );
 
 function MarketingHero() {
-  const { isDay } = useMarketingTheme();
-
   return (
     <section className="relative">
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
         <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 lg:gap-8">
           <div className="relative min-w-0 w-full sm:max-w-md sm:flex-1 lg:max-w-lg">
             <div className="relative z-10">
-              <p
-                className={cn(
-                  "mb-1.5 text-xs font-semibold uppercase tracking-[0.12em]",
-                  isDay ? "text-brand-600" : "text-brand-400"
-                )}
-              >
+              <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-brand-400">
                 {MARKETING_HERO.eyebrow}
               </p>
-              <h1 className="text-2xl font-semibold leading-snug tracking-tight text-marketing-fg sm:text-3xl">
+              <h1 className="text-2xl font-semibold leading-snug tracking-tight text-white sm:text-3xl">
                 {MARKETING_HERO.headlineBefore}
-                <span className={isDay ? "text-brand-600" : "text-brand-500"}>
-                  {MARKETING_HERO.headlineHighlight}
-                </span>
+                <span className="text-brand-500">{MARKETING_HERO.headlineHighlight}</span>
               </h1>
-              <p className="mt-2.5 max-w-lg text-sm leading-relaxed text-marketing-muted sm:text-[15px]">
+              <p className="mt-2.5 max-w-lg text-sm leading-relaxed text-slate-300 sm:text-[15px]">
                 {MARKETING_HERO.subheadline}
               </p>
             </div>
