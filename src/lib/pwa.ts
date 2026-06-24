@@ -1,4 +1,23 @@
 export const PWA_BANNER_DISMISS_KEY = "someducation-pwa-banner-dismissed";
+export const PWA_INSTALL_AVAILABLE_EVENT = "pwa-install-available";
+export const PWA_INSTALLED_EVENT = "pwa-installed";
+
+/** Capture install prompt before React hydrates (Android one-tap install). */
+export const PWA_EARLY_INSTALL_CAPTURE = `
+(function(){
+  if(typeof window==="undefined")return;
+  window.__pwaDeferredInstall=null;
+  window.addEventListener("beforeinstallprompt",function(e){
+    e.preventDefault();
+    window.__pwaDeferredInstall=e;
+    window.dispatchEvent(new Event("${PWA_INSTALL_AVAILABLE_EVENT}"));
+  });
+  window.addEventListener("appinstalled",function(){
+    window.__pwaDeferredInstall=null;
+    window.dispatchEvent(new Event("${PWA_INSTALLED_EVENT}"));
+  });
+})();
+`;
 
 export function isStandaloneDisplay(): boolean {
   if (typeof window === "undefined") return false;
@@ -84,7 +103,10 @@ function shouldRegisterServiceWorker(): boolean {
     return false;
   }
   const host = window.location.hostname;
-  return host !== "localhost" && host !== "127.0.0.1";
+  if (host === "localhost" || host === "127.0.0.1") {
+    return window.location.protocol === "https:";
+  }
+  return window.location.protocol === "https:" || host.endsWith(".vercel.app");
 }
 
 export function registerServiceWorker(): void {

@@ -15,6 +15,7 @@ import {
 } from "@/lib/seo";
 import { clerkAppearance } from "@/lib/clerk-appearance";
 import { isClerkConfigured } from "@/lib/clerk-config";
+import { PWA_EARLY_INSTALL_CAPTURE } from "@/lib/pwa";
 import "@/lib/clerk-env";
 import "./globals.css";
 
@@ -115,6 +116,11 @@ export default function RootLayout({
         ) : null}
         <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="apple-touch-icon" href="/apple-icon" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: PWA_EARLY_INSTALL_CAPTURE,
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem("someducation-marketing-theme");if(t==="day"||t==="night")document.documentElement.setAttribute("data-marketing-theme",t)}catch(e){}})();`,

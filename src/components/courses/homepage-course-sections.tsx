@@ -37,21 +37,21 @@ const SECTIONS = [
     eyebrow: "Special Offers",
     title: "Discounted Courses",
     description: "Great courses at special prices",
-    href: "/courses",
+    href: "/courses?pricing=paid",
   },
   {
     key: "recent" as const,
     eyebrow: "New Arrivals",
     title: "Recently Added Courses",
     description: "Explore our latest courses",
-    href: "/courses",
+    href: "/courses?pricing=paid",
   },
   {
     key: "popular" as const,
     eyebrow: "Popular Courses",
     title: "Start with our most popular courses",
     description: "Most loved by students on SomEducation",
-    href: "/courses",
+    href: "/courses?pricing=paid",
   },
   {
     key: "free" as const,
@@ -89,6 +89,13 @@ function HomepageCourseSection({
 }) {
   if (courses.length === 0) return null;
 
+  const visibleCourses =
+    sectionKey === "free"
+      ? courses.filter((course) => course.price <= 0)
+      : courses.filter((course) => course.price > 0);
+
+  if (visibleCourses.length === 0) return null;
+
   return (
     <section className="py-6 first:pt-10 sm:py-8 sm:first:pt-12 lg:py-10 lg:first:pt-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -112,7 +119,7 @@ function HomepageCourseSection({
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
-          {courses.slice(0, 4).map((course) => (
+          {visibleCourses.slice(0, 4).map((course) => (
             <HomepageCourseCard
               key={course._id}
               href={`/courses/${course.slug}`}

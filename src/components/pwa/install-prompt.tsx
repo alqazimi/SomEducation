@@ -9,7 +9,7 @@ import { dismissInstallBanner } from "@/lib/pwa";
 import { PLATFORM_NAME } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
-const SHOW_DELAY_MS = 800;
+const SHOW_DELAY_MS = 600;
 
 export function InstallPrompt() {
   const { isNight } = useMarketingTheme();
@@ -47,9 +47,8 @@ export function InstallPrompt() {
 
   if (!canShowBanner || !bannerReady) return null;
 
+  const isAndroidNative = platform === "android-native";
   const isIos = platform === "ios";
-  const isAndroidManual = platform === "android-manual";
-  const installLabel = isIos ? "How to add" : "Install app";
 
   return (
     <div
@@ -76,54 +75,41 @@ export function InstallPrompt() {
               isNight ? "text-white" : "text-foreground"
             )}
           >
-            {isIos ? `Add ${PLATFORM_NAME} to Home Screen` : `Install ${PLATFORM_NAME}`}
+            Install {PLATFORM_NAME}
           </p>
 
-          {platform === "android-native" && (
+          {isAndroidNative && (
             <p
               className={cn(
                 "mt-1 text-sm leading-relaxed",
                 isNight ? "text-slate-300" : "text-muted-foreground"
               )}
             >
-              Tap Install — one step adds the app to your home screen.
+              One tap opens the install dialog — no extra steps.
             </p>
           )}
 
-          {isIos && !isIosSafari && (
-            <p
-              className={cn(
-                "mt-2 rounded-lg border px-3 py-2 text-xs leading-relaxed",
-                isNight
-                  ? "border-amber-400/30 bg-amber-500/10 text-amber-100"
-                  : "border-amber-200 bg-amber-50 text-amber-900"
-              )}
-            >
-              For the best experience, open this site in <strong>Safari</strong>{" "}
-              first. Tap the button below for instructions.
-            </p>
-          )}
-
-          {isIos && isIosSafari && (
+          {isIos && (
             <p
               className={cn(
                 "mt-1 text-sm leading-relaxed",
                 isNight ? "text-slate-300" : "text-muted-foreground"
               )}
             >
-              iPhone requires a few manual taps. Tap the button below for
-              step-by-step instructions.
+              {isIosSafari
+                ? "Tap Install, then Share → Add to Home Screen → Add."
+                : "Open in Safari, then tap Install for quick steps."}
             </p>
           )}
 
-          {isAndroidManual && (
+          {platform === "android-manual" && (
             <p
               className={cn(
                 "mt-1 text-sm leading-relaxed",
                 isNight ? "text-slate-300" : "text-muted-foreground"
               )}
             >
-              Tap Install, or use browser menu{" "}
+              Tap Install — if needed use browser menu{" "}
               <strong className={isNight ? "text-white" : "text-foreground"}>
                 (⋮) → Install app
               </strong>
@@ -139,7 +125,7 @@ export function InstallPrompt() {
               onClick={() => void handleInstall()}
               disabled={installing}
             >
-              {installing ? "Installing…" : installLabel}
+              {installing ? "Installing…" : "Install app"}
             </Button>
             <Button
               type="button"

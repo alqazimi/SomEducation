@@ -55,7 +55,7 @@ export function HomepageCourseCard({
   canLearn = false,
   className,
 }: HomepageCourseCardProps) {
-  const isFree = price === 0;
+  const isFree = price <= 0;
   const showContinueLearning = canLearn || isEnrolled;
   const courseSlug = slug ?? href.replace(/^\/courses\//, "").replace(/\/$/, "");
   const hasDiscount =

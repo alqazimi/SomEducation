@@ -30,6 +30,10 @@ function isFreeCourse(course: { price: number }) {
   return course.price <= 0;
 }
 
+function isPaidCourse(course: { price: number }) {
+  return course.price > 0;
+}
+
 async function resolveCourseThumbnail(
   ctx: QueryCtx,
   course: Doc<"courses">
@@ -248,46 +252,56 @@ export const listHomepageSections = query({
       .collect();
 
     const takeFour = <T,>(items: T[]) => items.slice(0, 4);
-
-    const freeCourses = courses.filter(isFreeCourse);
-    const paidCourses = courses.filter((course) => !isFreeCourse(course));
-    const freeIds = new Set(freeCourses.map((course) => course._id));
-
-    const paidOnly = paidCourses.filter((course) => !freeIds.has(course._id));
-
-    const discountedRaw = takeFour(
-      [...paidOnly]
-        .filter(
-          (course) =>
-            course.compareAtPrice !== undefined &&
-            course.compareAtPrice > course.price
-        )
-        .sort((a, b) => {
-          const savingsA = a.compareAtPrice! - a.price;
-          const savingsB = b.compareAtPrice! - b.price;
-          return savingsB - savingsA || b.price - a.price;
-        })
+    const usedIds = new Set<Id<"courses">>();
+    const freeCourseIds = new Set(
+      courses.filter(isFreeCourse).map((course) => course._id)
+    );
+    const paidPool = courses.filter(
+      (course) => isPaidCourse(course) && !freeCourseIds.has(course._id)
     );
 
-    const discountedIds = new Set(discountedRaw.map((course) => course._id));
-
-    const recentRaw = takeFour(
-      [...paidOnly]
-        .filter((course) => !discountedIds.has(course._id))
-        .sort((a, b) => b.createdAt - a.createdAt)
-    );
-
-    const recentIds = new Set(recentRaw.map((course) => course._id));
+    const pickPaid = (
+      filter: (course: Doc<"courses">) => boolean,
+      sort: (a: Doc<"courses">, b: Doc<"courses">) => number
+    ) => {
+      const picked = takeFour(
+        paidPool
+          .filter((course) => !usedIds.has(course._id))
+          .filter(filter)
+          .sort(sort)
+      );
+      for (const course of picked) {
+        usedIds.add(course._id);
+      }
+      return picked;
+    };
 
     const freeRaw = takeFour(
-      [...freeCourses].sort((a, b) => b.createdAt - a.createdAt)
+      courses
+        .filter(isFreeCourse)
+        .sort((a, b) => b.createdAt - a.createdAt)
+    );
+    for (const course of freeRaw) {
+      usedIds.add(course._id);
+    }
+
+    const discountedRaw = pickPaid(
+      (course) =>
+        course.compareAtPrice !== undefined && course.compareAtPrice > course.price,
+      (a, b) => {
+        const savingsA = a.compareAtPrice! - a.price;
+        const savingsB = b.compareAtPrice! - b.price;
+        return savingsB - savingsA || b.price - a.price;
+      }
     );
 
-    const popularCandidates = [...paidOnly]
-      .filter(
-        (course) =>
-          !discountedIds.has(course._id) && !recentIds.has(course._id)
-      )
+    const recentRaw = pickPaid(
+      () => true,
+      (a, b) => b.createdAt - a.createdAt
+    );
+
+    const popularCandidates = paidPool
+      .filter((course) => !usedIds.has(course._id))
       .sort(
         (a, b) =>
           (b.publishedAt ?? b.createdAt) - (a.publishedAt ?? a.createdAt)
@@ -296,9 +310,14 @@ export const listHomepageSections = query({
     const popularEnriched = await Promise.all(
       popularCandidates.map((course) => enrichPublishedCourseCard(ctx, course))
     );
-    const popular = takeFour(
-      [...popularEnriched].sort((a, b) => b.enrollmentCount - a.enrollmentCount)
+    const popularRaw = takeFour(
+      [...popularEnriched]
+        .filter((course) => isPaidCourse(course))
+        .sort((a, b) => b.enrollmentCount - a.enrollmentCount)
     );
+    for (const course of popularRaw) {
+      usedIds.add(course._id);
+    }
 
     const enrichById = async (rawCourses: Doc<"courses">[]) => {
       const unique = new Map(rawCourses.map((course) => [course._id, course]));
@@ -315,13 +334,17 @@ export const listHomepageSections = query({
       enrichById(freeRaw),
     ]);
 
-    const withoutFree = <T extends { price: number }>(items: T[]) =>
-      items.filter((course) => !isFreeCourse(course));
+    const paidSectionsOnly = <T extends { price: number; _id: Id<"courses"> }>(
+      items: T[]
+    ) =>
+      items.filter(
+        (course) => isPaidCourse(course) && !freeCourseIds.has(course._id)
+      );
 
     return {
-      discounted: withoutFree(discounted),
-      recent: withoutFree(recent),
-      popular: withoutFree(popular),
+      discounted: paidSectionsOnly(discounted),
+      recent: paidSectionsOnly(recent),
+      popular: paidSectionsOnly(popularRaw),
       free: free.filter(isFreeCourse),
     };
   },
