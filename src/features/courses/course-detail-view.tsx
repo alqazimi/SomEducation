@@ -24,6 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConvexQueryGate } from "@/components/convex/convex-query-gate";
 import { cn, formatPrice } from "@/lib/utils";
+import { getDisplayProfileImageUrl } from "@/lib/profile-image";
 
 type CourseDetail = NonNullable<
   ReturnType<typeof useQuery<typeof api.courses.getBySlug>>
@@ -193,6 +194,7 @@ function CourseDetailHeader({ course }: { course: CourseDetail }) {
   const teacherName = course.teacher
     ? `${course.teacher.firstName ?? ""} ${course.teacher.lastName ?? ""}`.trim()
     : "Instructor";
+  const teacherImageUrl = getDisplayProfileImageUrl(course.teacher?.imageUrl);
 
   return (
     <div className="space-y-7">
@@ -227,10 +229,10 @@ function CourseDetailHeader({ course }: { course: CourseDetail }) {
         </p>
         {course.teacher && (
           <div className="mt-5 flex items-center gap-2 text-sm text-marketing-fg">
-            {course.teacher.imageUrl ? (
+            {teacherImageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={course.teacher.imageUrl}
+                src={teacherImageUrl}
                 alt={teacherName}
                 className="h-8 w-8 rounded-full object-cover"
               />

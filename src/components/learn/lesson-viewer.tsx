@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CourseProgressBar } from "@/components/ui/course-progress-bar";
 import { LearnLightSurface } from "@/components/learn/learn-light-surface";
+import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { cn } from "@/lib/utils";
 import { type } from "@/lib/typography";
 
@@ -75,6 +76,7 @@ function SyllabusPanel({
   passedExamIds,
   onLessonClick,
   className,
+  isNight = false,
 }: {
   slug: string;
   modules: ModuleItem[];
@@ -83,6 +85,7 @@ function SyllabusPanel({
   passedExamIds?: Set<string>;
   onLessonClick?: () => void;
   className?: string;
+  isNight?: boolean;
 }) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(
@@ -144,7 +147,9 @@ function SyllabusPanel({
                             className={cn(
                               "flex items-start gap-3 px-3 py-2.5 text-sm transition-colors",
                               active
-                                ? "bg-brand-50 text-brand-700"
+                                ? isNight
+                                  ? "bg-brand-600/15 text-brand-400"
+                                  : "bg-brand-50 text-brand-700"
                                 : "text-muted-foreground hover:bg-muted"
                             )}
                           >
@@ -252,6 +257,7 @@ export function LessonViewerShell({
   onGoToNext,
 }: LessonViewerShellProps) {
   const [mobileSyllabusOpen, setMobileSyllabusOpen] = useState(false);
+  const { isNight } = useMarketingTheme();
   const nav = getLessonNavigation(modules, lessonId);
   const completedSet = new Set(completedLessonIds);
   const passedExamSet = new Set(passedExamIds);
@@ -263,7 +269,7 @@ export function LessonViewerShell({
         <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link
             href={`/learn/${slug}`}
-            className="inline-flex min-w-0 items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-brand-700"
+            className="inline-flex min-w-0 items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-brand-600 dark:hover:text-brand-400"
           >
             <ChevronLeft className="h-4 w-4 shrink-0" />
             <span className="hidden truncate sm:inline">Back to course home</span>
@@ -375,6 +381,7 @@ export function LessonViewerShell({
             currentLessonId={lessonId}
             completedLessonIds={completedSet}
             passedExamIds={passedExamSet}
+            isNight={isNight}
           />
         </aside>
       </div>
@@ -406,6 +413,7 @@ export function LessonViewerShell({
               completedLessonIds={completedSet}
               passedExamIds={passedExamSet}
               onLessonClick={() => setMobileSyllabusOpen(false)}
+              isNight={isNight}
               className="min-h-0 flex-1"
             />
           </div>

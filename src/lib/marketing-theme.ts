@@ -5,6 +5,10 @@ export function isMarketingSitePath(pathname: string) {
   return true;
 }
 
+export function isLearnPath(pathname: string) {
+  return pathname.startsWith("/learn");
+}
+
 /** Mockup-aligned marketing palette — deep navy + electric blue (night). */
 export const MARKETING_COLORS = {
   background: "#0a0e1a",

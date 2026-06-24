@@ -410,26 +410,32 @@
   color: var(--marketing-fg);
 }
 
-/* Learning player — always light, readable (Continue Learning, modules, lessons) */
-[data-surface="learn-light"] {
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --border: #e2e8f0;
-  background-color: #f8fafc;
-  color: #0f172a;
+/* Learning pages — follow global day/night theme */
+[data-surface="learn"] {
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
-[data-surface="learn-light"] h1,
-[data-surface="learn-light"] h2,
-[data-surface="learn-light"] h3,
-[data-surface="learn-light"] h4 {
-  color: #0f172a;
+[data-marketing-theme="night"] [data-surface="learn"] .bg-brand-50 {
+  background-color: rgb(0 82 255 / 0.12);
 }
 
-[data-surface="learn-light"] .text-muted-foreground {
-  color: #64748b;
+[data-marketing-theme="night"] [data-surface="learn"] .text-brand-700 {
+  color: #60a5fa;
+}
+
+[data-marketing-theme="night"] [data-surface="learn"] .bg-emerald-50 {
+  background-color: rgb(6 78 59 / 0.2);
+}
+
+[data-marketing-theme="night"] [data-surface="learn"] .border-emerald-200 {
+  border-color: rgb(52 211 153 / 0.35);
+}
+
+[data-marketing-theme="night"] [data-surface="learn"] .bg-red-50 {
+  background-color: rgb(127 29 29 / 0.2);
+}
+
+[data-marketing-theme="night"] [data-surface="learn"] .border-red-200 {
+  border-color: rgb(248 113 113 / 0.35);
 }

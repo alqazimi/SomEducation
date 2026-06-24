@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { PLATFORM_NAME } from "@/lib/brand";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
-import { isMarketingSitePath, marketingFooterClassDay, marketingFooterClassNight } from "@/lib/marketing-theme";
+import { isMarketingSitePath, isLearnPath, marketingFooterClassDay, marketingFooterClassNight } from "@/lib/marketing-theme";
 import { cn } from "@/lib/utils";
 
 const quickLinks = [
@@ -28,15 +28,17 @@ const supportLinks = [
 
 export function Footer({ variant = "default" }: { variant?: "default" | "marketing" | "light" }) {
   const pathname = usePathname();
+  const isLearn = isLearnPath(pathname);
   const isMarketing =
     variant === "marketing" ||
     (variant === "default" && isMarketingSitePath(pathname));
+  const usesThemedFooter = isMarketing || isLearn;
   const { isDay, isNight } = useMarketingTheme();
 
   return (
     <footer
       className={cn(
-        isMarketing
+        usesThemedFooter
           ? cn(
               "mt-auto border-t",
               isNight ? marketingFooterClassNight : marketingFooterClassDay
@@ -50,14 +52,14 @@ export function Footer({ variant = "default" }: { variant?: "default" | "marketi
             <Link href="/" className="flex items-center gap-2">
               <SomEducationLogo size={36} />
               <SomEducationWordmark
-                inverted={isMarketing && isNight}
-                className={cn(isMarketing && isNight && "text-white")}
+                inverted={usesThemedFooter && isNight}
+                className={cn(usesThemedFooter && isNight && "text-white")}
               />
             </Link>
             <p
               className={cn(
                 "mt-4 max-w-xs text-sm leading-relaxed",
-                isMarketing ? "text-marketing-muted" : "text-stone-600"
+                usesThemedFooter ? "text-marketing-muted" : "text-stone-600"
               )}
             >
               Structured online courses from working instructors. Learn at your
@@ -69,7 +71,7 @@ export function Footer({ variant = "default" }: { variant?: "default" | "marketi
             <h4
               className={cn(
                 "text-sm font-semibold",
-                isMarketing ? "text-marketing-fg" : "text-stone-900"
+                usesThemedFooter ? "text-marketing-fg" : "text-stone-900"
               )}
             >
               Quick Links
@@ -81,7 +83,7 @@ export function Footer({ variant = "default" }: { variant?: "default" | "marketi
                     href={link.href}
                     className={cn(
                       "transition-colors",
-                      isMarketing
+                      usesThemedFooter
                         ? isDay
                           ? "text-marketing-muted hover:text-brand-600"
                           : "text-marketing-muted hover:text-brand-400"
@@ -99,7 +101,7 @@ export function Footer({ variant = "default" }: { variant?: "default" | "marketi
             <h4
               className={cn(
                 "text-sm font-semibold",
-                isMarketing ? "text-marketing-fg" : "text-stone-900"
+                usesThemedFooter ? "text-marketing-fg" : "text-stone-900"
               )}
             >
               Support
@@ -111,7 +113,7 @@ export function Footer({ variant = "default" }: { variant?: "default" | "marketi
                     href={link.href}
                     className={cn(
                       "transition-colors",
-                      isMarketing
+                      usesThemedFooter
                         ? isDay
                           ? "text-marketing-muted hover:text-brand-600"
                           : "text-marketing-muted hover:text-brand-400"
@@ -144,7 +146,7 @@ export function Footer({ variant = "default" }: { variant?: "default" | "marketi
             <h4
               className={cn(
                 "text-sm font-semibold",
-                isMarketing ? "text-marketing-fg" : "text-stone-900"
+                usesThemedFooter ? "text-marketing-fg" : "text-stone-900"
               )}
             >
               Newsletter
@@ -152,7 +154,7 @@ export function Footer({ variant = "default" }: { variant?: "default" | "marketi
             <p
               className={cn(
                 "mt-4 text-sm leading-relaxed",
-                isMarketing ? "text-marketing-muted" : "text-stone-600"
+                usesThemedFooter ? "text-marketing-muted" : "text-stone-600"
               )}
             >
               Subscribe for updates and new course alerts.
@@ -166,7 +168,7 @@ export function Footer({ variant = "default" }: { variant?: "default" | "marketi
                 placeholder="Enter your email"
                 className={cn(
                   "h-10 rounded-lg",
-                  isMarketing
+                  usesThemedFooter
                     ? "border-marketing-border bg-marketing-elevated text-marketing-fg placeholder:text-marketing-muted"
                     : "bg-white"
                 )}
@@ -185,7 +187,7 @@ export function Footer({ variant = "default" }: { variant?: "default" | "marketi
         <p
           className={cn(
             "mt-10 border-t pt-6 text-center text-sm",
-            isMarketing
+            usesThemedFooter
               ? "border-marketing-border text-marketing-muted"
               : "border-border text-stone-500"
           )}

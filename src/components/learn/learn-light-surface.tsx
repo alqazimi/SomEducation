@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/** Forces readable light UI on learning pages regardless of day/night theme. */
+/** Learning pages follow the global day/night theme (Continue Learning, lessons, exams). */
 export function LearnLightSurface({
   children,
   className,
@@ -9,7 +9,10 @@ export function LearnLightSurface({
   className?: string;
 }) {
   return (
-    <div data-surface="learn-light" className={cn("text-foreground", className)}>
+    <div
+      data-surface="learn"
+      className={cn("min-h-screen bg-background text-foreground", className)}
+    >
       {children}
     </div>
   );

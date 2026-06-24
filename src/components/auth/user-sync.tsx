@@ -4,6 +4,7 @@ import { useUser } from "@clerk/nextjs";
 import { useConvexAuth, useMutation } from "convex/react";
 import { useEffect, useRef } from "react";
 import { api } from "convex/_generated/api";
+import { getDisplayProfileImageUrl } from "@/lib/profile-image";
 
 export function UserSync() {
   const { user, isLoaded } = useUser();
@@ -21,7 +22,7 @@ export function UserSync() {
         email: user.primaryEmailAddress?.emailAddress ?? "",
         firstName: user.firstName ?? undefined,
         lastName: user.lastName ?? undefined,
-        imageUrl: user.imageUrl ?? undefined,
+        imageUrl: getDisplayProfileImageUrl(user.imageUrl),
       }).catch(() => {
         syncedRef.current = null;
         window.setTimeout(() => {
@@ -31,7 +32,7 @@ export function UserSync() {
             email: user.primaryEmailAddress?.emailAddress ?? "",
             firstName: user.firstName ?? undefined,
             lastName: user.lastName ?? undefined,
-            imageUrl: user.imageUrl ?? undefined,
+            imageUrl: getDisplayProfileImageUrl(user.imageUrl),
           }).catch(() => {
             syncedRef.current = null;
           });

@@ -22,7 +22,7 @@ import {
 import { NotificationBell } from "@/features/notifications/notifications-inbox";
 import { MarketingThemeToggle } from "@/components/marketing/marketing-theme-toggle";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
-import { isMarketingSitePath, marketingHeaderClassDay, marketingHeaderClassNight, dashboardHeaderClass } from "@/lib/marketing-theme";
+import { isMarketingSitePath, isLearnPath, marketingHeaderClassDay, marketingHeaderClassNight, dashboardHeaderClass } from "@/lib/marketing-theme";
 import { HeaderSearch } from "./header-search";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
 
@@ -51,6 +51,7 @@ function isMarketingNavActive(pathname: string, href: string) {
 export function Header({ variant = "default" }: { variant?: "default" | "marketing" | "light" }) {
   const pathname = usePathname();
   const isDashboard = pathname.startsWith("/dashboard");
+  const isLearn = isLearnPath(pathname);
   const isMarketing =
     variant === "marketing" ||
     (variant === "default" && isMarketingSitePath(pathname));
@@ -65,7 +66,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [navPathname, setNavPathname] = useState(pathname);
   const { isDay, isNight } = useMarketingTheme();
-  const useDarkChrome = isNight && (isMarketing || isDashboard);
+  const useDarkChrome = isNight && (isMarketing || isDashboard || isLearn);
 
   if (pathname !== navPathname) {
     setNavPathname(pathname);
@@ -88,10 +89,12 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
           "top-0 z-50 w-full",
           isMarketing && useDarkChrome ? "" : "backdrop-blur-md",
           isMarketing ? "fixed" : "sticky",
-          (isMarketing || isDashboard) && "pt-[env(safe-area-inset-top,0px)]",
+          (isMarketing || isDashboard || isLearn) && "pt-[env(safe-area-inset-top,0px)]",
           useDarkChrome
             ? cn(
-                isMarketing ? marketingHeaderClassNight : dashboardHeaderClass,
+                isMarketing
+                  ? marketingHeaderClassNight
+                  : dashboardHeaderClass,
                 isDay && isMarketing && "shadow-sm"
               )
             : isMarketing
@@ -189,7 +192,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
             )}
 
             <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5">
-              {(isMarketing || isDashboard) && (
+              {(isMarketing || isDashboard || isLearn) && (
                 <MarketingThemeToggle className="h-9 w-9 sm:h-10 sm:w-10" />
               )}
 

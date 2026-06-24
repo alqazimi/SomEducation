@@ -1,6 +1,7 @@
 "use client";
 
 import { SignOutButton, useAuth, useUser } from "@clerk/nextjs";
+import { getDisplayProfileImageUrl } from "@/lib/profile-image";
 import Link from "next/link";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -40,7 +41,7 @@ export function useEnsureConvexUser() {
         email: clerkUser.primaryEmailAddress?.emailAddress ?? "",
         firstName: clerkUser.firstName ?? undefined,
         lastName: clerkUser.lastName ?? undefined,
-        imageUrl: clerkUser.imageUrl ?? undefined,
+        imageUrl: getDisplayProfileImageUrl(clerkUser.imageUrl),
       });
     } catch (error) {
       setSyncError(

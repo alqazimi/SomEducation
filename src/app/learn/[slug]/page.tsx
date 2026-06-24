@@ -53,8 +53,9 @@ export default function LearnPage() {
     return (
       <>
         <Header />
+        <LearnLightSurface className="min-h-screen">
         <main className="flex min-h-[60vh] items-center justify-center px-4 py-12">
-          <Card className="w-full max-w-lg text-center shadow-sm">
+          <Card className="w-full max-w-lg border-border bg-card text-center shadow-sm">
             <CardContent className="px-6 py-12">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-brand-600">
                 <BookOpen className="h-7 w-7" />
@@ -74,6 +75,7 @@ export default function LearnPage() {
             </CardContent>
           </Card>
         </main>
+        </LearnLightSurface>
         <Footer />
       </>
     );

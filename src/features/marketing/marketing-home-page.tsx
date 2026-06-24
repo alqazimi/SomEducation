@@ -22,8 +22,8 @@ const HomepageCourseSections = dynamic(
 function MarketingHero() {
   return (
     <section className="relative">
-      <div className="mx-auto max-w-7xl px-4 pt-2 pb-4 sm:px-6 sm:pt-4 sm:pb-5 lg:px-8 lg:py-10">
-        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-8 lg:gap-12">
+      <div className="mx-auto max-w-7xl px-4 pt-7 pb-5 sm:px-6 sm:pt-4 sm:pb-5 lg:px-8 lg:py-10">
+        <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8 lg:gap-12">
           <div className="relative min-w-0 w-full sm:max-w-md sm:flex-1 lg:max-w-xl">
             <div className="relative z-10">
               <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-brand-400 lg:text-sm">
