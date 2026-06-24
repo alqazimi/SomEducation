@@ -26,8 +26,10 @@ import {
 import { useConvexUploadReady } from "@/hooks/use-convex-upload-ready";
 import {
   PAYMENT_PROOF_ACCEPT,
+  PAYMENT_PROOF_HINT,
   uploadPaymentProofToConvex,
 } from "@/lib/payment-upload";
+import { PurchaseStepNav } from "@/features/student/purchase-step-nav";
 import { type } from "@/lib/typography";
 import { cn, formatPrice } from "@/lib/utils";
 
@@ -68,6 +70,10 @@ export function PurchaseCourseForm() {
   const [step, setStep] = useState(1);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [screenshotPreviewUrl, setScreenshotPreviewUrl] = useState<string | null>(
+    null
+  );
+  const screenshotPreviewRef = useRef<string | null>(null);
   const [screenshotId, setScreenshotId] = useState<Id<"_storage"> | null>(null);
   const [paymentType, setPaymentType] = useState<PaymentType | null>(null);
   const [selectedProviderId, setSelectedProviderId] =
@@ -120,6 +126,14 @@ export function PurchaseCourseForm() {
     selectedProviderId ||
       (paymentType && manualProvidersReady && !hasActiveProviders)
   );
+
+  useEffect(() => {
+    return () => {
+      if (screenshotPreviewRef.current) {
+        URL.revokeObjectURL(screenshotPreviewRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (searchParams.get("cancelled") === "1") {
@@ -238,9 +252,25 @@ export function PurchaseCourseForm() {
         file
       );
       setScreenshotId(storageId);
+      if (screenshotPreviewRef.current) {
+        URL.revokeObjectURL(screenshotPreviewRef.current);
+      }
+      if (file.type.startsWith("image/") || /\.(png|jpe?g|webp)$/i.test(file.name)) {
+        const preview = URL.createObjectURL(file);
+        screenshotPreviewRef.current = preview;
+        setScreenshotPreviewUrl(preview);
+      } else {
+        screenshotPreviewRef.current = null;
+        setScreenshotPreviewUrl(null);
+      }
       toast.success("Payment screenshot uploaded");
     } catch (error) {
       setScreenshotId(null);
+      setScreenshotPreviewUrl(null);
+      if (screenshotPreviewRef.current) {
+        URL.revokeObjectURL(screenshotPreviewRef.current);
+        screenshotPreviewRef.current = null;
+      }
       toast.error(
         error instanceof Error ? error.message : "Upload failed. Please sign in again and retry."
       );
@@ -483,19 +513,23 @@ export function PurchaseCourseForm() {
         </p>
       </div>
 
-      <div className="mt-6 flex gap-2">
-        {[1, 2, 3, 4].map((s) => (
-          <div
-            key={s}
-            className={`h-1.5 flex-1 rounded-full ${
-              s <= step ? "bg-brand-600" : "bg-muted-foreground/15"
-            }`}
-          />
-        ))}
+      <div className="mt-6">
+        <PurchaseStepNav
+          step={step}
+          onBack={
+            step === 2
+              ? () => setStep(1)
+              : step === 3
+                ? () => setStep(2)
+                : step === 4
+                  ? () => setStep(3)
+                  : undefined
+          }
+        />
       </div>
 
       {step === 1 && (
-        <Card className="mt-8 border-border bg-card shadow-sm">
+        <Card className="mt-6 border-border bg-card shadow-sm">
           <CardHeader>
             <CardTitle>Your details</CardTitle>
           </CardHeader>
@@ -555,7 +589,7 @@ export function PurchaseCourseForm() {
       )}
 
       {step === 2 && (
-        <Card className="mt-8 border-border bg-card shadow-sm">
+        <Card className="mt-6 border-border bg-card shadow-sm">
           <CardHeader>
             <CardTitle>Choose payment method</CardTitle>
           </CardHeader>
@@ -667,7 +701,7 @@ export function PurchaseCourseForm() {
       )}
 
       {step === 3 && (
-        <Card className="mt-8 border-border bg-card shadow-sm">
+        <Card className="mt-6 border-border bg-card shadow-sm">
           <CardHeader>
             <CardTitle>Upload payment screenshot</CardTitle>
           </CardHeader>
@@ -685,13 +719,14 @@ export function PurchaseCourseForm() {
             <Input
               ref={fileInputRef}
               type="file"
-              accept={`${PAYMENT_PROOF_ACCEPT},image/*`}
+              accept={PAYMENT_PROOF_ACCEPT}
               disabled={uploading || !canUpload}
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) void handleFileUpload(file);
               }}
             />
+            <p className="text-xs text-muted-foreground">{PAYMENT_PROOF_HINT}</p>
             {statusMessage && (
               <p className="text-sm text-muted-foreground">{statusMessage}</p>
             )}
@@ -699,7 +734,17 @@ export function PurchaseCourseForm() {
               <p className="text-sm text-muted-foreground">Uploading… this may take a moment.</p>
             )}
             {screenshotId && (
-              <p className="text-sm text-green-600">Screenshot uploaded successfully</p>
+              <p className="text-sm font-medium text-green-600">
+                Screenshot uploaded successfully
+              </p>
+            )}
+            {screenshotPreviewUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={screenshotPreviewUrl}
+                alt="Payment proof preview"
+                className="max-h-48 w-full rounded-lg border border-border object-contain"
+              />
             )}
             <Button
               type="button"
@@ -717,14 +762,45 @@ export function PurchaseCourseForm() {
       )}
 
       {step === 4 && (
-        <Card className="mt-8 border-border bg-card shadow-sm">
+        <Card className="mt-6 border-border bg-card shadow-sm">
           <CardHeader>
             <CardTitle>Review & submit</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="rounded-lg border border-border bg-muted/50 p-4 text-sm">
+              <p className="font-medium text-foreground">Your details</p>
+              <dl className="mt-3 space-y-2 text-muted-foreground">
+                <div className="flex justify-between gap-4">
+                  <dt>Name</dt>
+                  <dd className="text-right font-medium text-foreground">
+                    {formValues.fullName || "—"}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt>Phone</dt>
+                  <dd className="text-right font-medium text-foreground">
+                    {formValues.phone || "—"}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt>Reference</dt>
+                  <dd className="text-right font-medium text-foreground">
+                    {formValues.transactionReference || "—"}
+                  </dd>
+                </div>
+                {formValues.notes?.trim() && (
+                  <div>
+                    <dt>Notes</dt>
+                    <dd className="mt-1 text-foreground">{formValues.notes}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+
             {selectedProvider ? (
-              <div className="rounded-lg border border-border bg-muted p-4 text-sm text-muted-foreground">
-                <p>
+              <div className="rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
+                <p className="font-medium text-foreground">Payment method</p>
+                <p className="mt-2">
                   <strong>Provider:</strong> {selectedProvider.name}
                 </p>
                 <p className="mt-1">
@@ -732,18 +808,41 @@ export function PurchaseCourseForm() {
                 </p>
               </div>
             ) : paymentType ? (
-              <div className="rounded-lg border border-border bg-muted p-4 text-sm text-muted-foreground">
-                <p>
-                  <strong>Method:</strong>{" "}
+              <div className="rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
+                <p className="font-medium text-foreground">Payment method</p>
+                <p className="mt-2">
                   {paymentType === "mobile_money" ? "Mobile Money" : "Bank Transfer"}
                 </p>
               </div>
+            ) : (
+              <p className="text-sm text-red-600">
+                Choose a payment method before submitting.
+              </p>
+            )}
+
+            {screenshotPreviewUrl ? (
+              <div className="rounded-lg border border-border bg-muted/50 p-4">
+                <p className="text-sm font-medium text-foreground">Payment proof</p>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={screenshotPreviewUrl}
+                  alt="Payment proof"
+                  className="mt-3 max-h-52 w-full rounded-lg border border-border object-contain"
+                />
+              </div>
+            ) : screenshotId ? (
+              <p className="text-sm text-green-600">Payment proof uploaded</p>
             ) : null}
-            <p className="text-sm text-green-600">Payment screenshot uploaded</p>
+
             <p className="text-sm text-muted-foreground">
               Your payment will be reviewed by our admin team. You&apos;ll receive a
               notification once approved.
             </p>
+            {formErrors.paymentProviderId && (
+              <p className="text-sm text-red-600">
+                {formErrors.paymentProviderId.message}
+              </p>
+            )}
             {!canTransact && statusMessage && (
               <p className="text-sm text-amber-800">{statusMessage}</p>
             )}
@@ -751,7 +850,7 @@ export function PurchaseCourseForm() {
               type="button"
               onClick={() => void handleSubmitPayment()}
               className="w-full"
-              disabled={submitting || !canTransact}
+              disabled={submitting || !canTransact || !screenshotId}
             >
               {submitting ? "Submitting…" : "Submit payment request"}
             </Button>

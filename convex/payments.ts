@@ -132,7 +132,10 @@ export const fixAndResubmit = mutation({
   args: {
     paymentId: v.id("payments"),
     screenshotStorageId: v.id("_storage"),
-    paymentProviderId: v.id("paymentProviders"),
+    paymentProviderId: v.optional(v.id("paymentProviders")),
+    method: v.optional(
+      v.union(v.literal("mobile_money"), v.literal("bank_transfer"))
+    ),
     transactionReference: v.string(),
     notes: v.optional(v.string()),
   },
@@ -148,12 +151,24 @@ export const fixAndResubmit = mutation({
       throw new Error("This payment cannot be updated right now");
     }
 
-    const provider = await ctx.db.get(args.paymentProviderId);
-    if (!provider || !provider.isActive || !provider.accountNumber.trim()) {
-      throw new Error("Selected payment method is not available");
-    }
-    if (provider.type !== "mobile_money" && provider.type !== "bank_transfer") {
-      throw new Error("Invalid payment method");
+    let method: "mobile_money" | "bank_transfer";
+    let paymentProviderId: typeof args.paymentProviderId;
+
+    if (args.paymentProviderId) {
+      const provider = await ctx.db.get(args.paymentProviderId);
+      if (!provider || !provider.isActive || !provider.accountNumber.trim()) {
+        throw new Error("Selected payment method is not available");
+      }
+      if (provider.type !== "mobile_money" && provider.type !== "bank_transfer") {
+        throw new Error("Invalid payment method");
+      }
+      method = provider.type;
+      paymentProviderId = provider._id;
+    } else if (args.method) {
+      method = args.method;
+      paymentProviderId = undefined;
+    } else {
+      throw new Error("Choose a payment method to continue");
     }
 
     await validateStorageFile(ctx, args.screenshotStorageId);
@@ -161,8 +176,8 @@ export const fixAndResubmit = mutation({
     const now = Date.now();
     await ctx.db.patch(args.paymentId, {
       screenshotStorageId: args.screenshotStorageId,
-      paymentProviderId: provider._id,
-      method: provider.type,
+      paymentProviderId,
+      method,
       transactionReference: sanitizeText(args.transactionReference, 100),
       notes: args.notes ? sanitizeText(args.notes, 500) : payment.notes,
       status: "pending",

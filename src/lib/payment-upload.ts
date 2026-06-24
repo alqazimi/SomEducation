@@ -1,6 +1,6 @@
 import { Id } from "convex/_generated/dataModel";
 
-export const PAYMENT_PROOF_ACCEPT = ".png,.jpg,.jpeg,.webp,.pdf";
+export const PAYMENT_PROOF_ACCEPT = ".png,.jpg,.jpeg,.webp,.pdf,image/*";
 
 export const PAYMENT_PROOF_MIME_TYPES = [
   "image/png",
@@ -10,6 +10,9 @@ export const PAYMENT_PROOF_MIME_TYPES = [
   "application/pdf",
 ] as const;
 
+/** Shown when a phone picks HEIC/HEIF — not stored by Convex. */
+const HEIC_EXTENSIONS = new Set([".heic", ".heif"]);
+
 const EXTENSION_TO_MIME: Record<string, (typeof PAYMENT_PROOF_MIME_TYPES)[number]> =
   {
     ".png": "image/png",
@@ -18,6 +21,9 @@ const EXTENSION_TO_MIME: Record<string, (typeof PAYMENT_PROOF_MIME_TYPES)[number
     ".webp": "image/webp",
     ".pdf": "application/pdf",
   };
+
+export const PAYMENT_PROOF_HINT =
+  "PNG, JPG, or PDF up to 5MB. iPhone HEIC photos are not supported — take a screenshot or use “Most Compatible” in camera settings.";
 
 const MAX_PAYMENT_PROOF_SIZE = 5 * 1024 * 1024;
 const UPLOAD_TIMEOUT_MS = 60_000;
@@ -63,6 +69,13 @@ async function fetchWithTimeout(
 }
 
 export function resolvePaymentProofMimeType(file: File) {
+  const extension = file.name.toLowerCase().match(/\.[^.]+$/)?.[0];
+  if (extension && HEIC_EXTENSIONS.has(extension)) {
+    throw new Error(
+      "HEIC photos are not supported. Save as JPG/PNG (screenshot works) and try again."
+    );
+  }
+
   if (
     file.type &&
     PAYMENT_PROOF_MIME_TYPES.includes(
@@ -72,9 +85,14 @@ export function resolvePaymentProofMimeType(file: File) {
     return file.type as (typeof PAYMENT_PROOF_MIME_TYPES)[number];
   }
 
-  const extension = file.name.toLowerCase().match(/\.[^.]+$/)?.[0];
   if (extension && EXTENSION_TO_MIME[extension]) {
     return EXTENSION_TO_MIME[extension];
+  }
+
+  if (file.type?.startsWith("image/")) {
+    throw new Error(
+      "This image type is not supported. Use PNG, JPG, or WEBP, or upload a PDF receipt."
+    );
   }
 
   throw new Error("Only PNG, JPG, JPEG, WEBP, and PDF files are allowed");

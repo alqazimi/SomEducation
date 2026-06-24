@@ -17,6 +17,7 @@ import { paymentFixSchema, type PaymentFixValues } from "@/schemas";
 import {
   isPdfProofUrl,
   PAYMENT_PROOF_ACCEPT,
+  PAYMENT_PROOF_HINT,
   uploadPaymentProofToConvex,
 } from "@/lib/payment-upload";
 import {
@@ -71,7 +72,7 @@ export function PaymentFixForm({
   showSupportLink = true,
 }: PaymentFixFormProps) {
   const draftKey = `payment-fix-draft:${payment._id}`;
-  const { canUpload, statusMessage } = useConvexUploadReady();
+  const { canUpload, canTransact, statusMessage } = useConvexUploadReady();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const draftRestoredRef = useRef(false);
 
@@ -88,6 +89,7 @@ export function PaymentFixForm({
     api.paymentProviders.list,
     paymentType ? { type: paymentType, activeOnly: true } : "skip"
   );
+  const platformSettings = useQuery(api.settings.get);
   const generateUploadUrl = useMutation(api.files.generateUploadUrlMutation);
   const fixAndResubmit = useMutation(api.payments.fixAndResubmit);
 
@@ -95,10 +97,14 @@ export function PaymentFixForm({
     resolver: zodResolver(paymentFixSchema),
     defaultValues: {
       paymentProviderId: payment.paymentProviderId ?? "",
+      method: payment.paymentProviderId ? undefined : payment.method,
       transactionReference: payment.transactionReference,
       notes: payment.notes ?? "",
     },
   });
+
+  const manualProvidersReady = providers !== undefined;
+  const hasActiveProviders = (providers?.length ?? 0) > 0;
 
   const selectedProvider = useMemo(
     () => providers?.find((provider) => provider._id === selectedProviderId),
@@ -185,11 +191,25 @@ export function PaymentFixForm({
     setPaymentType(nextType);
     setSelectedProviderId(null);
     form.setValue("paymentProviderId", "");
+    form.setValue("method", nextType);
   }
 
   function handleProviderSelect(providerId: Id<"paymentProviders">) {
     setSelectedProviderId(providerId);
     form.setValue("paymentProviderId", providerId);
+    form.setValue("method", undefined);
+  }
+
+  function syncPaymentFields() {
+    if (selectedProviderId) {
+      form.setValue("paymentProviderId", selectedProviderId);
+      form.setValue("method", undefined);
+      return;
+    }
+    if (paymentType) {
+      form.setValue("method", paymentType);
+      form.setValue("paymentProviderId", "");
+    }
   }
 
   async function handleFileUpload(file: File) {
@@ -224,8 +244,17 @@ export function PaymentFixForm({
       toast.error("Please upload a new payment screenshot or receipt");
       return;
     }
-    if (!selectedProviderId) {
-      toast.error("Please choose a payment provider");
+
+    if (!canTransact) {
+      toast.error("Please wait until your account is connected, then try again.");
+      return;
+    }
+
+    syncPaymentFields();
+
+    const providerId = data.paymentProviderId?.trim();
+    if (!providerId && !data.method) {
+      toast.error("Choose a payment method");
       return;
     }
 
@@ -234,7 +263,10 @@ export function PaymentFixForm({
       await fixAndResubmit({
         paymentId: payment._id,
         screenshotStorageId: screenshotId,
-        paymentProviderId: data.paymentProviderId as Id<"paymentProviders">,
+        paymentProviderId: providerId
+          ? (providerId as Id<"paymentProviders">)
+          : undefined,
+        method: providerId ? undefined : data.method,
         transactionReference: data.transactionReference,
         notes: data.notes?.trim() ? data.notes : undefined,
       });
@@ -259,7 +291,10 @@ export function PaymentFixForm({
       ? "Choose Mobile Money or Bank again, send payment, then upload new proof. You do not need to start a new purchase."
       : "Choose your payment method again if needed, then upload clearer proof.";
 
-  const canContinueToDetails = Boolean(selectedProviderId);
+  const canContinueToDetails = Boolean(
+    selectedProviderId ||
+      (paymentType && manualProvidersReady && !hasActiveProviders)
+  );
 
   return (
     <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
@@ -343,9 +378,13 @@ export function PaymentFixForm({
                   Loading providers...
                 </p>
               ) : providers.length === 0 ? (
-                <p className="mt-2 text-sm text-amber-800">
-                  No active providers for this method.
-                </p>
+                <div className="mt-2 rounded-lg border border-amber-300 bg-card p-3 text-sm text-amber-900">
+                  <p className="font-medium">Payment instructions</p>
+                  <p className="mt-2 whitespace-pre-wrap">
+                    {platformSettings?.paymentInstructions ??
+                      "Send the exact course amount using your preferred mobile money or bank app, then upload proof in the next step."}
+                  </p>
+                </div>
               ) : (
                 <div className="mt-2 grid gap-2 sm:grid-cols-2">
                   {providers.map((provider) => {
@@ -403,7 +442,7 @@ export function PaymentFixForm({
           onSubmit={form.handleSubmit(onSubmit)}
           className="mt-4 space-y-4"
         >
-          {selectedProvider && (
+          {selectedProvider ? (
             <div className="rounded-lg border border-amber-300 bg-card p-3 text-sm">
               <p className="font-medium">Paying via {selectedProvider.name}</p>
               <p className="mt-1 font-mono">{selectedProvider.accountNumber}</p>
@@ -416,7 +455,21 @@ export function PaymentFixForm({
                 Change payment method
               </Button>
             </div>
-          )}
+          ) : paymentType ? (
+            <div className="rounded-lg border border-amber-300 bg-card p-3 text-sm">
+              <p className="font-medium">
+                {paymentType === "mobile_money" ? "Mobile Money" : "Bank Transfer"}
+              </p>
+              <Button
+                type="button"
+                variant="link"
+                className="mt-1 h-auto p-0 text-sm"
+                onClick={() => setStep(1)}
+              >
+                Change payment method
+              </Button>
+            </div>
+          ) : null}
 
           <div>
             <Label htmlFor={`ref-${payment._id}`}>Transaction reference</Label>
@@ -458,6 +511,7 @@ export function PaymentFixForm({
                 if (file) void handleFileUpload(file);
               }}
             />
+            <p className="mt-1 text-xs text-amber-800">{PAYMENT_PROOF_HINT}</p>
             {statusMessage && (
               <p className="mt-1 text-sm text-amber-800">{statusMessage}</p>
             )}
@@ -487,10 +541,10 @@ export function PaymentFixForm({
               size="sm"
               disabled={
                 !screenshotId ||
-                !selectedProviderId ||
                 uploading ||
                 submitting ||
-                !canUpload
+                !canUpload ||
+                !canTransact
               }
             >
               {submitting ? "Submitting..." : "Submit for review"}
