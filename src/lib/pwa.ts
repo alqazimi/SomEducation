@@ -1,37 +1,117 @@
 export const PWA_BANNER_DISMISS_KEY = "someducation-pwa-banner-dismissed";
 export const PWA_INSTALL_AVAILABLE_EVENT = "pwa-install-available";
 export const PWA_INSTALLED_EVENT = "pwa-installed";
+export const PWA_INSTALL_NEEDS_RETRY_EVENT = "pwa-install-needs-retry";
 
-function canRegisterServiceWorkerInBrowser(): boolean {
-  if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
-    return false;
-  }
-  return window.location.protocol === "https:";
+export function isSecurePwaContext(): boolean {
+  if (typeof window === "undefined") return false;
+  const host = window.location.hostname;
+  const isLocalhost = host === "localhost" || host === "127.0.0.1";
+  return window.location.protocol === "https:" || isLocalhost;
 }
 
-/** Capture install prompt + register SW before React hydrates. */
+/** Capture install prompt, register SW, and expose one-tap install before React loads. */
 export const PWA_EARLY_INSTALL_CAPTURE = `
 (function(){
   if(typeof window==="undefined")return;
   if(window.__pwaBootstrap)return;
   window.__pwaBootstrap=true;
-  if(!window.__pwaDeferredInstall)window.__pwaDeferredInstall=null;
+
+  var INSTALL_AVAILABLE="${PWA_INSTALL_AVAILABLE_EVENT}";
+  var INSTALLED="${PWA_INSTALLED_EVENT}";
+  var NEEDS_RETRY="${PWA_INSTALL_NEEDS_RETRY_EVENT}";
+  var RELOAD_KEY="someducation-pwa-sw-reload";
+
+  function isLocalhost(){
+    var h=location.hostname;
+    return h==="localhost"||h==="127.0.0.1";
+  }
+  function canRegisterSW(){
+    return "serviceWorker"in navigator&&(location.protocol==="https:"||isLocalhost());
+  }
+  function isIOS(){
+    var ua=navigator.userAgent;
+    return /iPad|iPhone|iPod/.test(ua)||(ua.indexOf("Mac")>=0&&"ontouchend"in document);
+  }
+  function isAndroid(){
+    return /Android/i.test(navigator.userAgent);
+  }
+
+  window.__pwaDeferredInstall=null;
+
   function storeInstall(e){
     e.preventDefault();
     window.__pwaDeferredInstall=e;
-    window.dispatchEvent(new Event("${PWA_INSTALL_AVAILABLE_EVENT}"));
+    window.dispatchEvent(new Event(INSTALL_AVAILABLE));
   }
+
   window.addEventListener("beforeinstallprompt",storeInstall);
   window.addEventListener("appinstalled",function(){
     window.__pwaDeferredInstall=null;
-    window.dispatchEvent(new Event("${PWA_INSTALLED_EVENT}"));
+    try{sessionStorage.removeItem(RELOAD_KEY)}catch(x){}
+    window.dispatchEvent(new Event(INSTALLED));
   });
-  if("serviceWorker"in navigator&&location.protocol==="https:"){
+
+  if(canRegisterSW()){
     navigator.serviceWorker.register("/sw.js",{scope:"/",updateViaCache:"none"}).catch(function(){});
     navigator.serviceWorker.addEventListener("controllerchange",function(){
-      window.dispatchEvent(new Event("${PWA_INSTALL_AVAILABLE_EVENT}"));
+      window.dispatchEvent(new Event(INSTALL_AVAILABLE));
     });
   }
+
+  window.__pwaInstallNow=function(){
+    var prompt=window.__pwaDeferredInstall;
+    if(prompt&&typeof prompt.prompt==="function"){
+      try{
+        var p=prompt.prompt();
+        if(p&&typeof p.then==="function"){
+          p.then(function(){
+            if(prompt.userChoice){
+              prompt.userChoice.then(function(choice){
+                if(choice&&choice.outcome==="accepted"){
+                  window.__pwaDeferredInstall=null;
+                  window.dispatchEvent(new Event(INSTALLED));
+                }
+              });
+            }
+          }).catch(function(){});
+        }
+        return true;
+      }catch(err){
+        console.warn("[SomEducation] PWA install failed:",err);
+      }
+    }
+
+    if(isIOS()&&navigator.share){
+      try{
+        navigator.share({title:"SomEducation",url:location.origin+"/"});
+        return true;
+      }catch(err){
+        if(err&&err.name==="AbortError")return true;
+      }
+    }
+
+    if(isAndroid()&&"serviceWorker"in navigator){
+      navigator.serviceWorker.getRegistration().then(function(reg){
+        if(reg&&!navigator.serviceWorker.controller){
+          try{
+            if(!sessionStorage.getItem(RELOAD_KEY)){
+              sessionStorage.setItem(RELOAD_KEY,"1");
+              location.reload();
+              return;
+            }
+          }catch(x){}
+        }
+        window.dispatchEvent(new Event(NEEDS_RETRY));
+      }).catch(function(){
+        window.dispatchEvent(new Event(NEEDS_RETRY));
+      });
+      return true;
+    }
+
+    window.dispatchEvent(new Event(NEEDS_RETRY));
+    return false;
+  };
 })();
 `;
 
@@ -79,18 +159,15 @@ export function getPwaShareUrl(): string {
   return window.location.origin + "/";
 }
 
-export function openInstallShareSheet(title: string): void {
-  if (!canUseWebShare()) return;
-
-  void navigator
-    .share({
-      title,
-      url: getPwaShareUrl(),
-    })
-    .catch((error) => {
-      if (error instanceof Error && error.name === "AbortError") return;
-      console.warn("[SomEducation] Web Share failed:", error);
-    });
+export function triggerPwaInstallFromClick(): boolean {
+  if (typeof window === "undefined") return false;
+  const installNow = (
+    window as Window & { __pwaInstallNow?: () => boolean }
+  ).__pwaInstallNow;
+  if (typeof installNow === "function") {
+    return installNow();
+  }
+  return false;
 }
 
 /** Banner hidden for current browser tab/session only — resets on next visit. */
@@ -111,12 +188,8 @@ export function dismissInstallBanner(): void {
   }
 }
 
-function shouldRegisterServiceWorker(): boolean {
-  return canRegisterServiceWorkerInBrowser();
-}
-
 export function registerServiceWorker(): void {
-  if (!shouldRegisterServiceWorker()) return;
+  if (!isSecurePwaContext() || !("serviceWorker" in navigator)) return;
 
   void navigator.serviceWorker
     .register("/sw.js", { scope: "/", updateViaCache: "none" })

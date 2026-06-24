@@ -1,8 +1,14 @@
-/* SomEducation PWA service worker — enables install + faster repeat visits. */
-const CACHE = "someducation-shell-v2";
+/* SomEducation PWA service worker */
+const CACHE = "someducation-shell-v3";
+const PRECACHE = ["/manifest.webmanifest", "/icon", "/apple-icon"];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(self.skipWaiting());
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((cache) => cache.addAll(PRECACHE).catch(() => undefined))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (event) => {
@@ -19,29 +25,26 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
-  const url = new URL(event.request.url);
-  const isStaticAsset =
-    url.pathname.startsWith("/_next/static/") ||
-    url.pathname === "/icon" ||
-    url.pathname === "/apple-icon" ||
-    url.pathname === "/icon.svg" ||
-    url.pathname === "/manifest.webmanifest" ||
-    url.pathname === "/sw.js";
-
-  if (!isStaticAsset) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
   event.respondWith(
-    caches.open(CACHE).then(async (cache) => {
-      const cached = await cache.match(event.request);
-      if (cached) return cached;
-      const response = await fetch(event.request);
-      if (response.ok) {
-        void cache.put(event.request, response.clone());
-      }
-      return response;
-    })
+    fetch(event.request)
+      .then((response) => {
+        if (response.ok) {
+          const url = new URL(event.request.url);
+          const shouldCache =
+            url.pathname.startsWith("/_next/static/") ||
+            url.pathname === "/icon" ||
+            url.pathname === "/apple-icon" ||
+            url.pathname === "/manifest.webmanifest" ||
+            url.pathname === "/sw.js";
+
+          if (shouldCache) {
+            void caches.open(CACHE).then((cache) => {
+              void cache.put(event.request, response.clone());
+            });
+          }
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request).then((cached) => cached || Response.error()))
   );
 });
