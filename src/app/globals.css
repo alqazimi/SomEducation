@@ -10,6 +10,7 @@
   --muted-foreground: #64748b;
   --brand-50: #e8f1fd;
   --brand-100: #cce0fa;
+  --brand-400: #3385ff;
   --brand-500: #1a66ff;
   --brand-600: #0052ff;
   --brand-700: #0046d9;
@@ -43,6 +44,7 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-brand-50: var(--brand-50);
   --color-brand-100: var(--brand-100);
+  --color-brand-400: var(--brand-400);
   --color-brand-500: var(--brand-500);
   --color-brand-600: var(--brand-600);
   --color-brand-700: var(--brand-700);
@@ -133,7 +135,7 @@
   --card: #ffffff;
   --card-foreground: #1c1917;
   --muted-foreground: #64748b;
-  --marketing-bg: #ffffff;
+  --marketing-bg: #f8fafc;
   --marketing-bg-footer: #ffffff;
   --marketing-bg-card: #ffffff;
   --marketing-bg-card-hover: #f8fafc;
@@ -218,37 +220,11 @@
   color: #ffffff;
 }
 
-.marketing-courses-band {
-  background-color: #ffffff;
-  color: #0f172a;
+.marketing-courses-band,
+[data-surface="courses-light"] {
+  background-color: var(--marketing-bg);
+  color: var(--marketing-fg);
   isolation: isolate;
-}
-
-/* Courses band stays light regardless of day/night toggle */
-[data-surface="courses-light"],
-.marketing-courses-band {
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --border: #e2e8f0;
-  --input: #ffffff;
-  --marketing-bg: #ffffff;
-  --marketing-bg-card: #ffffff;
-  --marketing-bg-card-hover: #f8fafc;
-  --marketing-bg-elevated: #f1f5f9;
-  --marketing-fg: #0f172a;
-  --marketing-fg-subtle: #334155;
-  --marketing-muted: #64748b;
-  --marketing-border: #e2e8f0;
-  --marketing-badge-bg: #eff6ff;
-  --marketing-badge-fg: #1d4ed8;
-  --marketing-accent: #0052ff;
-  --marketing-accent-muted: #1d4ed8;
-  --marketing-icon-tint: #0052ff;
-  --marketing-card-icon-bg: #eff6ff;
 }
 
 [data-surface="courses-light"] h1,
@@ -259,20 +235,42 @@
 .marketing-courses-band h2,
 .marketing-courses-band h3,
 .marketing-courses-band h4 {
-  color: #0f172a;
+  color: var(--marketing-fg);
 }
 
-/* Marketing page body stays light; only header/footer follow day/night */
-.marketing-page-light {
-  background-color: #f8fafc;
-  color: #0f172a;
+.marketing-page {
+  background-color: var(--marketing-bg);
+  color: var(--marketing-fg);
 }
 
-.marketing-page-light h1,
-.marketing-page-light h2,
-.marketing-page-light h3,
-.marketing-page-light h4 {
-  color: #0f172a;
+.marketing-page-header {
+  border-bottom: 1px solid var(--marketing-border);
+  background-color: var(--marketing-bg-card);
+  color: var(--marketing-fg);
+}
+
+.marketing-page-header h1,
+.marketing-page-header h2,
+.marketing-page-header h3,
+.marketing-page-header h4,
+.marketing-page-header p {
+  color: inherit;
+}
+
+.marketing-page-header h1 {
+  color: var(--marketing-fg);
+}
+
+.marketing-page-header .marketing-page-header-muted {
+  color: var(--marketing-muted);
+}
+
+.marketing-page-header .marketing-page-header-eyebrow {
+  color: #0052ff;
+}
+
+[data-marketing-theme="night"] .marketing-page-header .marketing-page-header-eyebrow {
+  color: #60a5fa;
 }
 
 /* Dashboard status / alert panels in night mode */
@@ -304,28 +302,18 @@
   border-color: rgb(0 82 255 / 0.35);
 }
 
-/* Courses band — light surface for readable cards (day + night) */
+/* Courses band — follows global day/night tokens */
 [data-surface="courses-light"] {
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --border: #e2e8f0;
-  --input: #ffffff;
+  --background: var(--marketing-bg);
+  --foreground: var(--marketing-fg);
+  --card: var(--marketing-bg-card);
+  --card-foreground: var(--marketing-fg);
+  --muted: var(--marketing-bg-elevated);
+  --muted-foreground: var(--marketing-muted);
+  --border: var(--marketing-border);
+  --input: var(--marketing-bg-card);
   --ring: #0052ff;
-  --marketing-bg: #f8fafc;
-  --marketing-bg-card: #ffffff;
-  --marketing-bg-card-hover: #f8fafc;
-  --marketing-bg-elevated: #f1f5f9;
-  --marketing-fg: #0f172a;
-  --marketing-fg-subtle: #334155;
-  --marketing-muted: #64748b;
-  --marketing-border: #e2e8f0;
-  --marketing-badge-bg: #eff6ff;
-  --marketing-badge-fg: #1d4ed8;
-  --marketing-card-icon-bg: #eff6ff;
+  --marketing-card-icon-bg: rgb(0 82 255 / 0.08);
   background-color: var(--marketing-bg);
   color: var(--marketing-fg);
 }
@@ -377,60 +365,49 @@
   background-color: var(--marketing-card-icon-bg);
 }
 
-/* Night mockup: white courses band (sheerxirfad-style) — kept for card hover tokens */
-[data-marketing-theme="night"] [data-surface="courses-light"],
-[data-marketing-theme="night"] .marketing-courses-band {
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --border: #e2e8f0;
-  --input: #ffffff;
-  --marketing-bg: #ffffff;
-  --marketing-bg-card: #ffffff;
-  --marketing-bg-card-hover: #f8fafc;
-  --marketing-bg-elevated: #f1f5f9;
-  --marketing-fg: #0f172a;
-  --marketing-fg-subtle: #334155;
-  --marketing-muted: #64748b;
-  --marketing-border: #e2e8f0;
-  --marketing-badge-bg: #eff6ff;
-  --marketing-badge-fg: #1d4ed8;
-  --marketing-accent: #0052ff;
-  --marketing-accent-muted: #1d4ed8;
-  --marketing-icon-tint: #0052ff;
-  --marketing-card-icon-bg: #eff6ff;
+[data-marketing-theme="night"] [data-surface="courses-light"] .marketing-course-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+[data-marketing-theme="night"] [data-surface="courses-light"] .marketing-course-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 82, 255, 0.2);
+}
+
+[data-marketing-theme="night"] [data-surface="courses-light"] {
+  --marketing-card-icon-bg: rgb(0 82 255 / 0.15);
 }
 
 /* Payment / purchase forms on marketing pages */
 .marketing-form-surface {
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --border: #e2e8f0;
-  --input: #ffffff;
+  --background: var(--marketing-bg-card);
+  --foreground: var(--marketing-fg);
+  --card: var(--marketing-bg-card);
+  --card-foreground: var(--marketing-fg);
+  --muted: var(--marketing-bg-elevated);
+  --muted-foreground: var(--marketing-muted);
+  --border: var(--marketing-border);
+  --input: var(--marketing-bg-card);
   --ring: #0052ff;
   border-radius: 1rem;
-  border: 1px solid #e2e8f0;
-  background-color: #ffffff;
-  color: #0f172a;
+  border: 1px solid var(--marketing-border);
+  background-color: var(--marketing-bg-card);
+  color: var(--marketing-fg);
   box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
 }
 
+[data-marketing-theme="night"] .marketing-form-surface {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
 .marketing-form-surface .text-muted-foreground {
-  color: #64748b;
+  color: var(--marketing-muted);
 }
 
 .marketing-form-surface h1,
 .marketing-form-surface h2,
 .marketing-form-surface h3,
 .marketing-form-surface h4 {
-  color: #0f172a;
+  color: var(--marketing-fg);
 }
 
 /* Learning player — always light, readable (Continue Learning, modules, lessons) */

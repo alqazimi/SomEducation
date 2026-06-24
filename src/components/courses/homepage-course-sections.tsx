@@ -97,7 +97,7 @@ function HomepageCourseSection({
             <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-600">
               {eyebrow}
             </p>
-            <h2 className="text-base font-semibold tracking-tight text-marketing-fg sm:text-lg lg:text-xl">
+            <h2 className="text-lg font-bold tracking-tight text-marketing-fg sm:text-xl lg:text-2xl">
               {title}
             </h2>
             <p className="mt-1 text-xs text-marketing-muted sm:text-sm">{description}</p>

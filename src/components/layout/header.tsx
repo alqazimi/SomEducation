@@ -119,7 +119,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                   isMarketing || isDashboard
                     ? useDarkChrome
                       ? "text-slate-300 hover:bg-white/10"
-                      : "text-stone-600 hover:bg-stone-100"
+                      : "text-slate-600 hover:bg-slate-100"
                     : "text-stone-600 hover:bg-stone-100"
                 )}
                 aria-label={mobileOpen ? "Close menu" : "Open menu"}
@@ -168,9 +168,9 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                             : "text-brand-400"
                           : "text-brand-600"
                         : isMarketing
-                          ? isDay
-                            ? "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
-                            : "text-slate-300 hover:bg-white/5 hover:text-white"
+                          ? useDarkChrome
+                            ? "text-slate-300 hover:bg-white/5 hover:text-white"
+                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                           : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
                     )}
                   >
@@ -200,7 +200,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                     "inline-flex h-9 w-9 items-center justify-center rounded-lg sm:h-10 sm:w-10",
                     useDarkChrome
                       ? "text-slate-300 hover:bg-white/10"
-                      : "text-stone-600 hover:bg-stone-100"
+                      : "text-slate-600 hover:bg-slate-100"
                   )}
                   aria-label="Search courses"
                 >
@@ -215,7 +215,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                     "inline-flex h-9 w-9 items-center justify-center rounded-lg md:hidden sm:h-10 sm:w-10",
                     useDarkChrome
                       ? "text-slate-300 hover:bg-white/10"
-                      : "text-stone-600 hover:bg-stone-100"
+                      : "text-slate-600 hover:bg-slate-100"
                   )}
                   aria-label={mobileSearchOpen ? "Close search" : "Search"}
                   onClick={() => {
@@ -269,7 +269,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                             "h-10 px-4 text-sm font-medium",
                             useDarkChrome
                               ? "text-slate-200 hover:bg-white/10 hover:text-white"
-                              : "text-stone-700"
+                              : "text-slate-700 hover:bg-slate-100"
                           )}
                         >
                           Log in

@@ -84,15 +84,15 @@ function CoursesPageContent() {
 
   return (
     <MarketingShell>
-      <section className="border-b border-marketing-border bg-marketing-hero">
+      <section className="marketing-page-header">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-400">
+          <p className="marketing-page-header-eyebrow text-[11px] font-semibold uppercase tracking-[0.14em]">
             Course Catalog
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-marketing-fg sm:text-3xl">
             Explore our courses
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-marketing-muted">
+          <p className="marketing-page-header-muted mt-2 max-w-2xl text-sm">
             Learn new skills with expert-led courses — structured programs you
             can study at your own pace.
           </p>
@@ -115,15 +115,15 @@ function CoursesPageContent() {
               <SelectTrigger className="w-full border-marketing-border bg-marketing-card text-marketing-fg sm:w-[200px]">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
-              <SelectContent className="border-marketing-border bg-white text-[#0f172a]">
-                <SelectItem value="all" className="focus:bg-slate-100 focus:text-[#0f172a]">
+              <SelectContent className="border-marketing-border bg-marketing-card text-marketing-fg">
+                <SelectItem value="all" className="focus:bg-marketing-elevated focus:text-marketing-fg">
                   All categories
                 </SelectItem>
                 {categories?.map((cat) => (
                   <SelectItem
                   key={cat._id}
                   value={cat._id}
-                  className="focus:bg-slate-100 focus:text-[#0f172a]"
+                  className="focus:bg-marketing-elevated focus:text-marketing-fg"
                 >
                     {cat.name}
                   </SelectItem>
@@ -135,12 +135,12 @@ function CoursesPageContent() {
               <SelectTrigger className="w-full border-marketing-border bg-marketing-card text-marketing-fg sm:w-[180px]">
                 <SelectValue placeholder="Difficulty" />
               </SelectTrigger>
-              <SelectContent className="border-marketing-border bg-white text-[#0f172a]">
+              <SelectContent className="border-marketing-border bg-marketing-card text-marketing-fg">
                 {difficulties.map((item) => (
                   <SelectItem
                   key={item.value}
                   value={item.value}
-                  className="focus:bg-slate-100 focus:text-[#0f172a]"
+                  className="focus:bg-marketing-elevated focus:text-marketing-fg"
                 >
                     {item.label}
                   </SelectItem>

@@ -154,7 +154,9 @@ export function MobileNavDrawer({
         className={cn(
           "absolute left-0 top-0 flex h-full w-full max-w-sm flex-col shadow-xl",
           isMarketing
-            ? "bg-marketing-panel text-marketing-fg"
+            ? marketingDark
+              ? "bg-[#0c1328] text-white"
+              : "bg-white text-slate-900"
             : drawerDark
               ? "bg-marketing-panel text-marketing-fg"
               : "bg-background text-foreground"
@@ -163,14 +165,26 @@ export function MobileNavDrawer({
         <div
           className={cn(
             "flex items-center justify-between border-b px-4 py-4",
-            isMarketing || drawerDark ? "border-marketing-border" : "border-border"
+            isMarketing
+              ? marketingDark
+                ? "border-white/10"
+                : "border-slate-200"
+              : drawerDark
+                ? "border-marketing-border"
+                : "border-border"
           )}
         >
           <div>
             <p
               className={cn(
                 "text-sm font-medium",
-                isMarketing || drawerDark ? "text-marketing-fg" : "text-foreground"
+                isMarketing
+                  ? marketingDark
+                    ? "text-white"
+                    : "text-slate-900"
+                  : drawerDark
+                    ? "text-marketing-fg"
+                    : "text-foreground"
               )}
             >
               Menu
@@ -178,7 +192,13 @@ export function MobileNavDrawer({
             <p
               className={cn(
                 "text-xs",
-                isMarketing || drawerDark ? "text-marketing-muted" : "text-muted-foreground"
+                isMarketing
+                  ? marketingDark
+                    ? "text-slate-400"
+                    : "text-slate-500"
+                  : drawerDark
+                    ? "text-marketing-muted"
+                    : "text-muted-foreground"
               )}
             >
               {PLATFORM_TAGLINE}
@@ -214,7 +234,9 @@ export function MobileNavDrawer({
               className={cn(
                 "mb-2 flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left text-sm transition-colors",
                 isMarketing || drawerDark
-                  ? "border-white/15 bg-white/5 text-slate-400 hover:bg-white/10"
+                  ? marketingDark
+                    ? "border-white/15 bg-white/5 text-slate-400 hover:bg-white/10"
+                    : "border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100"
                   : "border-border bg-muted text-muted-foreground hover:bg-muted"
               )}
             >
@@ -275,7 +297,13 @@ export function MobileNavDrawer({
         <div
           className={cn(
             "border-t p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]",
-            isMarketing || drawerDark ? "border-marketing-border" : "border-border"
+            isMarketing
+              ? marketingDark
+                ? "border-white/10"
+                : "border-slate-200"
+              : drawerDark
+                ? "border-marketing-border"
+                : "border-border"
           )}
         >
           {!(clerkLoaded && isSignedIn) && (
@@ -286,7 +314,9 @@ export function MobileNavDrawer({
                   className={cn(
                     "w-full",
                     isMarketing &&
-                      "border-white/20 bg-transparent text-white hover:bg-white/10"
+                      (marketingDark
+                        ? "border-white/20 bg-transparent text-white hover:bg-white/10"
+                        : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50")
                   )}
                 >
                   Sign In

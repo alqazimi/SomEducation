@@ -35,7 +35,7 @@ function LegalSectionBlock({
           {section.bullets.map((bullet) => (
             <li
               key={bullet.slice(0, 48)}
-              className="flex gap-3 text-sm leading-relaxed text-slate-300 sm:text-[0.9375rem]"
+              className="flex gap-3 text-sm leading-relaxed text-marketing-fg-subtle sm:text-[0.9375rem]"
             >
               <span
                 aria-hidden

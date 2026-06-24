@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Mockup-aligned band: white background for course grids in night mode
- * (dark hero above, blue CTA + dark footer below).
+ * Course grids and catalog bands — follow global day/night theme.
+ * Hero stays dark via MarketingHeroZone (.marketing-hero-night).
  */
 export function MarketingCoursesSurface({
   children,

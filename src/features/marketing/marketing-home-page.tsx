@@ -60,7 +60,7 @@ function MarketingHero() {
 
 function MarketingCtaBanner() {
   return (
-    <section className="bg-[#f8fafc] pb-8 pt-2 sm:pb-10 sm:pt-4">
+    <section className="bg-marketing-bg pb-8 pt-2 sm:pb-10 sm:pt-4">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-4 rounded-2xl bg-brand-600 px-5 py-6 shadow-lg shadow-brand-600/25 sm:flex-row sm:justify-between sm:px-8 sm:py-7">
           <div className="flex items-center gap-3 text-left">

@@ -1,4 +1,9 @@
-import { marketingBackgroundClass } from "@/lib/marketing-theme";
+import {
+  marketingPageHeaderClass,
+  marketingPageHeaderEyebrowClass,
+  marketingPageHeaderMutedClass,
+  marketingPageHeaderTitleClass,
+} from "@/lib/marketing-theme";
 import { type } from "@/lib/typography";
 import { cn } from "@/lib/utils";
 
@@ -25,9 +30,7 @@ export function PageHeader({
     <div
       className={cn(
         "border-b",
-        isMarketing
-          ? `border-marketing-border ${marketingBackgroundClass}`
-          : "border-border bg-white",
+        isMarketing ? marketingPageHeaderClass : "border-border bg-white",
         className
       )}
     >
@@ -38,7 +41,7 @@ export function PageHeader({
               <p
                 className={cn(
                   type.eyebrow,
-                  isMarketing && "text-brand-600"
+                  isMarketing && marketingPageHeaderEyebrowClass
                 )}
               >
                 {eyebrow}
@@ -47,7 +50,7 @@ export function PageHeader({
             <h1
               className={cn(
                 type.pageTitle,
-                isMarketing && "text-marketing-fg",
+                isMarketing && marketingPageHeaderTitleClass,
                 eyebrow ? "mt-2" : undefined
               )}
             >
@@ -58,7 +61,7 @@ export function PageHeader({
                 className={cn(
                   type.lead,
                   "mt-2 max-w-xl",
-                  isMarketing && "text-marketing-muted"
+                  isMarketing && marketingPageHeaderMutedClass
                 )}
               >
                 {description}

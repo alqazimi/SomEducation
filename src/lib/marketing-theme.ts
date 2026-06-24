@@ -19,7 +19,7 @@ export const MARKETING_COLORS = {
 } as const;
 
 export const marketingPageClass =
-  "marketing-page-light min-h-screen bg-[#f8fafc] text-slate-900";
+  "marketing-page min-h-screen bg-marketing-bg text-marketing-fg";
 
 export const marketingBackgroundClass = "bg-marketing-bg";
 
@@ -54,7 +54,13 @@ export const marketingInputClass =
 export const marketingCtaDarkButtonClass =
   "bg-marketing-bg hover:bg-marketing-panel text-marketing-fg";
 
-export const marketingHeroClass = "bg-marketing-hero";
+export const marketingPageHeaderClass = "marketing-page-header";
+
+export const marketingPageHeaderEyebrowClass = "marketing-page-header-eyebrow";
+
+export const marketingPageHeaderTitleClass = "text-marketing-fg";
+
+export const marketingPageHeaderMutedClass = "marketing-page-header-muted";
 
 export const marketingHeadingClass = "text-marketing-fg";
 
