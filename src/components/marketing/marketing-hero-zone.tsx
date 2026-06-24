@@ -17,18 +17,18 @@ export function MarketingHeroZone({
     <div
       className={cn(
         "relative overflow-x-clip",
-        isNight ? "marketing-hero-night pb-6 sm:pb-8" : "bg-marketing-hero pb-8 sm:pb-10",
+        isNight ? "marketing-hero-night pb-4 sm:pb-5" : "bg-marketing-hero pb-5 sm:pb-6",
         className
       )}
     >
       {isNight && (
         <>
           <div
-            className="pointer-events-none absolute -right-16 top-0 h-56 w-56 rounded-full bg-[#0052ff]/25 blur-[80px] sm:-right-24 sm:h-72 sm:w-72 sm:blur-[100px]"
+            className="pointer-events-none absolute -right-12 top-0 h-40 w-40 rounded-full bg-[#0052ff]/18 blur-[60px] sm:-right-16 sm:h-48 sm:w-48 sm:blur-[70px]"
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute -left-20 bottom-0 h-48 w-48 rounded-full bg-[#0033ff]/10 blur-[70px] sm:h-64 sm:w-64 sm:blur-[90px]"
+            className="pointer-events-none absolute -left-14 bottom-0 h-32 w-32 rounded-full bg-[#0033ff]/8 blur-[50px] sm:h-40 sm:w-40 sm:blur-[60px]"
             aria-hidden
           />
         </>

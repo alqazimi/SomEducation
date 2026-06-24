@@ -12,7 +12,6 @@ import { useMarketingTheme } from "@/components/marketing/marketing-theme-provid
 import { Button } from "@/components/ui/button";
 import {
   MARKETING_HERO,
-  MARKETING_HERO_DAY,
 } from "@/lib/marketing-content";
 import { cn } from "@/lib/utils";
 
@@ -26,47 +25,46 @@ const HomepageCourseSections = dynamic(
 
 function MarketingHero() {
   const { isDay } = useMarketingTheme();
-  const hero = isDay ? MARKETING_HERO_DAY : MARKETING_HERO;
 
   return (
     <section className="relative">
-      <div className="mx-auto max-w-7xl px-4 pb-6 pt-8 sm:px-6 sm:pb-8 sm:pt-10 lg:px-8">
-        <div className="flex flex-col items-stretch justify-between gap-8 lg:flex-row lg:items-center lg:gap-10">
-          <div className="relative min-w-0 w-full lg:max-w-[480px] lg:flex-1">
-            <div className="relative z-10 mb-6">
+      <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+        <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 lg:gap-8">
+          <div className="relative min-w-0 w-full sm:max-w-md sm:flex-1 lg:max-w-lg">
+            <div className="relative z-10">
               <p
                 className={cn(
-                  "mb-2 text-lg font-medium",
+                  "mb-1.5 text-xs font-semibold uppercase tracking-[0.12em]",
                   isDay ? "text-brand-600" : "text-brand-400"
                 )}
               >
-                {hero.eyebrow}
+                {MARKETING_HERO.eyebrow}
               </p>
-              <h1 className="text-3xl font-bold leading-tight tracking-tight text-marketing-fg sm:text-4xl lg:text-[42px] lg:leading-[3.5rem]">
-                {hero.headlineBefore}
+              <h1 className="text-2xl font-semibold leading-snug tracking-tight text-marketing-fg sm:text-3xl">
+                {MARKETING_HERO.headlineBefore}
                 <span className={isDay ? "text-brand-600" : "text-brand-500"}>
-                  {hero.headlineHighlight}
+                  {MARKETING_HERO.headlineHighlight}
                 </span>
               </h1>
-              <p className="mt-4 max-w-lg text-lg leading-relaxed text-marketing-muted">
-                {hero.subheadline}
+              <p className="mt-2.5 max-w-lg text-sm leading-relaxed text-marketing-muted sm:text-[15px]">
+                {MARKETING_HERO.subheadline}
               </p>
             </div>
 
-            <div className="relative z-10">
+            <div className="relative z-10 mt-4">
               <Link href="/courses" className="inline-block">
                 <Button
-                  size="lg"
-                  className="h-auto rounded-lg bg-brand-600 px-5 py-2.5 text-lg font-medium shadow-sm transition-colors hover:bg-brand-500"
+                  size="default"
+                  className="h-9 rounded-lg bg-brand-600 px-4 text-sm font-medium shadow-sm transition-colors hover:bg-brand-500"
                 >
                   Browse Courses
-                  <ArrowRight className="h-5 w-5" />
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
           </div>
 
-          <MarketingHeroImage className="mx-auto w-full max-w-md lg:mx-0 lg:max-w-[min(100%,520px)] lg:shrink-0" />
+          <MarketingHeroImage className="shrink-0" />
         </div>
       </div>
     </section>
@@ -81,9 +79,9 @@ function MarketingCtaBanner() {
       <section className="bg-marketing-bg pb-10 pt-2 sm:pb-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center gap-4 rounded-2xl border border-brand-100 bg-marketing-cta px-5 py-6 sm:flex-row sm:justify-between sm:px-8 sm:py-7">
-            <div className="flex items-center gap-3 text-center sm:text-left">
-              <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-600 sm:flex">
-                <GraduationCap className="h-5 w-5 text-white" />
+            <div className="flex items-center gap-3 text-left">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-600 sm:h-10 sm:w-10">
+                <GraduationCap className="h-4 w-4 text-white sm:h-5 sm:w-5" />
               </div>
               <div>
                 <h2 className="text-base font-semibold text-marketing-fg sm:text-lg">
@@ -113,9 +111,9 @@ function MarketingCtaBanner() {
     <section className="bg-marketing-bg pb-8 pt-2 sm:pb-10 sm:pt-4">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-4 rounded-2xl bg-brand-600 px-5 py-6 shadow-lg shadow-brand-600/25 sm:flex-row sm:justify-between sm:px-8 sm:py-7">
-          <div className="flex items-center gap-3 text-center sm:text-left">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15 sm:h-12 sm:w-12">
-              <GraduationCap className="h-5 w-5 text-white sm:h-6 sm:w-6" />
+          <div className="flex items-center gap-3 text-left">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 sm:h-10 sm:w-10">
+              <GraduationCap className="h-4 w-4 text-white sm:h-5 sm:w-5" />
             </div>
             <div>
               <h2 className="text-base font-semibold text-white sm:text-lg">

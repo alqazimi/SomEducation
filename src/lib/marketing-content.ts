@@ -1,16 +1,11 @@
-/** Hardcoded marketing copy — not loaded from Convex. */
+/** Hardcoded marketing copy — not loaded from Convex. Same on all themes and screen sizes. */
 export const MARKETING_HERO = {
-  eyebrow: "Online Learning",
-  headlineBefore: "Learn Today. Build ",
-  headlineHighlight: "Tomorrow.",
+  eyebrow: "Transform Your Future",
+  headlineBefore: "Learn a skill or ",
+  headlineHighlight: "teach!",
   subheadline:
-    "Practical courses. Expert instructors. Learn at your own pace.",
+    "Make learning and teaching more effective with active participation and student collaboration.",
 } as const;
 
-export const MARKETING_HERO_DAY = {
-  eyebrow: "Online Learning",
-  headlineBefore: "Learn new skills. Achieve ",
-  headlineHighlight: "your goals.",
-  subheadline:
-    "Expert-led courses you can study at your own pace — practical skills, clear paths, and support when you need it.",
-} as const;
+/** Kept for imports; identical copy so day/night always show the same hero text. */
+export const MARKETING_HERO_DAY = MARKETING_HERO;
