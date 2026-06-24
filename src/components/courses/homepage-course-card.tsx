@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, Clock, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  CourseHoverPreview,
+  type CourseHoverPreviewData,
+} from "@/components/courses/course-hover-preview";
 import { cn, formatPrice } from "@/lib/utils";
 
 export type HomepageCourseCardProps = {
@@ -15,8 +19,12 @@ export type HomepageCourseCardProps = {
   currency?: string;
   compareAtPrice?: number;
   difficulty?: string;
+  teacherName?: string;
+  categoryName?: string;
+  hasFreePreview?: boolean;
   bestseller?: boolean;
   showPrice?: boolean;
+  hoverPreview?: boolean;
   className?: string;
 };
 
@@ -32,8 +40,12 @@ export function HomepageCourseCard({
   currency = "USD",
   compareAtPrice,
   difficulty,
+  teacherName,
+  categoryName,
+  hasFreePreview = false,
   bestseller = false,
   showPrice = false,
+  hoverPreview = true,
   className,
 }: HomepageCourseCardProps) {
   const isFree = price === 0;
@@ -48,7 +60,26 @@ export function HomepageCourseCard({
         : `${enrollmentCount} Students`
       : "New";
 
-  return (
+  const previewData: CourseHoverPreviewData = {
+    href,
+    title,
+    description,
+    thumbnailUrl,
+    teacherName,
+    categoryName,
+    enrollmentCount,
+    durationHours,
+    lessonCount,
+    price,
+    currency,
+    compareAtPrice,
+    difficulty,
+    bestseller,
+    hasFreePreview,
+    showPrice,
+  };
+
+  const card = (
     <article
       className={cn(
         "marketing-course-card group flex h-full flex-col overflow-hidden rounded-2xl border border-marketing-border bg-marketing-card shadow-sm transition-all duration-300",
@@ -160,5 +191,13 @@ export function HomepageCourseCard({
         </div>
       </div>
     </article>
+  );
+
+  if (!hoverPreview) return card;
+
+  return (
+    <CourseHoverPreview preview={previewData} className="h-full">
+      {card}
+    </CourseHoverPreview>
   );
 }

@@ -17,6 +17,7 @@ import { settingsFormSchema, type SettingsFormValues } from "@/schemas";
 export function AdminSettings() {
   const { isAuthenticated } = useConvexAuth();
   const settings = useQuery(api.settings.get);
+  const stripeConfig = useQuery(api.stripeConfig.getPublicConfig);
   const categories = useQuery(api.categories.list, {});
   const paymentProviders = useQuery(
     api.paymentProviders.list,
@@ -41,9 +42,6 @@ export function AdminSettings() {
       toast.error(error instanceof Error ? error.message : "Failed");
     }
   }
-
-  const stripePublishableKey =
-    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? "";
 
   const activeProviders =
     paymentProviders?.filter(
@@ -111,7 +109,8 @@ export function AdminSettings() {
             <div>
               <p className="font-medium text-foreground">Enable Stripe checkout</p>
               <p className="text-sm text-muted-foreground">
-                Requires API keys in Convex and Vercel (see README).
+                Requires <code className="text-xs">STRIPE_SECRET_KEY</code> in
+                Convex (see README).
               </p>
             </div>
             <input
@@ -132,11 +131,8 @@ export function AdminSettings() {
               <code className="text-xs">STRIPE_WEBHOOK_SECRET</code>
             </li>
             <li>
-              Vercel: <code className="text-xs">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code>
-            </li>
-            <li>
-              Publishable key in this build:{" "}
-              {stripePublishableKey ? "configured" : "not set yet"}
+              Secret key in Convex:{" "}
+              {stripeConfig?.stripeConfigured ? "configured" : "not set yet"}
             </li>
           </ul>
           <Button onClick={form.handleSubmit(onSubmit)}>Save Stripe setting</Button>

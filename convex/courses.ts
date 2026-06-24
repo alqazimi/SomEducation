@@ -13,6 +13,7 @@ import { logAudit } from "./lib/audit";
 import { createNotification } from "./lib/notifications";
 import { validateImageStorageFile } from "./lib/files";
 import { sanitizeText, validateImageUrl, validatePrice, resolveCompareAtPrice, sanitizeLearningOutcomes } from "./lib/validation";
+import { parseYoutubeVideoId } from "./lib/youtube";
 import {
   assertCanManageCourse,
   canLearnCourse,
@@ -143,14 +144,70 @@ export const listPublished = query({
     }
 
     return await Promise.all(
-      courses.map(async (course) => {
-        const [teacher, category] = await Promise.all([
-          ctx.db.get(course.teacherId),
-          ctx.db.get(course.categoryId),
-        ]);
-        const thumbnailUrl = await resolveCourseThumbnail(ctx, course);
-        return { ...course, teacher, category, thumbnailUrl };
-      })
+      courses.map(async (course) => enrichPublishedCourseCard(ctx, course))
+    );
+  },
+});
+
+async function enrichPublishedCourseCard(ctx: QueryCtx, course: Doc<"courses">) {
+  const enriched = await enrichHomepageCourse(ctx, course);
+  const [teacher, category, previewLesson] = await Promise.all([
+    ctx.db.get(course.teacherId),
+    ctx.db.get(course.categoryId),
+    ctx.db
+      .query("lessons")
+      .withIndex("by_courseId", (q) => q.eq("courseId", course._id))
+      .filter((q) => q.eq(q.field("isFreePreview"), true))
+      .first(),
+  ]);
+
+  const teacherName = teacher
+    ? `${teacher.firstName ?? ""} ${teacher.lastName ?? ""}`.trim() ||
+      teacher.email
+    : undefined;
+
+  return {
+    ...enriched,
+    teacher,
+    category,
+    teacherName,
+    categoryName: category?.name,
+    hasFreePreview: previewLesson !== null,
+  };
+}
+
+export const listRelated = query({
+  args: {
+    slug: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = Math.min(args.limit ?? 4, 8);
+    const course = await ctx.db
+      .query("courses")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .unique();
+
+    if (!course || course.status !== "published") {
+      return [];
+    }
+
+    const published = await ctx.db
+      .query("courses")
+      .withIndex("by_status", (q) => q.eq("status", "published"))
+      .collect();
+
+    const others = published.filter((item) => item._id !== course._id);
+    const sameCategory = others.filter(
+      (item) => item.categoryId === course.categoryId
+    );
+    const otherCategories = others.filter(
+      (item) => item.categoryId !== course.categoryId
+    );
+
+    const ordered = [...sameCategory, ...otherCategories].slice(0, limit);
+    return Promise.all(
+      ordered.map((item) => enrichPublishedCourseCard(ctx, item))
     );
   },
 });
@@ -197,7 +254,7 @@ export const listHomepageSections = query({
       )
       .slice(0, 12);
     const popularEnriched = await Promise.all(
-      popularCandidates.map((course) => enrichHomepageCourse(ctx, course))
+      popularCandidates.map((course) => enrichPublishedCourseCard(ctx, course))
     );
     const popular = takeFour(
       [...popularEnriched].sort((a, b) => b.enrollmentCount - a.enrollmentCount)
@@ -206,7 +263,7 @@ export const listHomepageSections = query({
     const enrichById = async (rawCourses: Doc<"courses">[]) => {
       const unique = new Map(rawCourses.map((course) => [course._id, course]));
       const enriched = await Promise.all(
-        [...unique.values()].map((course) => enrichHomepageCourse(ctx, course))
+        [...unique.values()].map((course) => enrichPublishedCourseCard(ctx, course))
       );
       const map = new Map(enriched.map((course) => [course._id, course]));
       return rawCourses.map((course) => map.get(course._id)!);
@@ -454,12 +511,43 @@ export const getBySlug = query({
     );
     const enrollmentCount = await getActiveEnrollmentCount(ctx, course._id);
 
+    const previewLessonDoc = (
+      await ctx.db
+        .query("lessons")
+        .withIndex("by_courseId", (q) => q.eq("courseId", course._id))
+        .collect()
+    )
+      .filter((lesson) => lesson.isFreePreview)
+      .sort((a, b) => a.order - b.order)[0];
+
+    let previewLesson: {
+      _id: Id<"lessons">;
+      title: string;
+      youtubeVideoId: string | null;
+      videoUrl: string | null;
+    } | null = null;
+
+    if (previewLessonDoc) {
+      const videoUrl = previewLessonDoc.videoStorageId
+        ? await ctx.storage.getUrl(previewLessonDoc.videoStorageId)
+        : null;
+      previewLesson = {
+        _id: previewLessonDoc._id,
+        title: previewLessonDoc.title,
+        youtubeVideoId: previewLessonDoc.youtubeUrl
+          ? parseYoutubeVideoId(previewLessonDoc.youtubeUrl)
+          : null,
+        videoUrl,
+      };
+    }
+
     return {
       ...course,
       teacher,
       category,
       modules: modulesWithLessons,
       thumbnailUrl,
+      previewLesson,
       isEnrolled,
       activePayment,
       isCourseInstructor: isInstructor,

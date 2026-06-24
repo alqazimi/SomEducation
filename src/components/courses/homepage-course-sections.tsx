@@ -26,6 +26,9 @@ type HomepageCourse = {
   currency: string;
   compareAtPrice?: number;
   difficulty: string;
+  teacherName?: string;
+  categoryName?: string;
+  hasFreePreview?: boolean;
 };
 
 const SECTIONS = [
@@ -132,6 +135,9 @@ function HomepageCourseSection({
               currency={course.currency}
               compareAtPrice={course.compareAtPrice}
               difficulty={course.difficulty}
+              teacherName={course.teacherName}
+              categoryName={course.categoryName}
+              hasFreePreview={course.hasFreePreview}
               bestseller={sectionKey === "popular"}
               showPrice
             />

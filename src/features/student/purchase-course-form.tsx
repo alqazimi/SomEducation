@@ -62,8 +62,6 @@ export function PurchaseCourseForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const draftKey = `purchase-draft:${params.slug}`;
-  const stripePublishableKey =
-    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? "";
   const { canUpload, statusMessage } = useConvexUploadReady();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const draftRestoredRef = useRef(false);
@@ -109,7 +107,8 @@ export function PurchaseCourseForm() {
   const formValues = useWatch({ control: form.control });
 
   const stripeAvailable =
-    Boolean(stripeConfig?.stripeEnabled) && stripePublishableKey.length > 0;
+    stripeConfig?.stripeEnabled === true &&
+    stripeConfig?.stripeConfigured === true;
 
   useEffect(() => {
     if (stripeConfig === undefined) return;

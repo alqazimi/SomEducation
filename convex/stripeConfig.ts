@@ -14,6 +14,7 @@ export const getPublicConfig = query({
 
     return {
       stripeEnabled: settings?.stripeEnabled === true,
+      stripeConfigured: Boolean(process.env.STRIPE_SECRET_KEY?.trim()),
     };
   },
 });

@@ -3,13 +3,13 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-const HERO_ILLUSTRATION = "/images/hero-illustration.svg";
+const HERO_IMAGE = "/images/hero-student.png";
 
 export function MarketingHeroImage({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "relative w-full max-w-md mx-auto sm:max-w-[420px] lg:mx-0 lg:max-w-[min(100%,520px)]",
+        "relative w-full max-w-xs mx-auto sm:max-w-sm lg:mx-0 lg:max-w-[min(100%,420px)]",
         className
       )}
     >
@@ -17,13 +17,13 @@ export function MarketingHeroImage({ className }: { className?: string }) {
         className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-[#0052ff]/25 blur-[90px]"
         aria-hidden
       />
-      <div className="relative aspect-[6/5] w-full">
+      <div className="relative aspect-[522/713] w-full">
         <Image
-          src={HERO_ILLUSTRATION}
-          alt=""
+          src={HERO_IMAGE}
+          alt="Student learning on a laptop"
           fill
-          sizes="(max-width: 768px) 90vw, (max-width: 1200px) 44vw, 480px"
-          className="object-contain"
+          sizes="(max-width: 768px) 80vw, (max-width: 1200px) 36vw, 420px"
+          className="object-contain object-bottom drop-shadow-[0_20px_40px_rgba(0,82,255,0.15)]"
           priority
         />
       </div>

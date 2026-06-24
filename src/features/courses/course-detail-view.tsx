@@ -17,6 +17,8 @@ import { useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import { MarketingCoursesSurface } from "@/components/marketing/marketing-courses-surface";
 import { MarketingShell } from "@/components/layout/marketing-shell";
+import { CoursePreviewHero } from "@/components/courses/course-preview-hero";
+import { RelatedCoursesRow } from "@/components/courses/related-courses-row";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -116,17 +118,6 @@ function CourseDetailSidebar({ course }: { course: CourseDetail }) {
   return (
     <aside className="lg:col-span-1">
       <div className="sticky top-24 space-y-5 rounded-xl border border-marketing-border bg-marketing-card p-5 shadow-sm">
-        {course.thumbnailUrl && (
-          <div className="overflow-hidden rounded-lg">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={course.thumbnailUrl}
-              alt={course.title}
-              className="aspect-video w-full object-cover"
-            />
-          </div>
-        )}
-
         <div>
           {course.price === 0 ? (
             <p className="text-4xl font-bold text-emerald-600">FREE</p>
@@ -174,6 +165,30 @@ function CourseDetailSidebar({ course }: { course: CourseDetail }) {
   );
 }
 
+function CourseWhatYouLearn({ course }: { course: CourseDetail }) {
+  const outcomes = course.learningOutcomes?.filter(Boolean) ?? [];
+  if (outcomes.length === 0) return null;
+
+  return (
+    <section className="rounded-xl border border-marketing-border bg-marketing-card p-5 shadow-sm sm:p-6">
+      <h2 className="text-xl font-semibold text-marketing-fg">
+        What you&apos;ll learn
+      </h2>
+      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+        {outcomes.map((outcome) => (
+          <li
+            key={outcome}
+            className="flex gap-3 text-sm leading-relaxed text-marketing-muted sm:text-base"
+          >
+            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" />
+            <span>{outcome}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 function CourseDetailHeader({ course }: { course: CourseDetail }) {
   const teacherName = course.teacher
     ? `${course.teacher.firstName ?? ""} ${course.teacher.lastName ?? ""}`.trim()
@@ -185,6 +200,28 @@ function CourseDetailHeader({ course }: { course: CourseDetail }) {
         <h1 className="text-3xl font-semibold tracking-tight text-marketing-fg md:text-4xl">
           {course.title}
         </h1>
+        <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-marketing-muted">
+          <span className="inline-flex items-center gap-1 capitalize">
+            <GraduationCap className="h-4 w-4 text-brand-600" />
+            {course.difficulty}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <PlayCircle className="h-4 w-4 text-brand-600" />
+            {course.lessonCount} lessons
+          </span>
+          {course.totalDurationMinutes > 0 && (
+            <span className="inline-flex items-center gap-1">
+              <Clock className="h-4 w-4 text-brand-600" />
+              {Math.max(1, Math.round(course.totalDurationMinutes / 60))} hours
+            </span>
+          )}
+          {course.enrollmentCount > 0 && (
+            <span className="inline-flex items-center gap-1">
+              <Users className="h-4 w-4 text-brand-600" />
+              {course.enrollmentCount} students
+            </span>
+          )}
+        </p>
         <p className="mt-4 line-clamp-4 text-base leading-relaxed text-marketing-muted md:text-lg">
           {course.description}
         </p>
@@ -340,8 +377,6 @@ function CourseCurriculum({ course }: { course: CourseDetail }) {
 }
 
 function CourseDetailTabs({ course }: { course: CourseDetail }) {
-  const outcomes = course.learningOutcomes?.filter(Boolean) ?? [];
-
   return (
     <Tabs
       defaultValue="overview"
@@ -364,29 +399,10 @@ function CourseDetailTabs({ course }: { course: CourseDetail }) {
         </TabsList>
       </div>
 
-      <TabsContent value="overview" className="mt-0 space-y-8 p-5 sm:p-6">
+      <TabsContent value="overview" className="mt-0 p-5 sm:p-6">
         <p className="whitespace-pre-wrap text-base leading-relaxed text-marketing-muted">
           {course.description}
         </p>
-
-        {outcomes.length > 0 && (
-          <div>
-            <h3 className="text-xl font-semibold text-marketing-fg">
-              What You&apos;ll Master
-            </h3>
-            <ul className="mt-4 space-y-3">
-              {outcomes.map((outcome) => (
-                <li
-                  key={outcome}
-                  className="flex gap-3 text-sm leading-relaxed text-marketing-muted sm:text-base"
-                >
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" />
-                  <span>{outcome}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </TabsContent>
 
       <TabsContent value="curriculum" className="mt-0 p-5 sm:p-6">
@@ -449,11 +465,19 @@ export function CourseDetailView({ slug }: { slug: string }) {
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-10">
             <div className="space-y-8 lg:col-span-2">
+              <CoursePreviewHero
+                slug={course.slug}
+                title={course.title}
+                thumbnailUrl={course.thumbnailUrl}
+                previewLesson={course.previewLesson}
+              />
               <CourseDetailHeader course={course} />
+              <CourseWhatYouLearn course={course} />
               <CourseDetailTabs course={course} />
             </div>
             <CourseDetailSidebar course={course} />
           </div>
+          <RelatedCoursesRow slug={slug} />
         </div>
       </MarketingCoursesSurface>
     </MarketingShell>
