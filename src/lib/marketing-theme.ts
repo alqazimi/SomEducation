@@ -18,7 +18,8 @@ export const MARKETING_COLORS = {
   textMuted: "#94a3b8",
 } as const;
 
-export const marketingPageClass = "min-h-screen bg-marketing-bg text-marketing-fg";
+export const marketingPageClass =
+  "marketing-page-light min-h-screen bg-[#f8fafc] text-slate-900";
 
 export const marketingBackgroundClass = "bg-marketing-bg";
 
@@ -27,14 +28,21 @@ export const marketingMutedText = "text-marketing-muted";
 export const marketingCardClass =
   "rounded-2xl border border-marketing-border bg-marketing-card shadow-sm";
 
-export const marketingHeaderClass =
-  "border-b border-marketing-border bg-marketing-bg/95";
+export const marketingHeaderClassDay =
+  "border-b border-slate-200 bg-white/95 text-slate-900";
 
 export const marketingHeaderClassNight =
-  "border-transparent bg-marketing-bg";
+  "border-transparent bg-[#0a0e1a] text-white";
 
-export const marketingFooterClass =
-  "border-marketing-border bg-marketing-bg-footer text-marketing-muted";
+/** Dashboard header — still follows global day/night tokens. */
+export const dashboardHeaderClass =
+  "border-b border-marketing-border bg-marketing-bg/95";
+
+export const marketingFooterClassDay =
+  "border-slate-200 bg-white text-slate-600";
+
+export const marketingFooterClassNight =
+  "border-white/10 bg-[#01040f] text-slate-400";
 
 export const marketingElevatedClass = "bg-marketing-elevated";
 
@@ -73,4 +81,3 @@ export function dashboardNavLinkClass(active: boolean, isNight: boolean) {
     : "text-muted-foreground hover:bg-muted hover:text-foreground";
 }
 
-export const dashboardHeaderClass = marketingHeaderClass;

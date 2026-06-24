@@ -11,7 +11,7 @@ export function MarketingHeroZone({
   return (
     <div
       className={cn(
-        "marketing-hero-night relative overflow-x-clip pb-4 sm:pb-5",
+        "marketing-hero-night relative overflow-x-clip pb-3 sm:pb-5",
         className
       )}
     >

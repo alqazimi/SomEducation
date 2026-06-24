@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { PLATFORM_NAME } from "@/lib/brand";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
-import { isMarketingSitePath, marketingFooterClass } from "@/lib/marketing-theme";
+import { isMarketingSitePath, marketingFooterClassDay, marketingFooterClassNight } from "@/lib/marketing-theme";
 import { cn } from "@/lib/utils";
 
 const quickLinks = [
@@ -36,10 +36,12 @@ export function Footer({ variant = "default" }: { variant?: "default" | "marketi
   return (
     <footer
       className={cn(
-        "mt-auto border-t",
         isMarketing
-          ? cn(marketingFooterClass, isDay && "shadow-none")
-          : "border-border bg-stone-50"
+          ? cn(
+              "mt-auto border-t",
+              isNight ? marketingFooterClassNight : marketingFooterClassDay
+            )
+          : "mt-auto border-t border-border bg-stone-50"
       )}
     >
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">

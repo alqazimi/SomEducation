@@ -16,7 +16,7 @@ export function MarketingShell({
     <div className={cn(marketingPageClass, "relative", className)}>
       <div className="relative z-[1]">
         <Header />
-        <main className="pb-8 pt-[calc(4rem+env(safe-area-inset-top,0px))]">
+        <main className="pb-8 pt-[calc(3.5rem+env(safe-area-inset-top,0px))] sm:pt-16">
           {children}
         </main>
         <Footer />

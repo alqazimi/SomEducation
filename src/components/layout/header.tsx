@@ -22,7 +22,7 @@ import {
 import { NotificationBell } from "@/features/notifications/notifications-inbox";
 import { MarketingThemeToggle } from "@/components/marketing/marketing-theme-toggle";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
-import { isMarketingSitePath, marketingHeaderClass, marketingHeaderClassNight } from "@/lib/marketing-theme";
+import { isMarketingSitePath, marketingHeaderClassDay, marketingHeaderClassNight, dashboardHeaderClass } from "@/lib/marketing-theme";
 import { HeaderSearch } from "./header-search";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
 
@@ -91,10 +91,12 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
           (isMarketing || isDashboard) && "pt-[env(safe-area-inset-top,0px)]",
           useDarkChrome
             ? cn(
-                isMarketing ? marketingHeaderClassNight : marketingHeaderClass,
+                isMarketing ? marketingHeaderClassNight : dashboardHeaderClass,
                 isDay && isMarketing && "shadow-sm"
               )
-            : "border-b border-border/80 bg-background/95 shadow-sm"
+            : isMarketing
+              ? cn(marketingHeaderClassDay, "shadow-sm")
+              : "border-b border-border/80 bg-background/95 shadow-sm"
         )}
       >
         <div
