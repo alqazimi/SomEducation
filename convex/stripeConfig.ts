@@ -12,9 +12,13 @@ export const getPublicConfig = query({
       .withIndex("by_key", (q) => q.eq("key", SETTINGS_KEY))
       .unique();
 
+    const configured = Boolean(process.env.STRIPE_SECRET_KEY?.trim());
+    const explicitlyDisabled = settings?.stripeEnabled === false;
+
     return {
       stripeEnabled: settings?.stripeEnabled === true,
-      stripeConfigured: Boolean(process.env.STRIPE_SECRET_KEY?.trim()),
+      stripeConfigured: configured,
+      stripeReady: configured && !explicitlyDisabled,
     };
   },
 });

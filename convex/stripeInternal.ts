@@ -8,11 +8,14 @@ import { sanitizeText } from "./lib/validation";
 const SETTINGS_KEY = "platform";
 
 async function isStripeEnabled(ctx: { db: import("./_generated/server").QueryCtx["db"] }) {
+  if (!process.env.STRIPE_SECRET_KEY?.trim()) {
+    return false;
+  }
   const settings = await ctx.db
     .query("settings")
     .withIndex("by_key", (q) => q.eq("key", SETTINGS_KEY))
     .unique();
-  return settings?.stripeEnabled === true;
+  return settings?.stripeEnabled !== false;
 }
 
 export const assertStripePurchaseAllowed = internalQuery({

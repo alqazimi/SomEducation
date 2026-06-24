@@ -1,19 +1,25 @@
 import { z } from "zod";
 
-export const paymentFormSchema = z.object({
-  fullName: z.string().min(2, "Full name is required").max(100),
-  phone: z
-    .string()
-    .min(7, "Valid phone number required")
-    .max(20)
-    .regex(/^[\d\s+\-()]+$/, "Invalid phone format"),
-  paymentProviderId: z.string().min(1, "Payment provider is required"),
-  transactionReference: z
-    .string()
-    .min(3, "Transaction reference required")
-    .max(100),
-  notes: z.string().max(500).optional(),
-});
+export const paymentFormSchema = z
+  .object({
+    fullName: z.string().min(2, "Full name is required").max(100),
+    phone: z
+      .string()
+      .min(7, "Valid phone number required")
+      .max(20)
+      .regex(/^[\d\s+\-()]+$/, "Invalid phone format"),
+    paymentProviderId: z.string().optional(),
+    method: z.enum(["mobile_money", "bank_transfer"]).optional(),
+    transactionReference: z
+      .string()
+      .min(3, "Transaction reference required")
+      .max(100),
+    notes: z.string().max(500).optional(),
+  })
+  .refine((data) => data.paymentProviderId || data.method, {
+    message: "Choose a payment method",
+    path: ["paymentProviderId"],
+  });
 
 export type PaymentFormValues = z.infer<typeof paymentFormSchema>;
 

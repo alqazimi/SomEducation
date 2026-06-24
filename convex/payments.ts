@@ -25,7 +25,10 @@ export const submit = mutation({
     courseId: v.id("courses"),
     fullName: v.string(),
     phone: v.string(),
-    paymentProviderId: v.id("paymentProviders"),
+    paymentProviderId: v.optional(v.id("paymentProviders")),
+    method: v.optional(
+      v.union(v.literal("mobile_money"), v.literal("bank_transfer"))
+    ),
     transactionReference: v.string(),
     notes: v.optional(v.string()),
     screenshotStorageId: v.id("_storage"),
@@ -39,13 +42,24 @@ export const submit = mutation({
       throw new Error("Course not available for purchase");
     }
 
-    const provider = await ctx.db.get(args.paymentProviderId);
-    if (!provider || !provider.isActive || !provider.accountNumber.trim()) {
-      throw new Error("Selected payment method is not available");
-    }
+    let method: "mobile_money" | "bank_transfer";
+    let paymentProviderId: typeof args.paymentProviderId;
 
-    if (provider.type !== "mobile_money" && provider.type !== "bank_transfer") {
-      throw new Error("Invalid payment method");
+    if (args.paymentProviderId) {
+      const provider = await ctx.db.get(args.paymentProviderId);
+      if (!provider || !provider.isActive || !provider.accountNumber.trim()) {
+        throw new Error("Selected payment method is not available");
+      }
+      if (provider.type !== "mobile_money" && provider.type !== "bank_transfer") {
+        throw new Error("Invalid payment method");
+      }
+      method = provider.type;
+      paymentProviderId = provider._id;
+    } else if (args.method) {
+      method = args.method;
+      paymentProviderId = undefined;
+    } else {
+      throw new Error("Choose a payment method to continue");
     }
 
     const existingEnrollment = await ctx.db
@@ -100,8 +114,8 @@ export const submit = mutation({
       courseId: args.courseId,
       fullName: sanitizeText(args.fullName, 100),
       phone: sanitizeText(args.phone, 20),
-      method: provider.type,
-      paymentProviderId: provider._id,
+      method,
+      paymentProviderId,
       transactionReference: sanitizeText(args.transactionReference, 100),
       notes: args.notes ? sanitizeText(args.notes, 500) : undefined,
       screenshotStorageId: args.screenshotStorageId,

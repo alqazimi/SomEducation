@@ -11,21 +11,27 @@ export function MarketingHeroZone({
   children: React.ReactNode;
   className?: string;
 }) {
-  const { isDay, isNight } = useMarketingTheme();
+  const { isNight } = useMarketingTheme();
 
   return (
     <div
       className={cn(
         "relative overflow-x-clip",
-        isDay ? "bg-marketing-hero pb-8 sm:pb-10" : "bg-marketing-bg pb-8 sm:pb-10",
+        isNight ? "marketing-hero-night pb-6 sm:pb-8" : "bg-marketing-hero pb-8 sm:pb-10",
         className
       )}
     >
       {isNight && (
-        <div
-          className="pointer-events-none absolute -right-16 top-8 h-56 w-56 rounded-full bg-[#0052ff]/18 blur-[90px] sm:-right-24 sm:top-4 sm:h-72 sm:w-72"
-          aria-hidden
-        />
+        <>
+          <div
+            className="pointer-events-none absolute -right-16 top-0 h-56 w-56 rounded-full bg-[#0052ff]/25 blur-[80px] sm:-right-24 sm:h-72 sm:w-72 sm:blur-[100px]"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -left-20 bottom-0 h-48 w-48 rounded-full bg-[#0033ff]/10 blur-[70px] sm:h-64 sm:w-64 sm:blur-[90px]"
+            aria-hidden
+          />
+        </>
       )}
       {children}
     </div>

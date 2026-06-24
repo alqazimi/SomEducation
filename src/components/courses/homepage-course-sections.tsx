@@ -8,10 +8,8 @@ import {
   ConvexSectionErrorBoundary,
 } from "@/components/convex/convex-query-gate";
 import { HomepageCourseCard } from "@/components/courses/homepage-course-card";
-import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isConvexConfigured } from "@/lib/convex-url";
-import { cn } from "@/lib/utils";
 
 type HomepageCourse = {
   _id: string;
@@ -87,19 +85,10 @@ function HomepageCourseSection({
   href: string;
   courses: HomepageCourse[];
 }) {
-  const { isNight } = useMarketingTheme();
-
   if (courses.length === 0) return null;
 
   return (
-    <section
-      className={cn(
-        "py-6 sm:py-8 lg:py-10",
-        isNight
-          ? "first:pt-8 sm:first:pt-10 lg:first:pt-12"
-          : "first:pt-6 sm:first:pt-7 lg:first:pt-8"
-      )}
-    >
+    <section className="py-6 first:pt-10 sm:py-8 sm:first:pt-12 lg:py-10 lg:first:pt-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
           <div className="min-w-0 flex-1">

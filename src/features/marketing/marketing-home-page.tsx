@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, GraduationCap } from "lucide-react";
 import { MarketingCoursesSurface } from "@/components/marketing/marketing-courses-surface";
 import { MarketingHeroZone } from "@/components/marketing/marketing-hero-zone";
+import { MarketingStatsBar } from "@/components/marketing/marketing-stats-bar";
 import { MarketingShell } from "@/components/layout/marketing-shell";
 import { HomepageCourseSectionsFallback } from "@/components/courses/homepage-course-sections";
 import { MarketingHeroImage } from "@/components/marketing/marketing-hero-image";
@@ -30,7 +31,7 @@ function MarketingHero() {
 
   return (
     <section className="relative">
-      <div className="mx-auto max-w-7xl px-4 pb-10 pt-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 pb-6 pt-8 sm:px-6 sm:pb-8 sm:pt-10 lg:px-8">
         <div className="flex flex-col items-stretch justify-between gap-8 lg:flex-row lg:items-center lg:gap-10">
           <div className="relative min-w-0 w-full lg:max-w-[480px] lg:flex-1">
             <div className="relative z-10 mb-6">
@@ -78,7 +79,7 @@ function MarketingCtaBanner() {
 
   if (isDay) {
     return (
-      <section className="pb-10 pt-2 sm:pb-12">
+      <section className="bg-marketing-bg pb-10 pt-2 sm:pb-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center gap-4 rounded-2xl border border-brand-100 bg-marketing-cta px-5 py-6 sm:flex-row sm:justify-between sm:px-8 sm:py-7">
             <div className="flex items-center gap-3 text-center sm:text-left">
@@ -110,12 +111,12 @@ function MarketingCtaBanner() {
   }
 
   return (
-    <section className="pb-10 pt-2 sm:pb-12">
+    <section className="bg-marketing-bg pb-8 pt-2 sm:pb-10 sm:pt-4">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-4 rounded-2xl bg-brand-600 px-5 py-6 shadow-lg shadow-brand-600/25 sm:flex-row sm:justify-between sm:px-8 sm:py-7">
           <div className="flex items-center gap-3 text-center sm:text-left">
-            <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15 sm:flex">
-              <GraduationCap className="h-6 w-6 text-white" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15 sm:h-12 sm:w-12">
+              <GraduationCap className="h-5 w-5 text-white sm:h-6 sm:w-6" />
             </div>
             <div>
               <h2 className="text-base font-semibold text-white sm:text-lg">
@@ -148,6 +149,7 @@ export function MarketingHomePage() {
     <MarketingShell className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <MarketingHeroZone>
         <MarketingHero />
+        <MarketingStatsBar className="relative z-10 -mb-4 sm:-mb-6 lg:-mb-8" />
       </MarketingHeroZone>
       <MarketingCoursesSurface>
         <HomepageCourseSections />

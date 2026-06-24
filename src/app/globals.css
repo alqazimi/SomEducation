@@ -165,13 +165,27 @@
 
 /* App-wide night mode (dashboard + marketing) */
 [data-marketing-theme="night"] {
-  --background: #0f172a;
+  --background: #0a0e1a;
   --foreground: #f1f5f9;
   --muted: #0a0e1a;
   --border: rgba(255, 255, 255, 0.1);
   --card: #0f172a;
   --card-foreground: #f1f5f9;
   --muted-foreground: #94a3b8;
+  --marketing-bg: #0a0e1a;
+  --marketing-bg-footer: #01040f;
+  --marketing-bg-card: #0f172a;
+  --marketing-bg-card-hover: #151f3d;
+  --marketing-bg-elevated: #0b1224;
+  --marketing-bg-panel: #0c1328;
+  --marketing-bg-hero: #0a0e1a;
+  --marketing-bg-cta: #0052ff;
+  --marketing-fg: #ffffff;
+  --marketing-fg-subtle: #cbd5e1;
+  --marketing-muted: #94a3b8;
+  --marketing-border: rgba(255, 255, 255, 0.1);
+  --marketing-badge-bg: rgba(0, 0, 0, 0.5);
+  --marketing-badge-fg: #ffffff;
 }
 
 [data-marketing-theme="night"] h1,
@@ -184,6 +198,28 @@
 [data-marketing-theme="night"] ::selection {
   background: rgba(0, 82, 255, 0.35);
   color: #ffffff;
+}
+
+.marketing-hero-night {
+  background-color: #0a0e1a;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 100% 0%, rgba(0, 82, 255, 0.22), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 0% 100%, rgba(0, 51, 255, 0.08), transparent 50%);
+}
+
+[data-marketing-theme="day"] .marketing-hero-night {
+  background-color: var(--marketing-bg-hero);
+  background-image: none;
+}
+
+.marketing-courses-band {
+  background-color: #ffffff;
+  color: #0f172a;
+  isolation: isolate;
+}
+
+[data-marketing-theme="day"] .marketing-courses-band {
+  background-color: #f8fafc;
 }
 
 /* Dashboard status / alert panels in night mode */
@@ -289,7 +325,8 @@
 }
 
 /* Night mockup: white courses band (sheerxirfad-style) */
-[data-marketing-theme="night"] [data-surface="courses-light"] {
+[data-marketing-theme="night"] [data-surface="courses-light"],
+[data-marketing-theme="night"] .marketing-courses-band {
   --background: #ffffff;
   --foreground: #0f172a;
   --card: #ffffff;

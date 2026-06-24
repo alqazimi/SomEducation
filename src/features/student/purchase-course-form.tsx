@@ -33,10 +33,7 @@ import { cn, formatPrice } from "@/lib/utils";
 
 type PaymentType = "mobile_money" | "bank_transfer";
 
-type PaymentMode = "choose" | "stripe" | "manual";
-
 type PurchaseDraft = {
-  paymentMode?: PaymentMode;
   step?: number;
   paymentType?: PaymentType | null;
   selectedProviderId?: string | null;
@@ -67,7 +64,6 @@ export function PurchaseCourseForm() {
   const draftRestoredRef = useRef(false);
   const [courseReady, setCourseReady] = useState(false);
   const [openPaymentReady, setOpenPaymentReady] = useState(false);
-  const [paymentMode, setPaymentMode] = useState<PaymentMode>("choose");
   const [step, setStep] = useState(1);
   const [uploading, setUploading] = useState(false);
   const [screenshotId, setScreenshotId] = useState<Id<"_storage"> | null>(null);
@@ -77,6 +73,7 @@ export function PurchaseCourseForm() {
 
   const course = useQuery(api.courses.getBySlug, { slug: params.slug });
   const stripeConfig = useQuery(api.stripeConfig.getPublicConfig);
+  const platformSettings = useQuery(api.settings.get);
   const openPayment = useQuery(
     api.payments.getOpenForCourse,
     course ? { courseId: course._id } : "skip"
@@ -105,29 +102,17 @@ export function PurchaseCourseForm() {
   });
 
   const formValues = useWatch({ control: form.control });
+  const formErrors = form.formState.errors;
 
-  const stripeAvailable =
-    stripeConfig?.stripeEnabled === true &&
-    stripeConfig?.stripeConfigured === true;
+  const stripeConfigured = stripeConfig?.stripeConfigured === true;
+  const stripeReady = stripeConfig?.stripeReady === true;
 
-  const stripeStatusMessage = (() => {
-    if (stripeConfig === undefined) return null;
-    if (stripeAvailable) return null;
-    if (stripeConfig.stripeEnabled && !stripeConfig.stripeConfigured) {
-      return "Card payments are enabled but Stripe keys are not configured yet.";
-    }
-    if (!stripeConfig.stripeEnabled) {
-      return "Card payments are not enabled in admin settings yet.";
-    }
-    return "Card payments are not available yet.";
-  })();
-
-  useEffect(() => {
-    if (stripeConfig === undefined) return;
-    if (!stripeAvailable && paymentMode === "stripe") {
-      setPaymentMode("choose");
-    }
-  }, [stripeConfig, stripeAvailable, paymentMode]);
+  const manualProvidersReady = providers !== undefined;
+  const hasActiveProviders = (providers?.length ?? 0) > 0;
+  const canContinueStep2 = Boolean(
+    selectedProviderId ||
+      (paymentType && manualProvidersReady && !hasActiveProviders)
+  );
 
   useEffect(() => {
     if (searchParams.get("cancelled") === "1") {
@@ -142,16 +127,6 @@ export function PurchaseCourseForm() {
     if (!draft) return;
 
     queueMicrotask(() => {
-      const restoredMode = draft.paymentMode;
-      const shouldShowChooser =
-        restoredMode === "manual" &&
-        (!draft.step || draft.step === 1) &&
-        !draft.paymentType &&
-        !draft.selectedProviderId;
-
-      if (restoredMode && !shouldShowChooser) {
-        setPaymentMode(restoredMode);
-      }
       if (draft.step && draft.step >= 1 && draft.step <= 4) {
         setStep(draft.step);
       }
@@ -177,7 +152,6 @@ export function PurchaseCourseForm() {
   useEffect(() => {
     if (!draftRestoredRef.current) return;
     writePaymentDraft(draftKey, {
-      paymentMode,
       step,
       paymentType,
       selectedProviderId,
@@ -186,7 +160,6 @@ export function PurchaseCourseForm() {
     });
   }, [
     draftKey,
-    paymentMode,
     step,
     paymentType,
     selectedProviderId,
@@ -205,11 +178,29 @@ export function PurchaseCourseForm() {
     setPaymentType(nextType);
     setSelectedProviderId(null);
     form.setValue("paymentProviderId", "");
+    form.setValue("method", nextType);
   }
 
   function handleProviderSelect(providerId: Id<"paymentProviders">) {
     setSelectedProviderId(providerId);
     form.setValue("paymentProviderId", providerId);
+    form.setValue("method", undefined);
+  }
+
+  async function goToStep2() {
+    const valid = await form.trigger([
+      "fullName",
+      "phone",
+      "transactionReference",
+    ]);
+    if (!valid) {
+      const firstError = Object.values(form.formState.errors)[0];
+      toast.error(
+        firstError?.message?.toString() ?? "Please complete your details"
+      );
+      return;
+    }
+    setStep(2);
   }
 
   async function handleFileUpload(file: File) {
@@ -245,12 +236,20 @@ export function PurchaseCourseForm() {
       return;
     }
 
+    if (!data.paymentProviderId && !data.method) {
+      toast.error("Choose a payment method");
+      return;
+    }
+
     try {
       await submitPayment({
         courseId: course._id,
         fullName: data.fullName,
         phone: data.phone,
-        paymentProviderId: data.paymentProviderId as Id<"paymentProviders">,
+        paymentProviderId: data.paymentProviderId
+          ? (data.paymentProviderId as Id<"paymentProviders">)
+          : undefined,
+        method: data.paymentProviderId ? undefined : data.method,
         transactionReference: data.transactionReference,
         notes: data.notes,
         screenshotStorageId: screenshotId,
@@ -395,91 +394,50 @@ export function PurchaseCourseForm() {
         Amount: {formatPrice(course.price, course.currency)}
       </p>
 
-      {paymentMode === "choose" && course.price > 0 && (
-        <Card className="mt-8 border-border bg-card shadow-sm">
+      {course.price > 0 && (
+        <Card className="mt-8 border-brand-200 bg-brand-50/40 shadow-sm">
           <CardHeader>
-            <CardTitle>How would you like to pay?</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-brand-600" />
+              Pay with card (Stripe)
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                disabled={!stripeAvailable}
-                onClick={() => stripeAvailable && setPaymentMode("stripe")}
-                className={cn(
-                  "rounded-xl border border-border bg-background p-5 text-left transition-colors",
-                  stripeAvailable
-                    ? "hover:border-brand-600 hover:bg-brand-50"
-                    : "cursor-not-allowed opacity-60"
-                )}
-              >
-                <CreditCard className="h-6 w-6 text-brand-600" />
-                <p className="mt-3 font-semibold text-foreground">Card (Stripe)</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Pay securely with debit or credit card. Instant access after
-                  payment.
-                </p>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentMode("manual")}
-                className="rounded-xl border border-border bg-background p-5 text-left transition-colors hover:border-brand-600 hover:bg-brand-50"
-              >
-                <Smartphone className="h-6 w-6 text-brand-600" />
-                <p className="mt-3 font-semibold text-foreground">
-                  Mobile money / Bank
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Send payment manually and upload proof for admin review.
-                </p>
-              </button>
-            </div>
-            {stripeStatusMessage && (
-              <p className="text-sm text-muted-foreground">{stripeStatusMessage}</p>
+            <p className="text-sm text-muted-foreground">
+              Fastest option — pay by debit or credit card and get instant access.
+              No mobile wallet or bank provider setup needed.
+            </p>
+            {stripeReady ? (
+              <StripeCheckoutButton courseId={course._id} className="w-full" />
+            ) : stripeConfigured ? (
+              <p className="text-sm text-amber-800">
+                Card payments are turned off in admin settings.
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Card payments are not configured yet. Use manual payment below.
+              </p>
             )}
           </CardContent>
         </Card>
       )}
 
-      {paymentMode === "stripe" && stripeAvailable && (
-        <Card className="mt-8 border-border bg-card shadow-sm">
-          <CardHeader>
-            <CardTitle>Pay with card</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              You&apos;ll be redirected to Stripe to complete payment. Access is
-              granted automatically once payment succeeds.
-            </p>
-            <StripeCheckoutButton courseId={course._id} className="w-full" />
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full"
-              onClick={() => setPaymentMode("choose")}
-            >
-              Choose another method
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      <div className="relative my-8">
+        <div className="absolute inset-0 flex items-center" aria-hidden>
+          <div className="w-full border-t border-border" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-marketing-card px-3 text-sm text-muted-foreground">
+            Or pay manually
+          </span>
+        </div>
+      </div>
 
-      {paymentMode === "manual" && (
-        <>
-          <div className="mt-4 flex items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">Manual payment steps</p>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setPaymentMode("choose");
-                setStep(1);
-              }}
-            >
-              Change method
-            </Button>
-          </div>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-medium text-foreground">
+          Mobile money / Bank transfer
+        </p>
+      </div>
 
       <div className="mt-6 flex gap-2">
         {[1, 2, 3, 4].map((s) => (
@@ -505,6 +463,11 @@ export function PurchaseCourseForm() {
                 {...form.register("fullName")}
                 className="mt-1 bg-background"
               />
+              {formErrors.fullName && (
+                <p className="mt-1 text-sm text-red-600">
+                  {formErrors.fullName.message}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="phone">Phone Number</Label>
@@ -513,6 +476,11 @@ export function PurchaseCourseForm() {
                 {...form.register("phone")}
                 className="mt-1 bg-background"
               />
+              {formErrors.phone && (
+                <p className="mt-1 text-sm text-red-600">
+                  {formErrors.phone.message}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="ref">Transaction Reference</Label>
@@ -521,6 +489,11 @@ export function PurchaseCourseForm() {
                 {...form.register("transactionReference")}
                 className="mt-1 bg-background"
               />
+              {formErrors.transactionReference && (
+                <p className="mt-1 text-sm text-red-600">
+                  {formErrors.transactionReference.message}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="notes">Notes (optional)</Label>
@@ -530,7 +503,7 @@ export function PurchaseCourseForm() {
                 className="mt-1 bg-background"
               />
             </div>
-            <Button onClick={() => setStep(2)} className="w-full">
+            <Button onClick={() => void goToStep2()} className="w-full">
               Continue
             </Button>
           </CardContent>
@@ -575,36 +548,45 @@ export function PurchaseCourseForm() {
 
             {paymentType && (
               <div className="space-y-3">
-                <p className={type.cardTitle}>
-                  Choose {paymentType === "mobile_money" ? "wallet" : "bank"}
-                </p>
-                {!providers ? (
+                {!manualProvidersReady ? (
                   <p className="text-sm text-muted-foreground">Loading options...</p>
-                ) : providers.length === 0 ? (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                    No active {paymentType === "mobile_money" ? "mobile money" : "bank"}{" "}
-                    providers are available yet. Please contact support.
-                  </div>
+                ) : hasActiveProviders ? (
+                  <>
+                    <p className={type.cardTitle}>
+                      Choose {paymentType === "mobile_money" ? "wallet" : "bank"}
+                    </p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {providers!.map((provider) => {
+                        const active = selectedProviderId === provider._id;
+                        return (
+                          <button
+                            key={provider._id}
+                            type="button"
+                            onClick={() => handleProviderSelect(provider._id)}
+                            className={cn(
+                              "rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors",
+                              active
+                                ? "border-brand-600 bg-brand-50 text-brand-800"
+                                : "border-border bg-background text-foreground hover:bg-muted"
+                            )}
+                          >
+                            {provider.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
                 ) : (
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {providers.map((provider) => {
-                      const active = selectedProviderId === provider._id;
-                      return (
-                        <button
-                          key={provider._id}
-                          type="button"
-                          onClick={() => handleProviderSelect(provider._id)}
-                          className={cn(
-                            "rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors",
-                            active
-                              ? "border-brand-600 bg-brand-50 text-brand-800"
-                              : "border-border bg-background text-foreground hover:bg-muted"
-                          )}
-                        >
-                          {provider.name}
-                        </button>
-                      );
-                    })}
+                  <div className="rounded-lg border border-brand-200 bg-brand-50 p-4 text-sm text-brand-950">
+                    <p className="font-medium">Payment instructions</p>
+                    <p className="mt-2 whitespace-pre-wrap">
+                      {platformSettings?.paymentInstructions ??
+                        "Send the exact course amount using your preferred mobile money or bank app, then upload proof in the next step."}
+                    </p>
+                    <p className="mt-3">
+                      Send exactly {formatPrice(course.price, course.currency)} and
+                      keep your transaction reference.
+                    </p>
                   </div>
                 )}
               </div>
@@ -631,7 +613,7 @@ export function PurchaseCourseForm() {
             <Button
               onClick={() => setStep(3)}
               className="w-full"
-              disabled={!selectedProviderId}
+              disabled={!canContinueStep2}
             >
               I&apos;ve made the payment
             </Button>
@@ -645,11 +627,16 @@ export function PurchaseCourseForm() {
             <CardTitle>Upload payment screenshot</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {selectedProvider && (
+            {selectedProvider ? (
               <p className="text-sm text-muted-foreground">
                 Upload proof for your {selectedProvider.name} payment.
               </p>
-            )}
+            ) : paymentType ? (
+              <p className="text-sm text-muted-foreground">
+                Upload proof of your{" "}
+                {paymentType === "mobile_money" ? "mobile money" : "bank"} payment.
+              </p>
+            ) : null}
             <Input
               ref={fileInputRef}
               type="file"
@@ -682,7 +669,7 @@ export function PurchaseCourseForm() {
             <CardTitle>Review & submit</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {selectedProvider && (
+            {selectedProvider ? (
               <div className="rounded-lg border border-border bg-muted p-4 text-sm text-muted-foreground">
                 <p>
                   <strong>Provider:</strong> {selectedProvider.name}
@@ -691,18 +678,34 @@ export function PurchaseCourseForm() {
                   <strong>Number:</strong> {selectedProvider.accountNumber}
                 </p>
               </div>
-            )}
+            ) : paymentType ? (
+              <div className="rounded-lg border border-border bg-muted p-4 text-sm text-muted-foreground">
+                <p>
+                  <strong>Method:</strong>{" "}
+                  {paymentType === "mobile_money" ? "Mobile Money" : "Bank Transfer"}
+                </p>
+              </div>
+            ) : null}
             <p className="text-sm text-muted-foreground">
               Your payment will be reviewed by our admin team. You&apos;ll receive a
               notification once approved.
             </p>
-            <Button onClick={form.handleSubmit(onSubmit)} className="w-full">
+            <Button
+              onClick={() =>
+                void form.handleSubmit(onSubmit, (errors) => {
+                  const firstError = Object.values(errors)[0];
+                  toast.error(
+                    firstError?.message?.toString() ??
+                      "Please check your details and try again"
+                  );
+                })()
+              }
+              className="w-full"
+            >
               Submit payment request
             </Button>
           </CardContent>
         </Card>
-      )}
-        </>
       )}
     </>
   );
