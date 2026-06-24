@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Clock, Users } from "lucide-react";
+import { ArrowRight, BookOpen, Clock, PlayCircle, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   CourseHoverPreview,
   type CourseHoverPreviewData,
@@ -9,6 +10,7 @@ import { cn, formatPrice } from "@/lib/utils";
 
 export type HomepageCourseCardProps = {
   href: string;
+  slug?: string;
   title: string;
   description?: string;
   thumbnailUrl?: string | null;
@@ -25,11 +27,14 @@ export type HomepageCourseCardProps = {
   bestseller?: boolean;
   showPrice?: boolean;
   hoverPreview?: boolean;
+  isEnrolled?: boolean;
+  canLearn?: boolean;
   className?: string;
 };
 
 export function HomepageCourseCard({
   href,
+  slug,
   title,
   description,
   thumbnailUrl,
@@ -46,9 +51,13 @@ export function HomepageCourseCard({
   bestseller = false,
   showPrice = false,
   hoverPreview = true,
+  isEnrolled = false,
+  canLearn = false,
   className,
 }: HomepageCourseCardProps) {
   const isFree = price === 0;
+  const showContinueLearning = canLearn || isEnrolled;
+  const courseSlug = slug ?? href.replace(/^\/courses\//, "").replace(/\/$/, "");
   const hasDiscount =
     !isFree &&
     compareAtPrice !== undefined &&
@@ -99,6 +108,13 @@ export function HomepageCourseCard({
           ) : (
             <div className="flex h-full w-full items-center justify-center">
               <BookOpen className="h-10 w-10 text-brand-600/70" />
+            </div>
+          )}
+          {showContinueLearning && (
+            <div className="absolute left-3 top-3">
+              <Badge className="rounded-md border-0 bg-brand-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
+                Enrolled
+              </Badge>
             </div>
           )}
         </div>
@@ -160,7 +176,9 @@ export function HomepageCourseCard({
         </div>
 
         <div className="mt-4 flex items-center justify-between gap-3 border-t border-marketing-border pt-4">
-          {showPrice ? (
+          {showContinueLearning ? (
+            <p className="text-sm font-medium text-brand-600">Ready to continue</p>
+          ) : showPrice ? (
             <div className="min-w-0">
               {isFree ? (
                 <p className="text-sm font-semibold text-emerald-600">Free</p>
@@ -181,13 +199,22 @@ export function HomepageCourseCard({
             <span />
           )}
 
-          <Link
-            href={href}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white shadow-sm transition-transform hover:scale-105 hover:bg-brand-500"
-            aria-label={`View ${title}`}
-          >
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          {showContinueLearning ? (
+            <Button asChild size="sm" className="h-9 shrink-0 gap-1.5 px-3">
+              <Link href={`/learn/${courseSlug}`}>
+                <PlayCircle className="h-4 w-4" />
+                Continue Learning
+              </Link>
+            </Button>
+          ) : (
+            <Link
+              href={href}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white shadow-sm transition-transform hover:scale-105 hover:bg-brand-500"
+              aria-label={`View ${title}`}
+            >
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          )}
         </div>
       </div>
     </article>

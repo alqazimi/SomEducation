@@ -53,6 +53,7 @@ export function RelatedCoursesRow({ slug }: { slug: string }) {
           <HomepageCourseCard
             key={course._id}
             href={`/courses/${course.slug}`}
+            slug={course.slug}
             title={course.title}
             description={course.description}
             thumbnailUrl={course.thumbnailUrl}
@@ -66,6 +67,8 @@ export function RelatedCoursesRow({ slug }: { slug: string }) {
             teacherName={course.teacherName}
             categoryName={course.categoryName}
             hasFreePreview={course.hasFreePreview}
+            isEnrolled={course.isEnrolled}
+            canLearn={course.canLearn}
             showPrice
           />
         ))}

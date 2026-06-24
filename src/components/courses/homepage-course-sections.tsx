@@ -27,6 +27,8 @@ type HomepageCourse = {
   teacherName?: string;
   categoryName?: string;
   hasFreePreview?: boolean;
+  isEnrolled?: boolean;
+  canLearn?: boolean;
 };
 
 const SECTIONS = [
@@ -114,6 +116,7 @@ function HomepageCourseSection({
             <HomepageCourseCard
               key={course._id}
               href={`/courses/${course.slug}`}
+              slug={course.slug}
               title={course.title}
               description={course.description}
               thumbnailUrl={course.thumbnailUrl}
@@ -127,6 +130,8 @@ function HomepageCourseSection({
               teacherName={course.teacherName}
               categoryName={course.categoryName}
               hasFreePreview={course.hasFreePreview}
+              isEnrolled={course.isEnrolled}
+              canLearn={course.canLearn}
               bestseller={sectionKey === "popular"}
               showPrice
             />

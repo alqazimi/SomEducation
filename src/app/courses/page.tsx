@@ -200,6 +200,7 @@ function CoursesPageContent() {
                   <HomepageCourseCard
                     key={course._id}
                     href={`/courses/${course.slug}`}
+                    slug={course.slug}
                     title={course.title}
                     description={course.description}
                     thumbnailUrl={course.thumbnailUrl}
@@ -213,6 +214,8 @@ function CoursesPageContent() {
                     teacherName={course.teacherName}
                     categoryName={course.categoryName}
                     hasFreePreview={course.hasFreePreview}
+                    isEnrolled={course.isEnrolled}
+                    canLearn={course.canLearn}
                     showPrice
                   />
                 ))}

@@ -151,7 +151,7 @@ export const listPublished = query({
 
 async function enrichPublishedCourseCard(ctx: QueryCtx, course: Doc<"courses">) {
   const enriched = await enrichHomepageCourse(ctx, course);
-  const [teacher, category, previewLesson] = await Promise.all([
+  const [teacher, category, previewLesson, user] = await Promise.all([
     ctx.db.get(course.teacherId),
     ctx.db.get(course.categoryId),
     ctx.db
@@ -159,7 +159,21 @@ async function enrichPublishedCourseCard(ctx: QueryCtx, course: Doc<"courses">) 
       .withIndex("by_courseId", (q) => q.eq("courseId", course._id))
       .filter((q) => q.eq(q.field("isFreePreview"), true))
       .first(),
+    getCurrentUser(ctx),
   ]);
+
+  let isEnrolled = false;
+  let canLearn = false;
+  if (user) {
+    const enrollment = await ctx.db
+      .query("enrollments")
+      .withIndex("by_student_course", (q) =>
+        q.eq("studentId", user._id).eq("courseId", course._id)
+      )
+      .first();
+    isEnrolled = enrollment?.status === "active";
+    canLearn = canLearnCourse(user, course, isEnrolled);
+  }
 
   const teacherName = teacher
     ? `${teacher.firstName ?? ""} ${teacher.lastName ?? ""}`.trim() ||
@@ -173,6 +187,8 @@ async function enrichPublishedCourseCard(ctx: QueryCtx, course: Doc<"courses">) 
     teacherName,
     categoryName: category?.name,
     hasFreePreview: previewLesson !== null,
+    isEnrolled,
+    canLearn,
   };
 }
 

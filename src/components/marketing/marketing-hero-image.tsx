@@ -12,7 +12,7 @@ export function MarketingHeroImage({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "relative mx-auto w-full max-w-xs sm:max-w-sm lg:mx-0 lg:max-w-[min(100%,420px)]",
+        "relative mx-auto w-full max-w-[280px] sm:max-w-xs lg:mx-0 lg:max-w-[min(100%,360px)]",
         className
       )}
     >
@@ -27,12 +27,12 @@ export function MarketingHeroImage({ className }: { className?: string }) {
           aria-hidden
         />
       )}
-      <div className="relative aspect-[3/2] w-full">
+      <div className="relative aspect-[3/4] w-full">
         <Image
           src={HERO_IMAGE}
           alt="Student learning on a laptop"
           fill
-          sizes="(max-width: 768px) 80vw, (max-width: 1200px) 36vw, 420px"
+          sizes="(max-width: 768px) 72vw, (max-width: 1200px) 32vw, 360px"
           className="object-contain object-bottom"
           priority
         />
