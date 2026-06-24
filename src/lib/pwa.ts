@@ -112,17 +112,9 @@ function shouldRegisterServiceWorker(): boolean {
 export function registerServiceWorker(): void {
   if (!shouldRegisterServiceWorker()) return;
 
-  const register = () => {
-    void navigator.serviceWorker
-      .register("/sw.js", { scope: "/", updateViaCache: "none" })
-      .catch((error) => {
-        console.warn("[SomEducation] Service worker registration failed:", error);
-      });
-  };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", register, { once: true });
-  } else {
-    register();
-  }
+  void navigator.serviceWorker
+    .register("/sw.js", { scope: "/", updateViaCache: "none" })
+    .catch((error) => {
+      console.warn("[SomEducation] Service worker registration failed:", error);
+    });
 }

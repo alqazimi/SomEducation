@@ -16,11 +16,20 @@ const IosInstallGuide = dynamic(
   { ssr: false }
 );
 
+const ManualInstallGuide = dynamic(
+  () =>
+    import("./manual-install-guide").then((mod) => ({
+      default: mod.ManualInstallGuide,
+    })),
+  { ssr: false }
+);
+
 export function PwaShell() {
   return (
     <>
       <InstallPrompt />
       <IosInstallGuide />
+      <ManualInstallGuide />
     </>
   );
 }

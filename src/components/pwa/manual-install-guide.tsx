@@ -1,21 +1,21 @@
 "use client";
 
-import { Share, SquarePlus, X } from "lucide-react";
+import { Download, X } from "lucide-react";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
 import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "@/components/pwa/pwa-install-provider";
 import { PLATFORM_NAME } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
-export function IosInstallGuide() {
+export function ManualInstallGuide() {
   const { isNight } = useMarketingTheme();
-  const { iosGuideOpen, closeIosGuide, isIosSafari: safari } = usePwaInstall();
+  const { manualGuideOpen, closeManualGuide } = usePwaInstall();
 
-  if (!iosGuideOpen) return null;
+  if (!manualGuideOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-[130] flex items-end justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:items-center"
+      className="fixed inset-0 z-[120] flex items-end justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:items-center"
       role="dialog"
       aria-modal="true"
       aria-label={`Install ${PLATFORM_NAME}`}
@@ -24,7 +24,7 @@ export function IosInstallGuide() {
         type="button"
         className="absolute inset-0 bg-black/50"
         aria-label="Close guide"
-        onClick={closeIosGuide}
+        onClick={closeManualGuide}
       />
 
       <div
@@ -37,7 +37,7 @@ export function IosInstallGuide() {
       >
         <button
           type="button"
-          onClick={closeIosGuide}
+          onClick={closeManualGuide}
           className={cn(
             "absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg",
             isNight
@@ -51,7 +51,7 @@ export function IosInstallGuide() {
 
         <div className="flex items-start gap-3 pr-8">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white">
-            <SquarePlus className="h-5 w-5" aria-hidden />
+            <Download className="h-5 w-5" aria-hidden />
           </div>
           <div>
             <h2 className="text-base font-semibold sm:text-lg">
@@ -63,46 +63,30 @@ export function IosInstallGuide() {
                 isNight ? "text-slate-300" : "text-muted-foreground"
               )}
             >
-              {safari
-                ? "Tap Share at the bottom of Safari, then Add to Home Screen."
-                : "Open this site in Safari, then tap Install app again."}
+              Use your browser menu to add the app to your home screen.
             </p>
           </div>
         </div>
 
-        {safari ? (
-          <div
-            className={cn(
-              "mt-4 rounded-xl border px-4 py-3 text-sm leading-relaxed",
-              isNight
-                ? "border-white/10 bg-white/5 text-slate-200"
-                : "border-slate-200 bg-slate-50 text-slate-700"
-            )}
-          >
-            <p className="font-medium">Share → Add to Home Screen → Add</p>
-            <p className="mt-2 flex items-center gap-2 text-xs">
-              <Share className="h-4 w-4 shrink-0 text-brand-500" />
-              Look for the Share icon in Safari&apos;s bottom bar.
-            </p>
-          </div>
-        ) : (
-          <div
-            className={cn(
-              "mt-4 rounded-xl border px-3 py-3 text-sm",
-              isNight
-                ? "border-amber-400/30 bg-amber-500/10 text-amber-100"
-                : "border-amber-200 bg-amber-50 text-amber-900"
-            )}
-          >
-            iPhone install works best in <strong>Safari</strong>. Copy the site
-            URL from your browser and open it in Safari first.
-          </div>
-        )}
+        <div
+          className={cn(
+            "mt-4 rounded-xl border px-4 py-3 text-sm leading-relaxed",
+            isNight
+              ? "border-white/10 bg-white/5 text-slate-200"
+              : "border-slate-200 bg-slate-50 text-slate-700"
+          )}
+        >
+          <p className="font-medium">Chrome / Android</p>
+          <p className="mt-1">
+            Tap the menu <strong>(⋮)</strong> in the top-right corner, then choose{" "}
+            <strong>Install app</strong> or <strong>Add to Home screen</strong>.
+          </p>
+        </div>
 
         <Button
           type="button"
           className="mt-5 h-10 w-full rounded-lg"
-          onClick={closeIosGuide}
+          onClick={closeManualGuide}
         >
           Got it
         </Button>

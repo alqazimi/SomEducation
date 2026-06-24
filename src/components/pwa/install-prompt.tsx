@@ -17,7 +17,7 @@ export function InstallPrompt() {
     canShowBanner,
     platform,
     installing,
-    install,
+    installFromClick,
     dismissBanner,
     isIosSafari,
   } = usePwaInstall();
@@ -38,30 +38,23 @@ export function InstallPrompt() {
     dismissBanner();
   };
 
-  const handleInstall = async () => {
-    const result = await install();
-    if (result === "installed") {
-      dismissBanner();
-    }
-  };
-
   if (!canShowBanner || !bannerReady) return null;
 
-  const isAndroidNative = platform === "android-native";
+  const isNative = platform === "native";
   const isIos = platform === "ios";
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-[100] p-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[120] p-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden"
       role="dialog"
       aria-label={`Install ${PLATFORM_NAME}`}
     >
       <div
         className={cn(
-          "mx-auto flex max-w-lg items-start gap-3 rounded-2xl border p-4 shadow-xl",
+          "pointer-events-auto mx-auto flex max-w-lg items-start gap-3 rounded-2xl border p-4 shadow-xl",
           isNight
-            ? "border-white/10 bg-marketing-panel shadow-black/40"
-            : "border-border bg-card shadow-black/10"
+            ? "border-white/10 bg-[#0c1328] text-white shadow-black/40"
+            : "border-border bg-card text-foreground shadow-black/10"
         )}
       >
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white">
@@ -78,14 +71,14 @@ export function InstallPrompt() {
             Install {PLATFORM_NAME}
           </p>
 
-          {isAndroidNative && (
+          {isNative && (
             <p
               className={cn(
                 "mt-1 text-sm leading-relaxed",
                 isNight ? "text-slate-300" : "text-muted-foreground"
               )}
             >
-              One tap opens the install dialog — no extra steps.
+              One tap opens the install dialog.
             </p>
           )}
 
@@ -98,7 +91,7 @@ export function InstallPrompt() {
             >
               {isIosSafari
                 ? "Tap Install, then Share → Add to Home Screen → Add."
-                : "Open in Safari, then tap Install for quick steps."}
+                : "Open in Safari, then tap Install."}
             </p>
           )}
 
@@ -109,11 +102,7 @@ export function InstallPrompt() {
                 isNight ? "text-slate-300" : "text-muted-foreground"
               )}
             >
-              Tap Install — if needed use browser menu{" "}
-              <strong className={isNight ? "text-white" : "text-foreground"}>
-                (⋮) → Install app
-              </strong>
-              .
+              Tap Install for browser menu steps.
             </p>
           )}
 
@@ -121,9 +110,13 @@ export function InstallPrompt() {
             <Button
               type="button"
               size="sm"
-              className="h-9 rounded-lg"
-              onClick={() => void handleInstall()}
+              className="pointer-events-auto h-9 cursor-pointer rounded-lg"
               disabled={installing}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                installFromClick();
+              }}
             >
               {installing ? "Installing…" : "Install app"}
             </Button>
@@ -132,7 +125,7 @@ export function InstallPrompt() {
               size="sm"
               variant="outline"
               className={cn(
-                "h-9 rounded-lg",
+                "pointer-events-auto h-9 cursor-pointer rounded-lg",
                 isNight
                   ? "border-white/20 bg-transparent text-white hover:bg-white/10"
                   : undefined
@@ -148,7 +141,7 @@ export function InstallPrompt() {
           type="button"
           onClick={handleDismiss}
           className={cn(
-            "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+            "pointer-events-auto inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg",
             isNight
               ? "text-slate-400 hover:bg-white/10 hover:text-white"
               : "text-muted-foreground hover:bg-muted hover:text-foreground"

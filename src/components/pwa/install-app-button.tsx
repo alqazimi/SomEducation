@@ -18,7 +18,7 @@ export function InstallAppButton({
   variant = "outline",
   showIcon = true,
 }: InstallAppButtonProps) {
-  const { canInstall, installing, install } = usePwaInstall();
+  const { canInstall, installing, installFromClick } = usePwaInstall();
 
   if (!canInstall) return null;
 
@@ -27,9 +27,13 @@ export function InstallAppButton({
       type="button"
       size={size}
       variant={variant}
-      className={cn("rounded-lg", className)}
+      className={cn("pointer-events-auto cursor-pointer rounded-lg", className)}
       disabled={installing}
-      onClick={() => void install()}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        installFromClick();
+      }}
     >
       {showIcon && <Download className="h-4 w-4" />}
       {installing ? "Installing…" : "Install app"}
