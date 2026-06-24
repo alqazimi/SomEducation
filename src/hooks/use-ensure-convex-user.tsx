@@ -6,6 +6,11 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "convex/_generated/api";
 import { Button } from "@/components/ui/button";
+import {
+  getConvexErrorMessage,
+  isAuthSetupError,
+  isDeletedAccountError,
+} from "@/lib/convex-error";
 
 export function useEnsureConvexUser() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
@@ -39,7 +44,7 @@ export function useEnsureConvexUser() {
       });
     } catch (error) {
       setSyncError(
-        error instanceof Error ? error.message : "Failed to set up your account"
+        getConvexErrorMessage(error, "Failed to set up your account")
       );
     } finally {
       syncingRef.current = false;
@@ -165,12 +170,26 @@ export function AccountSetupState({
   syncError: string | null;
   onRetry: () => void;
 }) {
+  const showAuthSetupHelp = !!syncError && isAuthSetupError(syncError);
+  const showDeletedHelp = !!syncError && isDeletedAccountError(syncError);
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-muted p-8 text-center">
       {syncError ? (
         <>
           <h1 className="text-xl font-semibold">Could not set up your account</h1>
           <p className="max-w-md text-sm text-muted-foreground">{syncError}</p>
+          {showDeletedHelp ? (
+            <div className="max-w-lg rounded-lg border border-border bg-card p-4 text-left text-xs text-muted-foreground">
+              <p className="font-medium text-foreground">Account removed</p>
+              <p className="mt-2">
+                This login was previously removed by an administrator. Sign in
+                again after the backend update, or contact platform support if
+                the problem continues.
+              </p>
+            </div>
+          ) : null}
+          {showAuthSetupHelp ? (
           <div className="max-w-lg space-y-4 text-left text-xs text-muted-foreground">
             <div className="rounded-lg border border-border bg-card p-4">
               <p className="font-medium text-foreground">
@@ -226,6 +245,7 @@ export function AccountSetupState({
               </ol>
             </div>
           </div>
+          ) : null}
           <Button onClick={onRetry}>Try again</Button>
         </>
       ) : (

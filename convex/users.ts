@@ -71,10 +71,6 @@ export const syncUser = mutation({
     ]);
 
     if (existing) {
-      if (existing.status === "deleted") {
-        throw new Error("Account has been deleted");
-      }
-
       const updates: Record<string, unknown> = {
         email,
         firstName: args.firstName,
@@ -83,6 +79,17 @@ export const syncUser = mutation({
         searchText,
         updatedAt: now,
       };
+
+      if (existing.status === "deleted") {
+        updates.status = "active";
+        await logAudit(ctx, {
+          actorId: existing._id,
+          action: "user.reactivated",
+          entityType: "users",
+          entityId: existing._id,
+          details: JSON.stringify({ email }),
+        });
+      }
 
       if (
         getOwnerEmails().includes(email) &&
