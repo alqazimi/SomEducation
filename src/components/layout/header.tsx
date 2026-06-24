@@ -93,7 +93,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
           useDarkChrome
             ? cn(
                 isMarketing
-                  ? marketingHeaderClassNight
+                  ? cn(marketingHeaderClassNight, "border-b border-white/10")
                   : dashboardHeaderClass,
                 isDay && isMarketing && "shadow-sm"
               )
@@ -105,16 +105,16 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
         <div
           className={cn(
             "mx-auto max-w-7xl",
-            isMarketing ? "px-3 sm:px-4 lg:px-8" : "px-3 sm:px-4 sm:px-6 lg:px-8"
+            isMarketing ? "px-2 sm:px-4 lg:px-8" : "px-3 sm:px-4 sm:px-6 lg:px-8"
           )}
         >
           <div
             className={cn(
               "flex h-14 items-center sm:h-16",
-              isMarketing ? "gap-1 sm:gap-2 md:gap-6" : "gap-1 sm:gap-2 md:gap-3"
+              isMarketing ? "gap-0.5 sm:gap-2 md:gap-6" : "gap-1 sm:gap-2 md:gap-3"
             )}
           >
-            <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-2">
+            <div className="flex min-w-0 flex-1 items-center gap-0.5 sm:gap-2">
               <button
                 type="button"
                 className={cn(
@@ -140,14 +140,15 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
 
               <Link
                 href="/"
-                className="flex min-w-0 items-center gap-2 rounded-lg transition-opacity hover:opacity-90 sm:gap-2.5"
+                className="flex min-w-0 items-center gap-1.5 rounded-lg transition-opacity hover:opacity-90 sm:gap-2.5"
                 aria-label={`${PLATFORM_NAME} home`}
               >
-                <SomEducationLogo size={30} className="sm:hidden" />
-                <SomEducationLogo size={34} className="hidden sm:block" />
+                <SomEducationLogo size={28} className="shrink-0 sm:hidden" />
+                <SomEducationLogo size={34} className="hidden shrink-0 sm:block" />
                 <SomEducationWordmark
                   inverted={useDarkChrome}
                   className={cn(
+                    "hidden min-[360px]:inline truncate",
                     useDarkChrome && "text-white",
                     (isMarketing || isDashboard) && "text-sm sm:text-[0.9375rem]"
                   )}
@@ -191,23 +192,23 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
               </div>
             )}
 
-            <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5">
+            <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1.5">
               {(isMarketing || isDashboard || isLearn) && (
-                <MarketingThemeToggle className="h-9 w-9 sm:h-10 sm:w-10" />
+                <MarketingThemeToggle className="h-8 w-8 sm:h-10 sm:w-10" />
               )}
 
               {!isDashboard && !(clerkLoaded && isSignedIn) && (
                 <Link
                   href="/courses"
                   className={cn(
-                    "inline-flex h-9 w-9 items-center justify-center rounded-lg sm:h-10 sm:w-10",
+                    "inline-flex h-8 w-8 items-center justify-center rounded-lg sm:h-10 sm:w-10",
                     useDarkChrome
                       ? "text-slate-300 hover:bg-white/10"
                       : "text-slate-600 hover:bg-slate-100"
                   )}
                   aria-label="Search courses"
                 >
-                  <Search className="h-5 w-5" />
+                  <Search className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Link>
               )}
 
@@ -255,7 +256,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                   <UserButton
                     appearance={{
                       elements: {
-                        avatarBox: "h-9 w-9",
+                        avatarBox: "h-8 w-8 sm:h-9 sm:w-9",
                       },
                     }}
                   />
@@ -264,7 +265,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                 <>
                   {isMarketing ? (
                     <>
-                      <Link href={signInUrl} className="inline-flex">
+                      <Link href={signInUrl} className="hidden sm:inline-flex">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -278,7 +279,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                           Log in
                         </Button>
                       </Link>
-                      <Link href={signUpUrl} className="inline-flex">
+                      <Link href={signUpUrl} className="hidden sm:inline-flex">
                         <Button
                           size="sm"
                           className="h-10 rounded-lg bg-brand-600 px-5 text-sm font-medium hover:bg-brand-500"

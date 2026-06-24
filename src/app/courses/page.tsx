@@ -2,7 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { Search, X } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
@@ -50,8 +50,12 @@ export default function CoursesPage() {
 }
 
 function CoursesPageContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const urlSearch = searchParams.get("search") ?? "";
+  const urlPricing = searchParams.get("pricing");
+  const pricing =
+    urlPricing === "free" || urlPricing === "paid" ? urlPricing : undefined;
   const [search, setSearch] = useState(urlSearch);
   const [syncedUrlSearch, setSyncedUrlSearch] = useState(urlSearch);
   const [categoryId, setCategoryId] = useState<string>("all");
@@ -71,16 +75,34 @@ function CoursesPageContent() {
       difficulty !== "all"
         ? (difficulty as "beginner" | "intermediate" | "advanced")
         : undefined,
+    pricing,
   });
 
   const hasFilters =
-    search.trim() || categoryId !== "all" || difficulty !== "all";
+    search.trim() ||
+    categoryId !== "all" ||
+    difficulty !== "all" ||
+    pricing !== undefined;
 
   function clearFilters() {
     setSearch("");
     setCategoryId("all");
     setDifficulty("all");
+    router.replace("/courses");
   }
+
+  const pageTitle =
+    pricing === "free"
+      ? "Free courses"
+      : pricing === "paid"
+        ? "Paid courses"
+        : "Explore our courses";
+  const pageDescription =
+    pricing === "free"
+      ? "Start learning today with free courses — no payment required."
+      : pricing === "paid"
+        ? "Browse paid courses with structured lessons and instructor support."
+        : "Learn new skills with expert-led courses — structured programs you can study at your own pace.";
 
   return (
     <MarketingShell>
@@ -90,11 +112,10 @@ function CoursesPageContent() {
             Course Catalog
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-marketing-fg sm:text-3xl">
-            Explore our courses
+            {pageTitle}
           </h1>
           <p className="marketing-page-header-muted mt-2 max-w-2xl text-sm">
-            Learn new skills with expert-led courses — structured programs you
-            can study at your own pace.
+            {pageDescription}
           </p>
           <div className="relative mt-6 max-w-xl">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-marketing-muted" />

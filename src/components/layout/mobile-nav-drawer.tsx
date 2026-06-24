@@ -65,9 +65,9 @@ function DrawerLink({
           ? dark
             ? "bg-brand-600/20 text-brand-300"
             : "bg-brand-50 text-brand-700"
-          : dark
+            : dark
             ? "text-slate-300 hover:bg-white/5"
-            : "text-stone-700 hover:bg-stone-50"
+            : "text-slate-700 hover:bg-slate-50"
       )}
     >
       <Icon
@@ -79,7 +79,7 @@ function DrawerLink({
               : "text-brand-600"
             : dark
               ? "text-slate-500"
-              : "text-stone-500"
+              : "text-slate-500"
         )}
       />
       {label}
@@ -98,7 +98,7 @@ function SectionLabel({
     <p
       className={cn(
         "px-4 pb-1 pt-3 text-xs font-medium uppercase tracking-wide first:pt-1",
-        dark ? "text-slate-500" : "text-stone-400"
+        dark ? "text-slate-500" : "text-slate-400"
       )}
     >
       {children}
@@ -143,7 +143,7 @@ export function MobileNavDrawer({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 md:hidden">
+    <div className="fixed inset-0 z-[60] lg:hidden">
       <button
         type="button"
         className="absolute inset-0 bg-black/40"
@@ -152,7 +152,7 @@ export function MobileNavDrawer({
       />
       <div
         className={cn(
-          "absolute left-0 top-0 flex h-full w-full max-w-sm flex-col shadow-xl",
+          "absolute left-0 top-0 flex h-full w-full max-w-sm flex-col shadow-xl pt-[env(safe-area-inset-top,0px)]",
           isMarketing
             ? marketingDark
               ? "bg-[#0c1328] text-white"
@@ -245,7 +245,7 @@ export function MobileNavDrawer({
             </button>
           )}
 
-          <SectionLabel dark={drawerDark}>E-Learning</SectionLabel>
+          <SectionLabel dark={isMarketing ? marketingDark : drawerDark}>E-Learning</SectionLabel>
           {exploreLinks.map((link) => (
             <DrawerLink
               key={link.label}
@@ -254,13 +254,13 @@ export function MobileNavDrawer({
               icon={link.icon}
               active={isExploreActive(pathname, link.href)}
               onNavigate={onClose}
-              dark={drawerDark}
+              dark={isMarketing ? marketingDark : drawerDark}
             />
           ))}
 
           {clerkLoaded && isSignedIn && dashboardItems.length > 0 && (
               <>
-                <SectionLabel dark={drawerDark}>Dashboard</SectionLabel>
+                <SectionLabel dark={isMarketing ? marketingDark : drawerDark}>Dashboard</SectionLabel>
                 <DrawerLink
                   href={dashboardHref}
                   label="Overview"
@@ -271,7 +271,7 @@ export function MobileNavDrawer({
                       : false
                   }
                   onNavigate={onClose}
-                  dark={drawerDark}
+                  dark={isMarketing ? marketingDark : drawerDark}
                 />
                 {dashboardItems
                   .filter((item) => item.href !== dashboardHref)
@@ -287,7 +287,7 @@ export function MobileNavDrawer({
                           : false
                       }
                       onNavigate={onClose}
-                      dark={drawerDark}
+                      dark={isMarketing ? marketingDark : drawerDark}
                     />
                   ))}
               </>

@@ -58,7 +58,7 @@ const SECTIONS = [
     eyebrow: "Free Learning",
     title: "Free Courses",
     description: "Start learning for free",
-    href: "/courses",
+    href: "/courses?pricing=free",
   },
 ];
 
