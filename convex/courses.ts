@@ -238,11 +238,12 @@ export const listHomepageSections = query({
 
     const takeFour = <T,>(items: T[]) => items.slice(0, 4);
 
+    const paidCourses = courses.filter((course) => course.price > 0);
+
     const discountedRaw = takeFour(
-      [...courses]
+      [...paidCourses]
         .filter(
           (course) =>
-            course.price > 0 &&
             course.compareAtPrice !== undefined &&
             course.compareAtPrice > course.price
         )
@@ -254,7 +255,7 @@ export const listHomepageSections = query({
     );
 
     const recentRaw = takeFour(
-      [...courses].sort((a, b) => b.createdAt - a.createdAt)
+      [...paidCourses].sort((a, b) => b.createdAt - a.createdAt)
     );
 
     const freeRaw = takeFour(
@@ -263,7 +264,7 @@ export const listHomepageSections = query({
         .sort((a, b) => b.createdAt - a.createdAt)
     );
 
-    const popularCandidates = [...courses]
+    const popularCandidates = [...paidCourses]
       .sort(
         (a, b) =>
           (b.publishedAt ?? b.createdAt) - (a.publishedAt ?? a.createdAt)
