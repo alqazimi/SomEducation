@@ -110,10 +110,22 @@ export function PurchaseCourseForm() {
     stripeConfig?.stripeEnabled === true &&
     stripeConfig?.stripeConfigured === true;
 
+  const stripeStatusMessage = (() => {
+    if (stripeConfig === undefined) return null;
+    if (stripeAvailable) return null;
+    if (stripeConfig.stripeEnabled && !stripeConfig.stripeConfigured) {
+      return "Card payments are enabled but Stripe keys are not configured yet.";
+    }
+    if (!stripeConfig.stripeEnabled) {
+      return "Card payments are not enabled in admin settings yet.";
+    }
+    return "Card payments are not available yet.";
+  })();
+
   useEffect(() => {
     if (stripeConfig === undefined) return;
-    if (!stripeAvailable && paymentMode === "choose") {
-      setPaymentMode("manual");
+    if (!stripeAvailable && paymentMode === "stripe") {
+      setPaymentMode("choose");
     }
   }, [stripeConfig, stripeAvailable, paymentMode]);
 
@@ -130,7 +142,16 @@ export function PurchaseCourseForm() {
     if (!draft) return;
 
     queueMicrotask(() => {
-      if (draft.paymentMode) setPaymentMode(draft.paymentMode);
+      const restoredMode = draft.paymentMode;
+      const shouldShowChooser =
+        restoredMode === "manual" &&
+        (!draft.step || draft.step === 1) &&
+        !draft.paymentType &&
+        !draft.selectedProviderId;
+
+      if (restoredMode && !shouldShowChooser) {
+        setPaymentMode(restoredMode);
+      }
       if (draft.step && draft.step >= 1 && draft.step <= 4) {
         setStep(draft.step);
       }
@@ -379,12 +400,18 @@ export function PurchaseCourseForm() {
           <CardHeader>
             <CardTitle>How would you like to pay?</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-2">
-            {stripeAvailable && (
+          <CardContent className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2">
               <button
                 type="button"
-                onClick={() => setPaymentMode("stripe")}
-                className="rounded-xl border border-border bg-background p-5 text-left transition-colors hover:border-brand-600 hover:bg-brand-50"
+                disabled={!stripeAvailable}
+                onClick={() => stripeAvailable && setPaymentMode("stripe")}
+                className={cn(
+                  "rounded-xl border border-border bg-background p-5 text-left transition-colors",
+                  stripeAvailable
+                    ? "hover:border-brand-600 hover:bg-brand-50"
+                    : "cursor-not-allowed opacity-60"
+                )}
               >
                 <CreditCard className="h-6 w-6 text-brand-600" />
                 <p className="mt-3 font-semibold text-foreground">Card (Stripe)</p>
@@ -393,20 +420,23 @@ export function PurchaseCourseForm() {
                   payment.
                 </p>
               </button>
+              <button
+                type="button"
+                onClick={() => setPaymentMode("manual")}
+                className="rounded-xl border border-border bg-background p-5 text-left transition-colors hover:border-brand-600 hover:bg-brand-50"
+              >
+                <Smartphone className="h-6 w-6 text-brand-600" />
+                <p className="mt-3 font-semibold text-foreground">
+                  Mobile money / Bank
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Send payment manually and upload proof for admin review.
+                </p>
+              </button>
+            </div>
+            {stripeStatusMessage && (
+              <p className="text-sm text-muted-foreground">{stripeStatusMessage}</p>
             )}
-            <button
-              type="button"
-              onClick={() => setPaymentMode("manual")}
-              className="rounded-xl border border-border bg-background p-5 text-left transition-colors hover:border-brand-600 hover:bg-brand-50"
-            >
-              <Smartphone className="h-6 w-6 text-brand-600" />
-              <p className="mt-3 font-semibold text-foreground">
-                Mobile money / Bank
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Send payment manually and upload proof for admin review.
-              </p>
-            </button>
           </CardContent>
         </Card>
       )}
@@ -438,19 +468,17 @@ export function PurchaseCourseForm() {
         <>
           <div className="mt-4 flex items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">Manual payment steps</p>
-            {(stripeAvailable || paymentMode === "manual") && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setPaymentMode("choose");
-                  setStep(1);
-                }}
-              >
-                Change method
-              </Button>
-            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setPaymentMode("choose");
+                setStep(1);
+              }}
+            >
+              Change method
+            </Button>
           </div>
 
       <div className="mt-6 flex gap-2">
