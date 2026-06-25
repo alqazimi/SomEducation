@@ -302,7 +302,8 @@
   border-color: rgb(0 82 255 / 0.35);
 }
 
-[data-marketing-theme="night"] .dashboard-main select option {
+[data-marketing-theme="night"] .dashboard-main select option,
+[data-marketing-theme="night"] select option {
   background-color: #0f172a;
   color: #f1f5f9;
 }

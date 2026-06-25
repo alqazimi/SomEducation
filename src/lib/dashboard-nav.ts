@@ -98,8 +98,10 @@ export function isDashboardNavActive(
   const overviewHref = getDashboardOverviewHref(role);
   if (href === "/") return pathname === "/";
   if (pathname === href) return true;
-  if (href === overviewHref) return false;
-  return pathname.startsWith(`${href}/`) || pathname.startsWith(href);
+  if (href === overviewHref) {
+    return pathname === overviewHref;
+  }
+  return pathname.startsWith(`${href}/`);
 }
 
 /** Shortcuts for desktop sidebar grouping only; mobile uses one header menu. */

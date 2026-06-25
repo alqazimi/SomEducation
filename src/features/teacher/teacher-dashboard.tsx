@@ -94,54 +94,58 @@ export function TeacherDashboard() {
           </Card>
         ) : (
           courses.map((course) => (
-            <Card key={course._id} className="overflow-hidden transition-shadow hover:shadow-sm">
-              <CardContent className="flex flex-col gap-4 p-0 sm:flex-row sm:items-stretch">
-                <div className="aspect-video w-full shrink-0 bg-brand-50 sm:w-48">
-                  {course.thumbnailUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={course.thumbnailUrl}
-                      alt={course.title}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full min-h-28 items-center justify-center text-xs text-brand-300">
-                      No cover
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-1 flex-col justify-center gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className={type.cardTitle}>
-                        {course.title}
-                      </h3>
-                      <Badge variant={statusVariant[course.status] ?? "outline"}>
-                        {statusLabel[course.status] ?? course.status}
-                      </Badge>
-                    </div>
-                    <p className={`mt-1 ${type.muted}`}>
-                      {formatPrice(course.price, course.currency)} ·{" "}
-                      <span className="capitalize">{course.difficulty}</span>
-                      {course.moduleCount > 0 && (
-                        <>
-                          {" "}
-                          · {course.moduleCount} module
-                          {course.moduleCount === 1 ? "" : "s"}
-                        </>
-                      )}
-                    </p>
-                    <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-brand-700">
-                      <Users className="h-4 w-4" />
-                      {formatEnrollmentCount(course.enrollmentCount)}
-                    </p>
+            <Link
+              key={course._id}
+              href={`/dashboard/teacher/courses/${course._id}`}
+              className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+            >
+              <Card className="overflow-hidden transition-shadow hover:shadow-md">
+                <CardContent className="flex flex-col gap-4 p-0 sm:flex-row sm:items-stretch">
+                  <div className="aspect-video w-full shrink-0 bg-brand-50 sm:w-48 dark:bg-brand-600/10">
+                    {course.thumbnailUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={course.thumbnailUrl}
+                        alt={course.title}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full min-h-28 items-center justify-center text-xs text-brand-400">
+                        No cover
+                      </div>
+                    )}
                   </div>
-                  <Link href={`/dashboard/teacher/courses/${course._id}`}>
-                    <Button variant="outline">Manage Course</Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="flex flex-1 flex-col justify-center gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className={type.cardTitle}>{course.title}</h3>
+                        <Badge variant={statusVariant[course.status] ?? "outline"}>
+                          {statusLabel[course.status] ?? course.status}
+                        </Badge>
+                      </div>
+                      <p className={`mt-1 ${type.muted}`}>
+                        {formatPrice(course.price, course.currency)} ·{" "}
+                        <span className="capitalize">{course.difficulty}</span>
+                        {course.moduleCount > 0 && (
+                          <>
+                            {" "}
+                            · {course.moduleCount} module
+                            {course.moduleCount === 1 ? "" : "s"}
+                          </>
+                        )}
+                      </p>
+                      <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 dark:text-brand-400">
+                        <Users className="h-4 w-4" />
+                        {formatEnrollmentCount(course.enrollmentCount)}
+                      </p>
+                    </div>
+                    <Button variant="outline" type="button" tabIndex={-1}>
+                      Manage Course
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))
         )}
       </div>
