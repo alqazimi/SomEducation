@@ -76,7 +76,9 @@ export const assertStripePurchaseAllowed = internalQuery({
     }
 
     const fullName =
-      `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email;
+      `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() ||
+      user.email ||
+      "Student";
 
     return {
       userId: user._id,

@@ -40,8 +40,8 @@ export function CoursePricingFields({
   return (
     <div className={cn("space-y-4", className)}>
       <div>
-        <p className="text-sm font-medium text-slate-900">Pricing</p>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="text-sm font-medium text-foreground">Pricing</p>
+        <p className="mt-1 text-sm text-muted-foreground">
           Set a regular price and optional sale price — like WordPress / WooCommerce.
         </p>
       </div>
@@ -59,7 +59,7 @@ export function CoursePricingFields({
             placeholder="e.g. 99.00"
             className="mt-2"
           />
-          <p className="mt-1.5 text-xs text-slate-500">
+          <p className="mt-1.5 text-xs text-muted-foreground">
             The original price shown with a strikethrough when on sale.
           </p>
           {regularPriceError && (
@@ -79,7 +79,7 @@ export function CoursePricingFields({
             placeholder="e.g. 49.00"
             className="mt-2"
           />
-          <p className="mt-1.5 text-xs text-slate-500">
+          <p className="mt-1.5 text-xs text-muted-foreground">
             What students pay now. Use 0 for a free course.
           </p>
           {salePriceError && (
@@ -89,14 +89,14 @@ export function CoursePricingFields({
       </div>
 
       {hasDiscount && discountPercent > 0 && (
-        <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+        <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700">
           On sale — {discountPercent}% off (was ${regular.toFixed(2)}, now $
           {sale.toFixed(2)})
         </p>
       )}
 
       {regular !== null && sale !== null && regular > 0 && regular <= sale && (
-        <p className="text-xs text-amber-700">
+        <p className="text-xs text-amber-600">
           Regular price must be higher than sale price to show a discount.
         </p>
       )}

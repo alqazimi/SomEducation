@@ -670,7 +670,7 @@ export const listMessageRecipients = query({
           .trim()
           .toLowerCase();
         return (
-          candidate.email.toLowerCase().includes(search) ||
+          (candidate.email ?? "").toLowerCase().includes(search) ||
           name.includes(search)
         );
       })
@@ -678,7 +678,7 @@ export const listMessageRecipients = query({
         const aAdmin = isAdminOrOwner(a.role) ? 0 : 1;
         const bAdmin = isAdminOrOwner(b.role) ? 0 : 1;
         if (aAdmin !== bAdmin) return aAdmin - bAdmin;
-        return a.email.localeCompare(b.email);
+        return (a.email ?? "").localeCompare(b.email ?? "");
       })
       .slice(0, 50)
       .map((candidate) => ({
@@ -713,11 +713,11 @@ export const listStudentsForMessaging = query({
           .trim()
           .toLowerCase();
         return (
-          candidate.email.toLowerCase().includes(search) ||
+          (candidate.email ?? "").toLowerCase().includes(search) ||
           name.includes(search)
         );
       })
-      .sort((a, b) => a.email.localeCompare(b.email))
+      .sort((a, b) => (a.email ?? "").localeCompare(b.email ?? ""))
       .slice(0, 50)
       .map((candidate) => ({
         _id: candidate._id,

@@ -1,13 +1,11 @@
 "use client";
 
 import { ConvexReactClient } from "convex/react";
-import { ConvexProviderWithClerk } from "convex/react-clerk";
-import { useAuth } from "@clerk/nextjs";
+import { ConvexAuthNextjsProvider } from "@convex-dev/auth/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode, useMemo, useState } from "react";
 import { Toaster } from "sonner";
-import { ConvexAuthBanner } from "@/components/auth/convex-auth-banner";
-import { UserSync } from "@/components/auth/user-sync";
+import { AuthSessionGuard } from "@/components/auth/auth-session-guard";
 import { getConvexClientUrl, isConvexConfigured } from "@/lib/convex-url";
 
 function ConvexConfigBanner({ configured }: { configured: boolean }) {
@@ -49,14 +47,13 @@ export function Providers({
   const configured = isConvexConfigured(convexUrl);
 
   return (
-    <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+    <ConvexAuthNextjsProvider client={convex}>
       <QueryClientProvider client={queryClient}>
-        <UserSync />
-        <ConvexAuthBanner />
+        <AuthSessionGuard />
         <ConvexConfigBanner configured={configured} />
         {children}
         <Toaster position="top-right" richColors closeButton />
       </QueryClientProvider>
-    </ConvexProviderWithClerk>
+    </ConvexAuthNextjsProvider>
   );
 }

@@ -124,7 +124,12 @@ export function SupportPage() {
                   Track your submission under Dashboard → Payments. If
                   rejected or asked for a new screenshot, fix the same
                   payment there — upload new proof or change your payment
-                  method without starting over.
+                  method without starting over. Paid courses may be returned
+                  within 24 hours of approval — see our{" "}
+                  <Link href="/returns" className="font-medium text-brand-400 hover:underline">
+                    Return Policy
+                  </Link>
+                  .
                 </p>
               </div>
             </div>

@@ -12,6 +12,10 @@ export function isStaff(role: UserRole) {
   return role === "teacher" || isAdminOrOwner(role);
 }
 
+export function requiresMfa(role: UserRole) {
+  return isStaff(role);
+}
+
 export function getOwnerEmails(): string[] {
   return (process.env.OWNER_EMAILS ?? "")
     .split(",")

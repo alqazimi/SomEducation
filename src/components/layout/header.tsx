@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton, useAuth } from "@clerk/nextjs";
 import { useConvexAuth, useQuery } from "convex/react";
 import { Menu, Search, X } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
@@ -26,6 +25,7 @@ import { useMarketingTheme } from "@/components/marketing/marketing-theme-provid
 import { isMarketingSitePath, isLearnPath, marketingHeaderClassDay, marketingHeaderClassNight, dashboardHeaderClass } from "@/lib/marketing-theme";
 import { HeaderSearch } from "./header-search";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
+import { UserAccountMenu } from "@/components/auth/user-account-menu";
 
 const marketingNav = [
   { href: "/courses", label: "Courses" },
@@ -56,9 +56,8 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
   const isMarketing =
     variant === "marketing" ||
     (variant === "default" && isMarketingSitePath(pathname));
-  const { isSignedIn, isLoaded: clerkLoaded } = useAuth();
-  const { isAuthenticated } = useConvexAuth();
-  const convexReady = clerkLoaded && isSignedIn && isAuthenticated;
+  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const convexReady = isAuthenticated && !authLoading;
   const user = useQuery(api.users.getMe, convexReady ? {} : "skip");
   const dashboardHref = getDashboardHref(user?.role);
   const signInUrl = getSignInUrl(pathname || "/dashboard");
@@ -68,6 +67,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
   const [navPathname, setNavPathname] = useState(pathname);
   const { isDay, isNight } = useMarketingTheme();
   const useDarkChrome = isNight && (isMarketing || isDashboard || isLearn);
+  const showSiteSearch = !isDashboard;
 
   if (pathname !== navPathname) {
     setNavPathname(pathname);
@@ -157,8 +157,8 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
               </Link>
             </div>
 
-            {/* Center nav hidden on mobile — use drawer; lg+ only */}
-            {!isDashboard && (
+            {/* Center nav on marketing pages — lg+ only */}
+            {showSiteSearch && (
               <nav className="mx-auto hidden items-center justify-center gap-0.5 lg:flex xl:gap-1">
                 {marketingNav.map((item) => (
                   <Link
@@ -185,13 +185,17 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
               </nav>
             )}
 
-            {isDashboard && (
-              <div className="hidden min-w-0 flex-1 px-2 md:block md:max-w-xl lg:max-w-2xl">
-                <Suspense fallback={<HeaderSearchFallback dark={useDarkChrome} />}>
-                  <HeaderSearch dark={useDarkChrome} />
-                </Suspense>
-              </div>
-            )}
+            {/* Inline search — dashboard + public pages on tablet/desktop */}
+            <div
+              className={cn(
+                "hidden min-w-0 flex-1 px-2 md:block",
+                isDashboard ? "md:max-w-xl lg:max-w-2xl" : "md:max-w-xs lg:max-w-sm xl:max-w-md"
+              )}
+            >
+              <Suspense fallback={<HeaderSearchFallback dark={useDarkChrome} />}>
+                <HeaderSearch dark={useDarkChrome} />
+              </Suspense>
+            </div>
 
             <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1.5">
               {(isMarketing || isLearn) && (
@@ -207,45 +211,28 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                 <MarketingThemeToggle className="h-8 w-8 sm:h-10 sm:w-10" />
               )}
 
-              {!isDashboard && !(clerkLoaded && isSignedIn) && (
-                <Link
-                  href="/courses"
-                  className={cn(
-                    "inline-flex h-8 w-8 items-center justify-center rounded-lg sm:h-10 sm:w-10",
-                    useDarkChrome
-                      ? "text-slate-300 hover:bg-white/10"
-                      : "text-slate-600 hover:bg-slate-100"
-                  )}
-                  aria-label="Search courses"
-                >
+              <button
+                type="button"
+                className={cn(
+                  "inline-flex h-8 w-8 items-center justify-center rounded-lg md:hidden sm:h-10 sm:w-10",
+                  useDarkChrome
+                    ? "text-slate-300 hover:bg-white/10"
+                    : "text-slate-600 hover:bg-slate-100"
+                )}
+                aria-label={mobileSearchOpen ? "Close search" : "Search courses"}
+                onClick={() => {
+                  setMobileOpen(false);
+                  setMobileSearchOpen((open) => !open);
+                }}
+              >
+                {mobileSearchOpen ? (
+                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                ) : (
                   <Search className="h-4 w-4 sm:h-5 sm:w-5" />
-                </Link>
-              )}
+                )}
+              </button>
 
-              {isDashboard && (
-                <button
-                  type="button"
-                  className={cn(
-                    "inline-flex h-9 w-9 items-center justify-center rounded-lg md:hidden sm:h-10 sm:w-10",
-                    useDarkChrome
-                      ? "text-slate-300 hover:bg-white/10"
-                      : "text-slate-600 hover:bg-slate-100"
-                  )}
-                  aria-label={mobileSearchOpen ? "Close search" : "Search"}
-                  onClick={() => {
-                    setMobileOpen(false);
-                    setMobileSearchOpen((open) => !open);
-                  }}
-                >
-                  {mobileSearchOpen ? (
-                    <X className="h-5 w-5" />
-                  ) : (
-                    <Search className="h-5 w-5" />
-                  )}
-                </button>
-              )}
-
-              {clerkLoaded && isSignedIn ? (
+              {convexReady ? (
                 <>
                   <Link
                     href={dashboardHref}
@@ -263,13 +250,7 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
                     Dashboard
                   </Link>
                   <NotificationBell dark={useDarkChrome} />
-                  <UserButton
-                    appearance={{
-                      elements: {
-                        avatarBox: "h-8 w-8 sm:h-9 sm:w-9",
-                      },
-                    }}
-                  />
+                  <UserAccountMenu dark={useDarkChrome} />
                 </>
               ) : (
                 <>
@@ -324,8 +305,13 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
             </div>
           </div>
 
-          {isDashboard && mobileSearchOpen && (
-            <div className="border-t border-border pb-3 pt-2 md:hidden">
+          {mobileSearchOpen && (
+            <div
+              className={cn(
+                "border-t pb-3 pt-2 md:hidden",
+                useDarkChrome ? "border-white/10" : "border-border"
+              )}
+            >
               <Suspense fallback={<HeaderSearchFallback dark={useDarkChrome} />}>
                 <HeaderSearch autoFocus dark={useDarkChrome} />
               </Suspense>
@@ -338,10 +324,10 @@ export function Header({ variant = "default" }: { variant?: "default" | "marketi
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
         role={user?.role}
-        variant={isMarketing ? "marketing" : "dashboard"}
+        variant={isMarketing ? "marketing" : isLearn ? "marketing" : "dashboard"}
         onSearch={() => {
           setMobileOpen(false);
-          if (isDashboard) setMobileSearchOpen(true);
+          setMobileSearchOpen(true);
         }}
       />
     </>

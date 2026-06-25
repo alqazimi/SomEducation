@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files — never commit secrets
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -39,7 +40,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-clerk-nextjs/
-
-# clerk configuration (can include secrets)
-/.clerk/

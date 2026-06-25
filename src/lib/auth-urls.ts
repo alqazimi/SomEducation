@@ -12,7 +12,7 @@ export function sanitizeRedirectPath(path: string | null | undefined) {
   if (
     trimmed.startsWith("/sign-in") ||
     trimmed.startsWith("/sign-up") ||
-    trimmed.startsWith("/__clerk")
+    trimmed.startsWith("/mfa")
   ) {
     return DEFAULT_AUTH_REDIRECT;
   }

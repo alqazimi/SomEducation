@@ -1,8 +1,9 @@
 import { QueryCtx, MutationCtx } from "../_generated/server";
 import { Id } from "../_generated/dataModel";
+import { getAuthSessionId, getAuthUserId } from "@convex-dev/auth/server";
 import { AuthUser, UserRole } from "./types";
 import { throwError } from "./errors";
-import { isAdminOrOwner, isOwner } from "./roles";
+import { isAdminOrOwner, isOwner, isStaff, requiresMfa } from "./roles";
 
 type Ctx = QueryCtx | MutationCtx;
 
@@ -19,19 +20,15 @@ export async function requireIdentity(ctx: Ctx) {
 }
 
 export async function getCurrentUser(ctx: Ctx): Promise<AuthUser | null> {
-  const identity = await getIdentity(ctx);
-  if (!identity) return null;
+  const userId = await getAuthUserId(ctx);
+  if (!userId) return null;
 
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-    .unique();
-
+  const user = await ctx.db.get(userId);
   if (!user || user.status === "deleted") return null;
-  return user;
+  return user as AuthUser;
 }
 
-export async function requireCurrentUser(ctx: Ctx): Promise<AuthUser> {
+export async function requireAuthenticatedUser(ctx: Ctx): Promise<AuthUser> {
   const user = await getCurrentUser(ctx);
   if (!user) {
     throwError("User not found. Please sign in again.", "UNAUTHENTICATED");
@@ -39,6 +36,26 @@ export async function requireCurrentUser(ctx: Ctx): Promise<AuthUser> {
   if (user.status === "suspended") {
     throwError("Your account has been suspended.", "FORBIDDEN");
   }
+  return user;
+}
+
+export async function requireCurrentUser(ctx: Ctx): Promise<AuthUser> {
+  const user = await requireAuthenticatedUser(ctx);
+
+  if (requiresMfa(user.role) && user.mfaEnabled) {
+    const sessionId = await getAuthSessionId(ctx);
+    if (!sessionId) {
+      throwError("Authentication required", "UNAUTHENTICATED");
+    }
+    const verified = await ctx.db
+      .query("mfaVerifications")
+      .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
+      .unique();
+    if (!verified) {
+      throwError("Multi-factor authentication required", "MFA_REQUIRED");
+    }
+  }
+
   return user;
 }
 
@@ -95,4 +112,4 @@ export function slugify(text: string): string {
     .slice(0, 80);
 }
 
-export { isAdminOrOwner, isOwner };
+export { isAdminOrOwner, isOwner, isStaff, requiresMfa };

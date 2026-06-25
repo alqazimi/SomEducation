@@ -1,19 +1,15 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import {
-  buildSearchText,
   getCurrentUser,
   isOwner,
   requireAdmin,
+  requireAuthenticatedUser,
   requireCurrentUser,
-  requireIdentity,
 } from "./lib/auth";
 import { logAudit } from "./lib/audit";
-import {
-  getOwnerEmails,
-  resolveInitialRole,
-} from "./lib/roles";
-import { checkRateLimit, sanitizeText } from "./lib/validation";
+import { getOwnerEmails, requiresMfa } from "./lib/roles";
+import { sanitizeText } from "./lib/validation";
 import { userRole } from "./schema";
 import { UserRole } from "./lib/types";
 
@@ -46,76 +42,20 @@ export const getMe = query({
   },
 });
 
-export const syncUser = mutation({
-  args: {
-    email: v.string(),
-    firstName: v.optional(v.string()),
-    lastName: v.optional(v.string()),
-    imageUrl: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const identity = await requireIdentity(ctx);
-    await checkRateLimit(ctx, `sync:${identity.subject}`, 10);
-
-    const existing = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    const now = Date.now();
-    const email = args.email.toLowerCase();
-    const searchText = buildSearchText([
-      args.firstName,
-      args.lastName,
-      args.email,
-    ]);
-
-    if (existing) {
-      const updates: Record<string, unknown> = {
-        email,
-        firstName: args.firstName,
-        lastName: args.lastName,
-        imageUrl: args.imageUrl,
-        searchText,
-        updatedAt: now,
-      };
-
-      if (existing.status === "deleted") {
-        updates.status = "active";
-        await logAudit(ctx, {
-          actorId: existing._id,
-          action: "user.reactivated",
-          entityType: "users",
-          entityId: existing._id,
-          details: JSON.stringify({ email }),
-        });
-      }
-
-      if (
-        getOwnerEmails().includes(email) &&
-        existing.role !== "owner"
-      ) {
-        updates.role = "owner";
-      }
-
-      await ctx.db.patch(existing._id, updates);
-      return existing._id;
+export const ensureProfile = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const user = await requireAuthenticatedUser(ctx);
+    if (
+      getOwnerEmails().includes((user.email ?? "").toLowerCase()) &&
+      user.role !== "owner"
+    ) {
+      await ctx.db.patch(user._id, {
+        role: "owner",
+        updatedAt: Date.now(),
+      });
     }
-
-    const role = resolveInitialRole(email);
-
-    return await ctx.db.insert("users", {
-      clerkId: identity.subject,
-      email,
-      firstName: args.firstName,
-      lastName: args.lastName,
-      imageUrl: args.imageUrl,
-      role,
-      status: "active",
-      searchText,
-      createdAt: now,
-      updatedAt: now,
-    });
+    return user._id;
   },
 });
 
@@ -220,6 +160,8 @@ export const updateUserRole = mutation({
 
     await ctx.db.patch(args.userId, {
       role: args.role,
+      mfaEnabled: requiresMfa(args.role) ? target.mfaEnabled ?? false : undefined,
+      mfaSecret: requiresMfa(args.role) ? target.mfaSecret : undefined,
       updatedAt: Date.now(),
     });
 

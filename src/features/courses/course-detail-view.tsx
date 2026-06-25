@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Show } from "@clerk/nextjs";
+import { useConvexAuth } from "convex/react";
 import {
   CheckCircle2,
   ChevronDown,
@@ -53,6 +53,8 @@ function SidebarRow({
 }
 
 function CourseEnrollActions({ course }: { course: CourseDetail }) {
+  const { isAuthenticated, isLoading } = useConvexAuth();
+
   if (course.canLearn) {
     return (
       <Link href={`/learn/${course.slug}`} className="block">
@@ -64,49 +66,66 @@ function CourseEnrollActions({ course }: { course: CourseDetail }) {
     );
   }
 
-  return (
-    <>
-      <Show when="signed-in">
-        {course.activePayment?.status === "pending" ? (
-          <Link href="/dashboard/student/payments" className="block">
-            <Button
-              className="h-11 w-full border-marketing-border bg-marketing-card text-marketing-fg hover:bg-marketing-elevated"
-              size="lg"
-              variant="outline"
-            >
-              Payment Pending Review
-            </Button>
-          </Link>
-        ) : course.activePayment?.status === "rejected" ||
-          course.activePayment?.status === "resubmit_requested" ? (
-          <Link href={`/courses/${course.slug}/purchase`} className="block">
-            <Button className="h-11 w-full" size="lg">
-              Fix Payment
-            </Button>
-          </Link>
-        ) : (
-          <Link href={`/courses/${course.slug}/purchase`} className="block">
-            <Button className="h-11 w-full" size="lg">
-              Enroll Now
-            </Button>
-          </Link>
-        )}
-      </Show>
-      <Show when="signed-out">
-        <Link
-          href={`/sign-in?redirect_url=${encodeURIComponent(
-            `/courses/${course.slug}/purchase`
-          )}`}
-          className="block"
-        >
-          <Button className="h-11 w-full" size="lg">
-            Sign in to Enroll
+  if (isLoading) {
+    return (
+      <Button className="h-11 w-full" size="lg" disabled>
+        Loading...
+      </Button>
+    );
+  }
+
+  if (isAuthenticated) {
+    if (course.activePayment?.status === "pending") {
+      return (
+        <Link href="/dashboard/student/payments" className="block">
+          <Button
+            className="h-11 w-full border-marketing-border bg-marketing-card text-marketing-fg hover:bg-marketing-elevated"
+            size="lg"
+            variant="outline"
+          >
+            Payment Pending Review
           </Button>
         </Link>
-        <p className="text-center text-xs text-marketing-muted">
-          Create an account to purchase this course.
-        </p>
-      </Show>
+      );
+    }
+
+    if (
+      course.activePayment?.status === "rejected" ||
+      course.activePayment?.status === "resubmit_requested"
+    ) {
+      return (
+        <Link href={`/courses/${course.slug}/purchase`} className="block">
+          <Button className="h-11 w-full" size="lg">
+            Fix Payment
+          </Button>
+        </Link>
+      );
+    }
+
+    return (
+      <Link href={`/courses/${course.slug}/purchase`} className="block">
+        <Button className="h-11 w-full" size="lg">
+          Enroll Now
+        </Button>
+      </Link>
+    );
+  }
+
+  return (
+    <>
+      <Link
+        href={`/sign-in?redirect_url=${encodeURIComponent(
+          `/courses/${course.slug}/purchase`
+        )}`}
+        className="block"
+      >
+        <Button className="h-11 w-full" size="lg">
+          Sign in to Enroll
+        </Button>
+      </Link>
+      <p className="text-center text-xs text-marketing-muted">
+        Create an account to purchase this course.
+      </p>
     </>
   );
 }

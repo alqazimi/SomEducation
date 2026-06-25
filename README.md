@@ -6,7 +6,7 @@ Premium online learning platform with manual payment verification, role-based ac
 
 - **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS 4, shadcn/ui
 - **Backend**: Convex
-- **Auth**: Clerk
+- **Auth**: [Convex Auth](https://labs.convex.dev/auth) (email + password, staff MFA)
 - **Deployment**: Vercel + Convex Cloud
 
 ## Quick Start
@@ -19,44 +19,43 @@ npm install
 
 ### 2. Configure environment
 
-Create `.env.local` in the project root (this file is **never** committed to git):
+Create `.env.local` in the project root (never committed to git):
 
 ```env
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-CLERK_SECRET_KEY=your_clerk_secret_key
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
-NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
+NEXT_PUBLIC_CONVEX_URL=https://your-dev-deployment.convex.cloud
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-Fill in your real Clerk and Convex values from their dashboards.
+`NEXT_PUBLIC_CONVEX_URL` is written automatically when you run `npx convex dev`.
 
-### 3. Start Convex (required first time)
+### 3. Initialize Convex Auth (first time)
 
 ```bash
 npx convex dev
 ```
 
-This creates your Convex deployment and generates `convex/_generated/`.
-
-Set in the Convex dashboard:
-- `CLERK_JWT_ISSUER_DOMAIN` — from Clerk JWT template
-- `ADMIN_EMAILS` — comma-separated admin emails
-- `STRIPE_SECRET_KEY` — Stripe secret key (`sk_test_…` or `sk_live_…`) — optional
-- `STRIPE_WEBHOOK_SECRET` — Stripe webhook signing secret (`whsec_…`) — optional
-
-### 4. Start Next.js
-
-In a second terminal:
+In a second terminal, if auth keys are not set yet:
 
 ```bash
-npm run dev:frontend
+npx @convex-dev/auth --web-server-url http://localhost:3000
 ```
 
-Or run both together:
+This sets `SITE_URL`, `JWT_PRIVATE_KEY`, and `JWKS` on your **dev** deployment.
+
+### 4. Convex environment variables
+
+Set in the [Convex dashboard](https://dashboard.convex.dev) (dev and prod separately):
+
+| Variable | Purpose |
+|----------|---------|
+| `SITE_URL` | App URL (`http://localhost:3000` dev, `https://www.someducation.com` prod) |
+| `JWT_PRIVATE_KEY` / `JWKS` | Set by `npx @convex-dev/auth` |
+| `OWNER_EMAILS` | Comma-separated emails promoted to **owner** on sign-up |
+| `ADMIN_EMAILS` | Comma-separated emails promoted to **admin** on sign-up |
+| `STRIPE_SECRET_KEY` | Optional — Stripe card checkout |
+| `STRIPE_WEBHOOK_SECRET` | Optional — Stripe webhook signing secret |
+
+### 5. Start the app
 
 ```bash
 npm run dev
@@ -64,82 +63,57 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Authentication
+
+- **Sign up / sign in**: `/sign-up`, `/sign-in` (email + password, min 12 characters)
+- **Sessions**: 3 hours for all users
+- **Students**: one active device — new login revokes other sessions
+- **Staff** (teacher, admin, owner): TOTP MFA required (`/mfa/setup`, `/mfa`)
+- **Legacy users**: sign up again with the **same email** to link an existing profile
+
 ## Vercel deployment
 
-In **Vercel → Project → Settings → Environment Variables**, add these for **Production**:
+**Vercel → Project → Settings → Environment Variables** (Production):
 
 | Variable | Value |
 |----------|--------|
 | `NEXT_PUBLIC_CONVEX_URL` | `https://precious-duck-100.eu-west-1.convex.cloud` (no trailing slash) |
-| `NEXT_PUBLIC_APP_URL` | `https://www.someducation.com` (your live domain, no trailing slash) |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | From Clerk Dashboard |
-| `CLERK_SECRET_KEY` | From Clerk Dashboard |
-| `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | `/sign-in` |
-| `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | `/sign-up` |
-| `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` | `/dashboard` |
-| `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` | `/dashboard` |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key (`pk_test_…` or `pk_live_…`) — optional, for card checkout |
-| `GOOGLE_SITE_VERIFICATION` | `ca20de5c3c61d824` (optional — already built into the site) |
+| `NEXT_PUBLIC_APP_URL` | `https://www.someducation.com` (no trailing slash) |
+| `GOOGLE_SITE_VERIFICATION` | `ca20de5c3c61d824` (optional — built into the site) |
 
-Redeploy after saving env vars. Use your **production** Convex URL (`precious-duck-100`), not the dev URL (`mild-seahorse-699`).
+Redeploy after saving. Use the **production** Convex URL (`precious-duck-100`), not dev (`mild-seahorse-699`).
 
-### Clerk + Convex auth (required for sign-in)
-
-After switching to Clerk **Production** (`pk_live_` keys on Vercel), configure both sides:
-
-**Clerk (Production instance):**
-1. Open [Clerk Convex setup](https://dashboard.clerk.com/apps/setup/convex)
-2. JWT template name must be exactly **`convex`** (Convex preset)
-
-**Convex production (`precious-duck-100`):**
+### Convex production
 
 ```bash
-npx convex env set CLERK_JWT_ISSUER_DOMAIN https://clerk.someducation.com --prod
+# Auth keys + SITE_URL for live domain
+npx @convex-dev/auth --prod --web-server-url https://www.someducation.com
+
+# Deploy backend
+npx convex deploy
 ```
 
-Use your Clerk **Production** Frontend API URL (from Clerk → Production → API Keys).  
-Do **not** use the dev URL (`https://stirring-grizzly-43.clerk.accounts.dev`).
+Remove any obsolete `CLERK_*` variables from Vercel and Convex if still present.
 
-Then sign out, sign in again, and test `/dashboard`.
+## Google Search
 
-## Google Search (show SomEducation in search results)
+Verification is included in the repo:
 
-Google verification is already included in the repo:
 - HTML file: `/googleca20de5c3c61d824.html`
 - Meta tag: `ca20de5c3c61d824`
 
-**You do not need a Vercel env var** for HTML-file verification. After deploy, open:
-`https://your-domain.com/googleca20de5c3c61d824.html`
+After deploy, verify in [Google Search Console](https://search.google.com/search-console) and submit `https://your-domain.com/sitemap.xml`.
 
-To appear when people search **SomEducation** or **someducation** (without typing `.com`):
+## Admin setup
 
-1. Set `NEXT_PUBLIC_APP_URL` to your real domain (e.g. `https://som-education.vercel.app` or your custom domain)
-2. **Redeploy** on Vercel
-3. Go to [Google Search Console](https://search.google.com/search-console)
-4. Add your site property (use the same URL as `NEXT_PUBLIC_APP_URL`)
-5. Choose **HTML file** verification — file is already on your site
-6. Click **Verify**
-7. Submit your sitemap: `https://your-domain.com/sitemap.xml`
-8. Request indexing for your homepage
-
-The site already includes:
-- Brand-focused page titles (`SomEducation — Premium Online Learning Platform`)
-- JSON-LD structured data (Organization, WebSite, EducationalOrganization)
-- `sitemap.xml` with public pages and published courses
-- `robots.txt` allowing Google on public pages
-
-**Tip:** A custom domain (e.g. `someducation.com`) helps Google show your brand more prominently than a `.vercel.app` URL.
-
-## Admin Setup
-
-1. Sign up with an email in `ADMIN_EMAILS`
-2. Open **Dashboard → Admin → Categories** — add your own course categories
-3. Open **Dashboard → Admin → Payment Methods** — add mobile money and bank numbers
+1. Add your email to `OWNER_EMAILS` or `ADMIN_EMAILS` in Convex, then sign up with that email
+2. **Dashboard → Admin → Categories** — add course categories
+3. **Dashboard → Admin → Payment Methods** — add mobile money / bank details
 4. Approve teacher requests and course submissions from the admin dashboard
 
-## Project Structure
+## Project structure
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full architecture, security design, and deployment guide.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for architecture, security, and deployment details.
 
 ```
 src/
@@ -150,8 +124,9 @@ src/
 └── lib/           # Utilities
 
 convex/
+├── auth.ts        # Convex Auth (password, sessions, callbacks)
 ├── schema.ts      # Database schema
-├── lib/           # Auth, audit, validation
+├── lib/           # Auth helpers, audit, validation
 └── *.ts           # Backend functions
 ```
 
@@ -168,10 +143,12 @@ npm test
 | **Student** | Browse courses, purchase, view enrollments, request teacher access |
 | **Teacher** | Create/edit courses, modules, lessons, view enrollments |
 | **Admin** | User management, payment verification, course approval, analytics, settings |
+| **Owner** | Full platform control including admin accounts |
 
-## Payment Flow
+## Payment flow
 
 ### Manual (mobile money / bank)
+
 1. Student clicks **Buy Course**
 2. Chooses **Mobile money / Bank**
 3. Fills payment form (name, phone, method, reference)
@@ -181,26 +158,24 @@ npm test
 7. On approval → enrollment created → student gains access
 
 ### Stripe (card — optional)
+
 1. Admin enables **Stripe checkout** in **Dashboard → Admin → Settings**
-2. Add Stripe keys (see below)
+2. Add Stripe keys in Convex (see below)
 3. Student chooses **Card (Stripe)** on the purchase page
 4. Pays on Stripe Checkout → webhook confirms payment → instant enrollment
 
 #### Stripe setup (test mode)
+
 1. Create a [Stripe account](https://dashboard.stripe.com/register) and stay in **Test mode**
-2. **Convex** (`npx convex env set …` or Dashboard → Settings → Environment Variables):
+2. **Convex** (`npx convex env set …` or dashboard):
    - `STRIPE_SECRET_KEY` = `sk_test_…`
    - `STRIPE_WEBHOOK_SECRET` = from step 4
-3. **Vercel** (or `.env.local` for local dev):
-   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` = `pk_test_…`
-4. **Stripe webhook** — Developers → Webhooks → Add endpoint:
+3. **Stripe webhook** — Developers → Webhooks → Add endpoint:
    - URL: `https://YOUR_DEPLOYMENT.convex.site/stripe/webhook`
    - Events: `checkout.session.completed`, `checkout.session.expired`
    - Copy the signing secret to `STRIPE_WEBHOOK_SECRET` in Convex
-5. **Admin → Settings** → turn on **Enable Stripe checkout** → Save
-6. Test a purchase with card `4242 4242 4242 4242`, any future expiry, any CVC
-
-When you have your test keys, send them and add via the steps above — no code changes needed.
+4. **Admin → Settings** → enable **Stripe checkout** → Save
+5. Test with card `4242 4242 4242 4242`, any future expiry, any CVC
 
 ## License
 

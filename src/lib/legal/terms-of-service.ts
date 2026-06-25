@@ -58,7 +58,7 @@ export const termsOfService: LegalDocument = {
       paragraphs: [
         `${PLATFORM_NAME} may use manual payment methods such as bank transfer, mobile money, or cash transfer. You agree to pay the stated course price using an approved method and to submit accurate payment proof when requested.`,
         "Payment verification is performed by authorized administrators. We may approve, reject, or request additional information before granting access. Submitting false, altered, or misleading payment proof is prohibited and may result in account suspension.",
-        "Unless otherwise stated on the course page or required by applicable law, all fees are final once access has been granted. Refund requests may be considered on a case-by-case basis by contacting support.",
+        `Paid courses are eligible for returns within 24 hours of payment approval, subject to our Return & Refund Policy. Free courses are not refundable.`,
       ],
     },
     {

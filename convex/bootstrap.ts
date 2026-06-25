@@ -20,7 +20,7 @@ export const setupPlatform = mutation({
       let user = emailHint
         ? await ctx.db
             .query("users")
-            .withIndex("by_email", (q) => q.eq("email", emailHint))
+            .withIndex("email", (q) => q.eq("email", emailHint))
             .unique()
         : null;
 
@@ -33,8 +33,9 @@ export const setupPlatform = mutation({
 
       if (user) {
         const ownerEmails = getOwnerEmails();
+        const userEmail = (user.email ?? "").toLowerCase();
         const role =
-          ownerEmails.includes(user.email) || ownerEmails.length === 0
+          ownerEmails.includes(userEmail) || ownerEmails.length === 0
             ? "owner"
             : "admin";
 
@@ -42,7 +43,7 @@ export const setupPlatform = mutation({
           role,
           updatedAt: Date.now(),
         });
-        promotedUser = { email: user.email, role };
+        promotedUser = { email: user.email ?? emailHint ?? String(user._id), role };
       }
     }
 

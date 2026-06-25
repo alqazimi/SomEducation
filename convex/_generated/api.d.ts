@@ -8,8 +8,10 @@
  * @module
  */
 
+import type * as auth from "../auth.js";
 import type * as bootstrap from "../bootstrap.js";
 import type * as categories from "../categories.js";
+import type * as contact from "../contact.js";
 import type * as courses from "../courses.js";
 import type * as crons from "../crons.js";
 import type * as enrollments from "../enrollments.js";
@@ -32,6 +34,7 @@ import type * as lib_types from "../lib/types.js";
 import type * as lib_validation from "../lib/validation.js";
 import type * as lib_youtube from "../lib/youtube.js";
 import type * as messages from "../messages.js";
+import type * as mfa from "../mfa.js";
 import type * as modules from "../modules.js";
 import type * as notifications from "../notifications.js";
 import type * as paymentProviders from "../paymentProviders.js";
@@ -53,8 +56,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  auth: typeof auth;
   bootstrap: typeof bootstrap;
   categories: typeof categories;
+  contact: typeof contact;
   courses: typeof courses;
   crons: typeof crons;
   enrollments: typeof enrollments;
@@ -77,6 +82,7 @@ declare const fullApi: ApiFromModules<{
   "lib/validation": typeof lib_validation;
   "lib/youtube": typeof lib_youtube;
   messages: typeof messages;
+  mfa: typeof mfa;
   modules: typeof modules;
   notifications: typeof notifications;
   paymentProviders: typeof paymentProviders;

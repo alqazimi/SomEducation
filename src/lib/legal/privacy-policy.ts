@@ -52,7 +52,7 @@ export const privacyPolicy: LegalDocument = {
       title: "Authentication and third-party services",
       paragraphs: [
         `${PLATFORM_NAME} uses trusted third-party providers to deliver core platform functionality. These providers process data on our behalf according to their own privacy policies and applicable agreements.`,
-        "Authentication is handled through Clerk, which may process your email address, name, profile image, and sign-in activity. If you choose to sign in with Google or another supported provider, that provider may share basic profile information with us.",
+        "Authentication is handled through our secure sign-in system, which processes your email address, name, and sign-in activity. Passwords are stored using industry-standard hashing and are never stored in plain text.",
         "Our application infrastructure, database, and file storage are provided by Convex and related hosting partners. Course data, payment records, uploaded files, and account-linked activity are stored securely within these systems.",
         "Our website is hosted on Vercel, which may process standard web server logs and performance data.",
       ],

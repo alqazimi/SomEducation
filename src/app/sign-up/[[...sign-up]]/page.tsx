@@ -1,15 +1,10 @@
 import { Suspense } from "react";
 import SignUpClient from "./sign-up-client";
+import { AuthPageLoading } from "@/components/auth/auth-page-loading";
 
 export default function SignUpPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center bg-muted">
-          Loading...
-        </div>
-      }
-    >
+    <Suspense fallback={<AuthPageLoading />}>
       <SignUpClient />
     </Suspense>
   );

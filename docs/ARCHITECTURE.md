@@ -1,158 +1,149 @@
-# EduFlow — Architecture & Deployment Guide
+# SomEducation — Architecture & Deployment Guide
 
-## Architecture Overview
+## Architecture overview
 
-EduFlow is a production-oriented learning platform with:
+SomEducation is a production-oriented learning platform with:
 
 - **Frontend**: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, shadcn/ui-style components
 - **Backend**: Convex (real-time database, server functions, file storage)
-- **Auth**: Clerk (identity) + Convex JWT validation (authorization)
+- **Auth**: [Convex Auth](https://labs.convex.dev/auth) — email/password, 3-hour sessions, staff MFA
 - **Deployment**: Vercel (frontend) + Convex Cloud (backend)
 
 ```
-┌─────────────┐     JWT      ┌─────────────┐
-│   Clerk     │─────────────▶│   Convex    │
-│   (Auth)    │              │  (Backend)  │
+┌─────────────┐   session    ┌─────────────┐
+│  Next.js    │◀────────────▶│   Convex    │
+│  (Vercel)   │   cookies    │  (Backend)  │
 └─────────────┘              └──────┬──────┘
-       ▲                            │
-       │                            │ Real-time queries
-┌──────┴──────┐                     │
-│  Next.js    │◀────────────────────┘
-│  (Vercel)   │
-└─────────────┘
+       │                            │
+       │  Convex Auth HTTP routes   │ Real-time queries
+       └────────────────────────────┘
 ```
 
-## Architectural Improvements (vs. Raw Requirements)
+## Architectural improvements
 
 | Area | Improvement |
 |------|-------------|
 | **Authorization** | All RBAC enforced in Convex mutations/queries — frontend checks are UX only |
-| **Admin bootstrap** | `ADMIN_EMAILS` env var promotes first-login users — no manual DB seeding |
+| **Admin bootstrap** | `OWNER_EMAILS` / `ADMIN_EMAILS` env vars promote users on sign-up |
 | **Audit trail** | Every admin action logged to `auditLogs` table |
 | **Rate limiting** | Per-user rate limits on payments, uploads, messages |
-| **Soft delete** | Users marked `deleted` instead of hard delete — preserves referential integrity |
-| **Search indexes** | Convex search indexes on users and courses — avoids full table scans |
+| **Soft delete** | Users marked `deleted` instead of hard delete |
+| **Search indexes** | Convex search indexes on users and courses |
 | **Payment state machine** | Strict status transitions with enrollment coupling on approval |
-| **File validation** | MIME type + size validated server-side on every upload reference |
-| **Input sanitization** | HTML stripped from all text inputs before storage |
+| **File validation** | MIME type + size validated server-side |
+| **Input sanitization** | HTML stripped from text inputs before storage |
+| **Staff MFA** | TOTP for teacher/admin/owner; verified per session |
+| **Student sessions** | One device — new login revokes other student sessions |
 
-## Folder Structure
+## Folder structure
 
 ```
-achool/
+SomEducation/
 ├── convex/                 # Backend (Convex functions)
+│   ├── auth.ts             # Convex Auth providers + callbacks
+│   ├── auth.config.ts      # JWT issuer config
 │   ├── schema.ts           # Database schema + indexes
+│   ├── mfa.ts              # Staff TOTP MFA
 │   ├── lib/                # Auth, audit, validation, files
 │   ├── users.ts            # User management
 │   ├── courses.ts          # Course CRUD + admin approval
-│   ├── modules.ts          # Course modules
-│   ├── lessons.ts          # Lessons + enrollment access
 │   ├── payments.ts         # Manual payment flow
-│   ├── enrollments.ts      # Access control
-│   ├── messages.ts         # Messaging system
-│   ├── notifications.ts    # In-app notifications
-│   ├── teacherRequests.ts  # Teacher onboarding
-│   ├── settings.ts         # Platform settings
-│   └── seed.ts             # Category seeding
+│   └── …                   # modules, lessons, messages, etc.
 ├── src/
 │   ├── app/                # Next.js App Router pages
-│   ├── components/         # UI + layout components
-│   ├── features/           # Feature modules (admin, teacher, student)
-│   ├── schemas/            # Zod validation schemas
-│   ├── lib/                # Utilities
-│   └── __tests__/          # Vitest tests
-└── .env.example            # Environment template
+│   ├── components/         # UI + layout (incl. auth pages)
+│   ├── features/           # admin, teacher, student
+│   ├── schemas/            # Zod validation
+│   └── lib/                # Utilities
+└── docs/                   # Documentation
 ```
 
-## Authentication Flow
+## Authentication flow
 
-1. User signs up/in via Clerk
-2. `UserSync` component calls `users.syncUser` mutation
-3. Convex creates user with role `student` (or `admin` if email in `ADMIN_EMAILS`)
-4. Clerk JWT passed to Convex on every request via `ConvexProviderWithClerk`
+1. User signs up or signs in at `/sign-up` or `/sign-in` (password provider)
+2. `convex/auth.ts` `createOrUpdateUser` links by email to legacy rows or creates a new user
+3. `users.ensureProfile` promotes owner emails on first dashboard load
+4. **Staff** with MFA enabled must complete `/mfa/setup` then `/mfa` per session
+5. Session cookies managed by `@convex-dev/auth/nextjs` (3-hour lifetime)
 
-## Authorization Flow
+## Authorization flow
 
 Every protected Convex function calls:
 
 ```typescript
-const user = await requireCurrentUser(ctx);  // Must be authenticated + active
-const admin = await requireAdmin(ctx);       // Must be admin
+const user = await requireCurrentUser(ctx);  // Auth + MFA for staff
+const admin = await requireAdmin(ctx);
 const teacher = await requireTeacherOrAdmin(ctx);
 ```
 
-Role checks happen **server-side only**. Middleware protects dashboard routes via Clerk.
+Role checks happen **server-side only**. `src/proxy.ts` uses `convexAuthNextjsMiddleware` to protect dashboard routes.
 
-## Admin Setup Instructions
+## Admin setup
 
-1. Sign up with an email listed in `ADMIN_EMAILS` Convex env var
-2. First login auto-assigns `admin` role
-3. Go to **Dashboard → Admin → Settings** to configure payment number/instructions
-4. Run category seed: Convex dashboard → Functions → `seed:seedCategories`
-5. Approve teacher requests and course submissions from admin dashboard
+1. Set `OWNER_EMAILS` / `ADMIN_EMAILS` in Convex env
+2. Sign up with that email at `/sign-up`
+3. **Dashboard → Admin → Settings** — payment instructions, Stripe toggle
+4. Seed categories via `bootstrap:setupPlatform` or admin UI
+5. Approve teacher requests and course submissions
 
-## Deployment Guide
+## Deployment guide
 
-### 1. Convex
+### 1. Convex (dev)
 
 ```bash
-npx convex dev          # Development
-npx convex deploy       # Production
+npx convex dev
+npx @convex-dev/auth --web-server-url http://localhost:3000
 ```
 
-Set in Convex dashboard:
-- `CLERK_JWT_ISSUER_DOMAIN`
-- `ADMIN_EMAILS`
+### 2. Convex (production)
 
-### 2. Clerk
+```bash
+npx @convex-dev/auth --prod --web-server-url https://www.someducation.com
+npx convex deploy
+```
 
-- Create application
-- Add JWT template named `convex` (use Convex docs template)
-- Configure sign-in/sign-up URLs
+Convex env (prod): `SITE_URL`, `JWT_PRIVATE_KEY`, `JWKS`, `OWNER_EMAILS`, `ADMIN_EMAILS`, optional Stripe keys.
 
 ### 3. Vercel
 
-```bash
-vercel --prod
-```
-
-Environment variables: see `.env.example`
+Set `NEXT_PUBLIC_CONVEX_URL` (prod deployment URL) and `NEXT_PUBLIC_APP_URL` (live domain). Redeploy.
 
 ### 4. Post-deploy
 
-- Verify Clerk webhook (optional)
-- Seed categories via admin
-- Create first admin account
+- Test sign-up, sign-in, dashboard by role
+- Test staff MFA flow
 - Test payment flow end-to-end
+- Remove obsolete third-party auth env vars if any remain
 
 ## Testing
 
 ```bash
-npm test              # Run all tests
-npm run test:watch    # Watch mode
+npm test
+npm run test:watch
 ```
 
-Tests cover:
-- Zod schema validation
-- Authorization rule definitions
-- File upload security rules
-
-## Security Checklist
+## Security checklist
 
 - [x] RBAC on all mutations/queries
 - [x] Ownership verification for course/lesson edits
-- [x] IDOR prevention (users can only access own payments/messages)
+- [x] IDOR prevention (users access own payments/messages only)
 - [x] Input sanitization (XSS prevention)
-- [x] File type validation (upload attacks)
+- [x] File type validation
 - [x] Rate limiting on sensitive endpoints
 - [x] Audit logging for admin actions
 - [x] Soft delete for users
 - [x] Suspended user blocking
+- [x] Staff MFA (TOTP)
+- [x] Student single-device sessions
 
 ## Performance
 
 - Convex indexes on all query patterns
 - Search indexes for courses/users
-- Parallel `Promise.all` for related data fetching
+- Parallel `Promise.all` for related data
 - Next.js code splitting via App Router
-- Stale-while-revalidate via TanStack Query defaults
+- TanStack Query defaults for client caching
+
+## Schema note
+
+`users.clerkId` remains optional for legacy data from the previous auth provider. New users do not receive a `clerkId`.

@@ -1,6 +1,10 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import {
+  convexAuthNextjsMiddleware,
+  createRouteMatcher,
+} from "@convex-dev/auth/nextjs/server";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+
+const SESSION_MAX_AGE_SECONDS = 3 * 60 * 60;
 
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -22,36 +26,43 @@ const isPublicRoute = createRouteMatcher([
   "/contact",
   "/privacy",
   "/terms",
+  "/returns",
   "/learn/:slug",
   "/learn/:slug/lessons/:lessonId",
   "/learn/:slug/exams/:examId",
 ]);
 
-const clerkConfigured = Boolean(
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim()
-);
+const isMfaRoute = createRouteMatcher(["/mfa(.*)"]);
 
-const withClerk = clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
-    await auth.protect();
-  }
-});
+export default convexAuthNextjsMiddleware(
+  async (request, { convexAuth }) => {
+    const isAuthenticated = await convexAuth.isAuthenticated();
 
-export default function proxy(
-  request: NextRequest,
-  event: Parameters<typeof withClerk>[1]
-) {
-  if (!clerkConfigured) {
+    if (isMfaRoute(request)) {
+      if (!isAuthenticated) {
+        const signInUrl = new URL("/sign-in", request.url);
+        signInUrl.searchParams.set("redirect_url", request.nextUrl.pathname);
+        return NextResponse.redirect(signInUrl);
+      }
+      return NextResponse.next();
+    }
+
+    if (!isPublicRoute(request) && !isAuthenticated) {
+      const signInUrl = new URL("/sign-in", request.url);
+      signInUrl.searchParams.set("redirect_url", request.nextUrl.pathname);
+      return NextResponse.redirect(signInUrl);
+    }
+
     return NextResponse.next();
+  },
+  {
+    cookieConfig: { maxAge: SESSION_MAX_AGE_SECONDS },
   }
-
-  return withClerk(request, event);
-}
+);
 
 export const config = {
   matcher: [
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     "/(api|trpc)(.*)",
-    "/__clerk/(.*)",
   ],
 };

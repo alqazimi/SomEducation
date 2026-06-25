@@ -38,7 +38,7 @@ export function LearningOutcomesEditor({
     <div className={cn("space-y-3", className)}>
       <div>
         <Label>What students will learn</Label>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Add short bullet points shown before students buy — like Coursera (e.g.
           &quot;Build a website&quot;, &quot;Use React hooks&quot;).
         </p>

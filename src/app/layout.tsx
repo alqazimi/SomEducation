@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
+import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { Providers } from "@/components/providers";
-import { ClerkSetupRequired } from "@/components/auth/clerk-setup-required";
 import { PwaShell } from "@/components/pwa/pwa-shell";
 import { PwaInstallProvider } from "@/components/pwa/pwa-install-provider";
 import { MarketingThemeProvider } from "@/components/marketing/marketing-theme-provider";
@@ -13,10 +12,7 @@ import {
   SITE_KEYWORDS,
   siteSeo,
 } from "@/lib/seo";
-import { clerkAppearance } from "@/lib/clerk-appearance";
-import { isClerkConfigured } from "@/lib/clerk-config";
 import { PWA_EARLY_INSTALL_CAPTURE } from "@/lib/pwa";
-import "@/lib/clerk-env";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -97,8 +93,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const clerkConfigured = isClerkConfigured();
-
   return (
     <html
       lang="en"
@@ -128,28 +122,17 @@ export default function RootLayout({
         />
       </head>
       <body className="flex min-h-full flex-col overflow-x-hidden antialiased">
-        <MarketingThemeProvider>
-          <PwaInstallProvider>
-            <SiteJsonLd />
-            <PwaShell />
-            {clerkConfigured ? (
-            <ClerkProvider
-              signInUrl="/sign-in"
-              signUpUrl="/sign-up"
-              signInFallbackRedirectUrl="/dashboard"
-              signUpFallbackRedirectUrl="/dashboard"
-              appearance={clerkAppearance}
-              publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-            >
+        <ConvexAuthNextjsServerProvider>
+          <MarketingThemeProvider>
+            <PwaInstallProvider>
+              <SiteJsonLd />
+              <PwaShell />
               <Providers convexUrl={process.env.NEXT_PUBLIC_CONVEX_URL ?? ""}>
                 {children}
               </Providers>
-            </ClerkProvider>
-          ) : (
-            <ClerkSetupRequired />
-          )}
-          </PwaInstallProvider>
-        </MarketingThemeProvider>
+            </PwaInstallProvider>
+          </MarketingThemeProvider>
+        </ConvexAuthNextjsServerProvider>
       </body>
     </html>
   );

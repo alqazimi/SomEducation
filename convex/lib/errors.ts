@@ -8,6 +8,7 @@ export class AppError extends Error {
       | "VALIDATION"
       | "CONFLICT"
       | "RATE_LIMITED"
+      | "MFA_REQUIRED"
   ) {
     super(message);
     this.name = "AppError";

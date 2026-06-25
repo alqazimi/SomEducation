@@ -1,5 +1,5 @@
-/** Clerk default avatar URLs embed a base64 payload with `"type":"default"`. */
-function decodeClerkImagePayload(url: string): { type?: string } | null {
+/** Filters legacy third-party default avatar URLs (placeholder images). */
+function decodeLegacyAvatarPayload(url: string): { type?: string } | null {
   const match = url.match(/img\.clerk\.com\/([^?]+)/);
   if (!match) return null;
 
@@ -13,10 +13,10 @@ function decodeClerkImagePayload(url: string): { type?: string } | null {
   }
 }
 
-export function isClerkDefaultAvatarUrl(imageUrl?: string | null): boolean {
+function isLegacyDefaultAvatarUrl(imageUrl?: string | null): boolean {
   if (!imageUrl?.trim()) return false;
   if (!imageUrl.includes("img.clerk.com/")) return false;
-  const payload = decodeClerkImagePayload(imageUrl);
+  const payload = decodeLegacyAvatarPayload(imageUrl);
   return payload?.type === "default";
 }
 
@@ -24,7 +24,7 @@ export function isClerkDefaultAvatarUrl(imageUrl?: string | null): boolean {
 export function getDisplayProfileImageUrl(
   imageUrl?: string | null
 ): string | undefined {
-  if (!imageUrl?.trim() || isClerkDefaultAvatarUrl(imageUrl)) {
+  if (!imageUrl?.trim() || isLegacyDefaultAvatarUrl(imageUrl)) {
     return undefined;
   }
   return imageUrl;

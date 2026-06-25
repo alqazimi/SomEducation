@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
@@ -13,14 +12,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function DashboardRedirect() {
   const router = useRouter();
-  const { isLoaded: clerkLoaded } = useAuth();
-  const { user, isLoading, isSuspended, syncError, retrySync, clerkSignedIn } =
+  const { user, isLoading, isSuspended, syncError, retrySync, isSignedIn } =
     useEnsureConvexUser();
 
   useEffect(() => {
-    if (!clerkLoaded || isLoading) return;
+    if (isLoading) return;
 
-    if (!clerkSignedIn) {
+    if (!isSignedIn) {
       router.replace("/sign-in");
       return;
     }
@@ -31,17 +29,17 @@ export function DashboardRedirect() {
     if (window.location.pathname !== target) {
       router.replace(target);
     }
-  }, [clerkLoaded, isLoading, clerkSignedIn, user, isSuspended, router]);
+  }, [isLoading, isSignedIn, user, isSuspended, router]);
 
-  if (!clerkLoaded || isLoading) {
+  if (isLoading) {
     return <DashboardRedirectSkeleton />;
   }
 
-  if (clerkSignedIn && isSuspended) {
+  if (isSignedIn && isSuspended) {
     return <SuspendedAccountState />;
   }
 
-  if (clerkSignedIn && !user) {
+  if (isSignedIn && !user) {
     return (
       <AccountSetupState
         syncError={syncError}

@@ -164,7 +164,7 @@ export function AdminUsers() {
             variant="destructive"
             className="gap-1"
             onClick={() =>
-              setRemoveTarget({ userId: user._id, email: user.email })
+              setRemoveTarget({ userId: user._id, email: user.email ?? "No email" })
             }
           >
             <Trash2 className="h-3.5 w-3.5" />

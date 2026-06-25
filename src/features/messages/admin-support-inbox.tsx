@@ -31,10 +31,11 @@ import { formatDate } from "@/lib/utils";
 function studentLabel(student: {
   firstName?: string;
   lastName?: string;
-  email: string;
+  email?: string;
 }) {
+  const email = student.email ?? "No email";
   const name = `${student.firstName ?? ""} ${student.lastName ?? ""}`.trim();
-  return name ? `${name} · ${student.email}` : student.email;
+  return name ? `${name} · ${email}` : email;
 }
 
 export function AdminSupportInbox() {

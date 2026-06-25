@@ -169,7 +169,7 @@
 [data-marketing-theme="night"] {
   --background: #0a0e1a;
   --foreground: #f1f5f9;
-  --muted: #0a0e1a;
+  --muted: #0f172a;
   --border: rgba(255, 255, 255, 0.1);
   --card: #0f172a;
   --card-foreground: #f1f5f9;
@@ -300,6 +300,19 @@
 [data-marketing-theme="night"] .dashboard-main .border-brand-100,
 [data-marketing-theme="night"] .dashboard-main .border-brand-200 {
   border-color: rgb(0 82 255 / 0.35);
+}
+
+[data-marketing-theme="night"] .dashboard-main select option {
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+[data-marketing-theme="night"] .dashboard-main .text-emerald-700 {
+  color: #6ee7b7;
+}
+
+[data-marketing-theme="night"] .dashboard-main .text-amber-600 {
+  color: #fbbf24;
 }
 
 /* Courses band — follows global day/night tokens */

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
+import { useConvexAuth } from "convex/react";
 import {
   BookOpen,
   HelpCircle,
@@ -130,7 +130,8 @@ export function MobileNavDrawer({
   const dashboardHref = getDashboardHref(role);
   const signInUrl = getSignInUrl(pathname || "/dashboard");
   const signUpUrl = getSignUpUrl(pathname || "/dashboard");
-  const { isSignedIn, isLoaded: clerkLoaded } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const isSignedIn = isAuthenticated && !authLoading;
 
   useEffect(() => {
     if (!open) return;
@@ -258,7 +259,7 @@ export function MobileNavDrawer({
             />
           ))}
 
-          {clerkLoaded && isSignedIn && dashboardItems.length > 0 && (
+          {isSignedIn && dashboardItems.length > 0 && (
               <>
                 <SectionLabel dark={isMarketing ? marketingDark : drawerDark}>Dashboard</SectionLabel>
                 <DrawerLink
@@ -306,7 +307,7 @@ export function MobileNavDrawer({
                 : "border-border"
           )}
         >
-          {!(clerkLoaded && isSignedIn) && (
+          {!isSignedIn && (
             <div className="flex flex-col gap-2">
               <Link href={signInUrl} className="w-full" onClick={onClose}>
                 <Button

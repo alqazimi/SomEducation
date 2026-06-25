@@ -1,4 +1,5 @@
 import { defineSchema, defineTable } from "convex/server";
+import { authTables } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
 export const userRole = v.union(
@@ -71,28 +72,43 @@ export const notificationType = v.union(
 );
 
 export default defineSchema({
+  ...authTables,
   users: defineTable({
-    clerkId: v.string(),
-    email: v.string(),
+    name: v.optional(v.string()),
+    image: v.optional(v.string()),
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+    clerkId: v.optional(v.string()),
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     role: userRole,
     status: userStatus,
-    phone: v.optional(v.string()),
     bio: v.optional(v.string()),
     searchText: v.string(),
+    mfaSecret: v.optional(v.string()),
+    mfaEnabled: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
+    .index("email", ["email"])
+    .index("phone", ["phone"])
     .index("by_clerkId", ["clerkId"])
-    .index("by_email", ["email"])
     .index("by_role", ["role", "status"])
     .index("by_status", ["status"])
     .searchIndex("search_users", {
       searchField: "searchText",
       filterFields: ["role", "status"],
     }),
+
+  mfaVerifications: defineTable({
+    sessionId: v.id("authSessions"),
+    userId: v.id("users"),
+    verifiedAt: v.number(),
+  }).index("by_sessionId", ["sessionId"]),
 
   teacherRequests: defineTable({
     userId: v.id("users"),
@@ -356,4 +372,12 @@ export default defineSchema({
     count: v.number(),
     windowStart: v.number(),
   }).index("by_key", ["key"]),
+
+  contactInquiries: defineTable({
+    name: v.string(),
+    email: v.string(),
+    subject: v.string(),
+    message: v.string(),
+    createdAt: v.number(),
+  }).index("by_createdAt", ["createdAt"]),
 });

@@ -66,7 +66,7 @@ export function ImageUploadField({
     <div>
       <Label>{label}</Label>
       <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-start">
-        <div className="flex h-32 w-full max-w-xs items-center justify-center overflow-hidden rounded-lg border border-border bg-slate-50">
+        <div className="flex h-32 w-full max-w-xs items-center justify-center overflow-hidden rounded-lg border border-border bg-muted">
           {displayPreview ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -75,7 +75,7 @@ export function ImageUploadField({
               className="h-full w-full object-cover"
             />
           ) : (
-            <span className="px-4 text-center text-xs text-slate-400">
+            <span className="px-4 text-center text-xs text-muted-foreground">
               No image selected
             </span>
           )}
@@ -105,7 +105,7 @@ export function ImageUploadField({
               Remove
             </Button>
           )}
-          <p className="text-xs text-slate-500">PNG, JPG, or WEBP · max 5MB</p>
+          <p className="text-xs text-muted-foreground">PNG, JPG, or WEBP · max 5MB</p>
         </div>
       </div>
     </div>

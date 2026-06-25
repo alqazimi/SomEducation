@@ -40,11 +40,9 @@ export function getConvexErrorMessage(
 export function isAuthSetupError(message: string) {
   const lower = message.toLowerCase();
   return (
-    lower.includes("jwt") ||
-    lower.includes("convex token") ||
-    lower.includes("timed out connecting clerk") ||
     lower.includes("authentication required") ||
-    lower.includes("not authenticated")
+    lower.includes("not authenticated") ||
+    lower.includes("user not found")
   );
 }
 

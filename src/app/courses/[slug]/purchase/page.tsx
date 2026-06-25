@@ -23,7 +23,7 @@ function PurchaseCourseFormWrapper() {
 export default function PurchasePage() {
   const router = useRouter();
   const params = useParams<{ slug: string }>();
-  const { user, isLoading, isSuspended, syncError, retrySync, clerkSignedIn } =
+  const { user, isLoading, isSuspended, syncError, retrySync, isSignedIn } =
     useEnsureConvexUser();
   const [accountReady, setAccountReady] = useState(false);
 
@@ -32,19 +32,19 @@ export default function PurchasePage() {
   )}`;
 
   const isReadyNow =
-    !isLoading && clerkSignedIn && !!user && !isSuspended;
+    !isLoading && isSignedIn && !!user && !isSuspended;
   if (isReadyNow && !accountReady) {
     setAccountReady(true);
   }
 
   useEffect(() => {
-    if (!isLoading && !clerkSignedIn) {
+    if (!isLoading && !isSignedIn) {
       router.replace(signInUrl);
     }
-  }, [isLoading, clerkSignedIn, router, signInUrl]);
+  }, [isLoading, isSignedIn, router, signInUrl]);
 
   const showInitialSetup =
-    !accountReady && (isLoading || !clerkSignedIn || !user);
+    !accountReady && (isLoading || !isSignedIn || !user);
 
   return (
     <MarketingShell>

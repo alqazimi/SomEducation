@@ -8,6 +8,8 @@ import { MarketingHeroZone } from "@/components/marketing/marketing-hero-zone";
 import { MarketingShell } from "@/components/layout/marketing-shell";
 import { HomepageCourseSectionsFallback } from "@/components/courses/homepage-course-sections";
 import { MarketingHeroImage } from "@/components/marketing/marketing-hero-image";
+import { MarketingHeroTrust } from "@/components/marketing/marketing-hero-trust";
+import { MarketingSocialProof } from "@/components/marketing/marketing-social-proof";
 import { Button } from "@/components/ui/button";
 import { MARKETING_HERO } from "@/lib/marketing-content";
 
@@ -49,6 +51,8 @@ function MarketingHero() {
                 </Button>
               </Link>
             </div>
+
+            <MarketingHeroTrust className="mt-8 sm:mt-10" />
           </div>
 
           <MarketingHeroImage className="shrink-0" />
@@ -99,6 +103,7 @@ export function MarketingHomePage() {
       </MarketingHeroZone>
       <MarketingCoursesSurface>
         <HomepageCourseSections />
+        <MarketingSocialProof />
       </MarketingCoursesSurface>
       <MarketingCtaBanner />
     </MarketingShell>
