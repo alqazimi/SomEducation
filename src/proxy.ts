@@ -57,6 +57,7 @@ export default convexAuthNextjsMiddleware(
   },
   {
     cookieConfig: { maxAge: SESSION_MAX_AGE_SECONDS },
+    verbose: process.env.NODE_ENV === "development",
   }
 );
 

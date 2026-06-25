@@ -10,6 +10,14 @@ export function getConvexErrorMessage(
   const raw = error.message.trim();
   if (!raw) return fallback;
 
+  const lower = raw.toLowerCase();
+  if (lower.includes("already exists") || lower.includes("already registered")) {
+    return "An account with this email already exists. Try signing in instead.";
+  }
+  if (lower.includes("invalid credentials")) {
+    return "Invalid email or password.";
+  }
+
   const withoutPrefix = raw.replace(CONVEX_ERROR_PREFIX, "").trim();
   if (
     withoutPrefix &&
