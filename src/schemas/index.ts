@@ -134,3 +134,33 @@ export const paymentProviderFormSchema = z.object({
 });
 
 export type PaymentProviderFormValues = z.infer<typeof paymentProviderFormSchema>;
+
+export const profileFormSchema = z.object({
+  firstName: z.string().min(1, "First name is required").max(80),
+  lastName: z.string().min(1, "Last name is required").max(80),
+  phone: z
+    .string()
+    .max(20)
+    .regex(/^[\d\s+\-()]*$/, "Invalid phone format")
+    .optional()
+    .or(z.literal("")),
+  bio: z.string().max(500).optional().or(z.literal("")),
+});
+
+export type ProfileFormValues = z.infer<typeof profileFormSchema>;
+
+export const passwordChangeSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z
+      .string()
+      .min(12, "Password must be at least 12 characters")
+      .max(128),
+    confirmPassword: z.string().min(12, "Confirm your new password"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export type PasswordChangeValues = z.infer<typeof passwordChangeSchema>;

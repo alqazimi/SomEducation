@@ -7,21 +7,9 @@ import { LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { api } from "convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import { getDashboardHref } from "@/lib/dashboard-nav";
 import Link from "next/link";
-
-function getInitials(
-  firstName?: string | null,
-  lastName?: string | null,
-  email?: string | null
-) {
-  const first = firstName?.trim().charAt(0) ?? "";
-  const last = lastName?.trim().charAt(0) ?? "";
-  const initials = `${first}${last}`.toUpperCase();
-  if (initials) return initials;
-  return (email?.charAt(0) ?? "U").toUpperCase();
-}
 
 export function UserAccountMenu({ dark }: { dark?: boolean }) {
   const router = useRouter();
@@ -33,6 +21,7 @@ export function UserAccountMenu({ dark }: { dark?: boolean }) {
 
   const dashboardHref = getDashboardHref(user.role);
   const initials = getInitials(user.firstName, user.lastName, user.email);
+  const profileImageUrl = user.profileImageUrl;
 
   async function handleSignOut() {
     await signOut();
@@ -45,16 +34,27 @@ export function UserAccountMenu({ dark }: { dark?: boolean }) {
       <button
         type="button"
         className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold sm:h-9 sm:w-9",
-          dark
-            ? "bg-brand-600/30 text-brand-200 ring-1 ring-white/20"
-            : "bg-brand-100 text-brand-700 ring-1 ring-brand-200"
+          "flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-xs font-semibold sm:h-9 sm:w-9",
+          profileImageUrl
+            ? "ring-1 ring-border"
+            : dark
+              ? "bg-brand-600/30 text-brand-200 ring-1 ring-white/20"
+              : "bg-brand-100 text-brand-700 ring-1 ring-brand-200"
         )}
         aria-label="Account menu"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
-        {initials}
+        {profileImageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={profileImageUrl}
+            alt="Profile"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          initials
+        )}
       </button>
 
       {open && (
@@ -87,6 +87,19 @@ export function UserAccountMenu({ dark }: { dark?: boolean }) {
                 <p className="truncate">{user.email}</p>
               ) : null}
             </div>
+            <Link
+              href="/dashboard/profile"
+              className={cn(
+                "flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm",
+                dark
+                  ? "text-slate-200 hover:bg-white/10"
+                  : "text-foreground hover:bg-muted"
+              )}
+              onClick={() => setOpen(false)}
+            >
+              <User className="h-4 w-4" />
+              Profile
+            </Link>
             <Link
               href={dashboardHref}
               className={cn(

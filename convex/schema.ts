@@ -85,6 +85,7 @@ export default defineSchema({
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
+    profileImageStorageId: v.optional(v.id("_storage")),
     role: userRole,
     status: userStatus,
     bio: v.optional(v.string()),

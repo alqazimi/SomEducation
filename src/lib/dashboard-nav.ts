@@ -11,6 +11,7 @@ import {
   PenLine,
   Settings,
   Tags,
+  UserCircle,
   Users,
   Wallet,
 } from "lucide-react";
@@ -37,6 +38,7 @@ const adminNav: DashboardNavItem[] = [
   { label: "My Courses", href: "/dashboard/teacher/courses", icon: PenLine },
   { label: "Teachers", href: "/dashboard/admin/teachers", icon: GraduationCap },
   { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
+  { label: "Profile", href: "/dashboard/profile", icon: UserCircle },
   { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
   { label: "Analytics", href: "/dashboard/admin/analytics", icon: BarChart3 },
   { label: "Settings", href: "/dashboard/admin/settings", icon: Settings },
@@ -46,6 +48,7 @@ const teacherNav: DashboardNavItem[] = [
   { label: "Overview", href: "/dashboard/teacher", icon: LayoutDashboard },
   { label: "My Courses", href: "/dashboard/teacher/courses", icon: BookOpen },
   { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
+  { label: "Profile", href: "/dashboard/profile", icon: UserCircle },
   { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
 ];
 
@@ -54,6 +57,7 @@ const studentNav: DashboardNavItem[] = [
   { label: "My Courses", href: "/dashboard/student/courses", icon: BookOpen },
   { label: "Payments", href: "/dashboard/student/payments", icon: CreditCard },
   { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
+  { label: "Profile", href: "/dashboard/profile", icon: UserCircle },
   { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
   {
     label: "Become Teacher",

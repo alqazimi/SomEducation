@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalQuery, mutation, query } from "./_generated/server";
 import {
+  buildSearchText,
   getCurrentUser,
   isOwner,
   requireAdmin,
@@ -9,7 +10,9 @@ import {
 } from "./lib/auth";
 import { logAudit } from "./lib/audit";
 import { getOwnerEmails, requiresMfa } from "./lib/roles";
-import { sanitizeText } from "./lib/validation";
+import { sanitizeText, validatePhone } from "./lib/validation";
+import { validateImageStorageFile } from "./lib/files";
+import { resolveProfileImageUrl } from "./lib/profileImage";
 import { userRole } from "./schema";
 import { UserRole } from "./lib/types";
 
@@ -38,7 +41,20 @@ function assertOwnerCanManage(actorRole: UserRole, targetRole: UserRole) {
 export const getMe = query({
   args: {},
   handler: async (ctx) => {
-    return await getCurrentUser(ctx);
+    const user = await getCurrentUser(ctx);
+    if (!user) return null;
+
+    const profileImageUrl = await resolveProfileImageUrl(ctx, user);
+    return { ...user, profileImageUrl };
+  },
+});
+
+export const getUserEmailInternal = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user || user.status === "deleted") return null;
+    return user.email?.trim().toLowerCase() ?? null;
   },
 });
 
@@ -244,16 +260,90 @@ export const deleteUser = mutation({
 
 export const updateProfile = mutation({
   args: {
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
     phone: v.optional(v.string()),
     bio: v.optional(v.string()),
+    profileImageStorageId: v.optional(v.id("_storage")),
+    removeProfileImage: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const user = await requireCurrentUser(ctx);
-    await ctx.db.patch(user._id, {
-      phone: args.phone ? sanitizeText(args.phone, 20) : undefined,
-      bio: args.bio ? sanitizeText(args.bio, 500) : undefined,
+
+    const nextFirstName =
+      args.firstName !== undefined
+        ? sanitizeText(args.firstName, 80)
+        : user.firstName ?? "";
+    const nextLastName =
+      args.lastName !== undefined
+        ? sanitizeText(args.lastName, 80)
+        : user.lastName ?? "";
+
+    if (args.firstName !== undefined && !nextFirstName) {
+      throw new Error("First name is required");
+    }
+    if (args.lastName !== undefined && !nextLastName) {
+      throw new Error("Last name is required");
+    }
+
+    let nextPhone = user.phone;
+    if (args.phone !== undefined) {
+      const phone = args.phone.trim();
+      if (phone && !validatePhone(phone)) {
+        throw new Error("Invalid phone number");
+      }
+      nextPhone = phone || undefined;
+    }
+
+    let nextBio = user.bio;
+    if (args.bio !== undefined) {
+      nextBio = args.bio ? sanitizeText(args.bio, 500) : undefined;
+    }
+
+    let nextProfileImageStorageId = user.profileImageStorageId;
+    let nextImageUrl = user.imageUrl;
+    let nextImage = user.image;
+
+    if (args.removeProfileImage) {
+      nextProfileImageStorageId = undefined;
+      nextImageUrl = undefined;
+      nextImage = undefined;
+    } else if (args.profileImageStorageId !== undefined) {
+      await validateImageStorageFile(ctx, args.profileImageStorageId);
+      const url = await ctx.storage.getUrl(args.profileImageStorageId);
+      nextProfileImageStorageId = args.profileImageStorageId;
+      nextImageUrl = url ?? undefined;
+      nextImage = url ?? undefined;
+    }
+
+    const {
+      _id,
+      _creationTime,
+      profileImageStorageId: _oldStorageId,
+      imageUrl: _oldImageUrl,
+      image: _oldImage,
+      ...rest
+    } = user;
+
+    const nextUser = {
+      ...rest,
+      firstName: nextFirstName || undefined,
+      lastName: nextLastName || undefined,
+      name:
+        [nextFirstName, nextLastName].filter(Boolean).join(" ").trim() ||
+        user.email,
+      phone: nextPhone,
+      bio: nextBio,
+      searchText: buildSearchText([nextFirstName, nextLastName, user.email]),
       updatedAt: Date.now(),
-    });
+      ...(nextProfileImageStorageId
+        ? { profileImageStorageId: nextProfileImageStorageId }
+        : {}),
+      ...(nextImageUrl ? { imageUrl: nextImageUrl } : {}),
+      ...(nextImage ? { image: nextImage } : {}),
+    };
+
+    await ctx.db.replace(user._id, nextUser);
   },
 });
 
