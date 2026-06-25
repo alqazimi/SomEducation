@@ -10,6 +10,7 @@ import { HomepageCourseSectionsFallback } from "@/components/courses/homepage-co
 import { MarketingHeroImage } from "@/components/marketing/marketing-hero-image";
 import { MarketingHeroTrust } from "@/components/marketing/marketing-hero-trust";
 import { MarketingSocialProof } from "@/components/marketing/marketing-social-proof";
+import { MarketingTrustedBy } from "@/components/marketing/marketing-trusted-by";
 import { Button } from "@/components/ui/button";
 import { MARKETING_HERO } from "@/lib/marketing-content";
 
@@ -101,6 +102,7 @@ export function MarketingHomePage() {
       <MarketingHeroZone>
         <MarketingHero />
       </MarketingHeroZone>
+      <MarketingTrustedBy />
       <MarketingCoursesSurface>
         <HomepageCourseSections />
         <MarketingSocialProof />

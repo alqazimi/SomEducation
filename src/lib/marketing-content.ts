@@ -1,3 +1,5 @@
+import { PLATFORM_NAME } from "@/lib/brand";
+
 /** Hardcoded marketing copy — not loaded from Convex. Same on all themes and screen sizes. */
 export const MARKETING_HERO = {
   eyebrow: "Transform Your Future",
@@ -21,6 +23,29 @@ export const MARKETING_HERO_TRUST = {
     { id: "4", image: "https://i.pravatar.cc/96?img=20" },
     { id: "5", image: "https://i.pravatar.cc/96?img=32" },
     { id: "6", image: "https://i.pravatar.cc/96?img=47" },
+  ],
+} as const;
+
+/** Udemy-style “trusted by” strip on the homepage. */
+export const MARKETING_TRUSTED_BY = {
+  headline: `${PLATFORM_NAME} is trusted by over 17,000 companies and millions of learners around the world`,
+  companies: [
+    { id: "volkswagen", name: "Volkswagen", logo: "/logos/trusted/volkswagen.svg" },
+    { id: "samsung", name: "Samsung", logo: "/logos/trusted/samsung.svg" },
+    { id: "cisco", name: "Cisco", logo: "/logos/trusted/cisco.svg" },
+    { id: "vimeo", name: "Vimeo", logo: "/logos/trusted/vimeo.svg" },
+    {
+      id: "pg",
+      name: "Procter & Gamble",
+      logo: "/logos/trusted/procter-gamble.svg",
+    },
+    {
+      id: "hpe",
+      name: "Hewlett Packard Enterprise",
+      logo: "/logos/trusted/hpe.svg",
+    },
+    { id: "citi", name: "Citi", logo: "/logos/trusted/citi.svg" },
+    { id: "ericsson", name: "Ericsson", logo: "/logos/trusted/ericsson.svg" },
   ],
 } as const;
 
