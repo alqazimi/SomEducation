@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as audit from "../audit.js";
 import type * as auth from "../auth.js";
 import type * as bootstrap from "../bootstrap.js";
 import type * as categories from "../categories.js";
@@ -31,7 +32,9 @@ import type * as lib_notifications from "../lib/notifications.js";
 import type * as lib_payments from "../lib/payments.js";
 import type * as lib_profileImage from "../lib/profileImage.js";
 import type * as lib_roles from "../lib/roles.js";
+import type * as lib_sessions from "../lib/sessions.js";
 import type * as lib_types from "../lib/types.js";
+import type * as lib_userSerialization from "../lib/userSerialization.js";
 import type * as lib_validation from "../lib/validation.js";
 import type * as lib_youtube from "../lib/youtube.js";
 import type * as messages from "../messages.js";
@@ -39,11 +42,13 @@ import type * as mfa from "../mfa.js";
 import type * as modules from "../modules.js";
 import type * as notifications from "../notifications.js";
 import type * as password from "../password.js";
+import type * as passwordInternal from "../passwordInternal.js";
 import type * as paymentProviders from "../paymentProviders.js";
 import type * as payments from "../payments.js";
 import type * as platform from "../platform.js";
 import type * as progress from "../progress.js";
 import type * as seed from "../seed.js";
+import type * as sessions from "../sessions.js";
 import type * as settings from "../settings.js";
 import type * as stripe from "../stripe.js";
 import type * as stripeConfig from "../stripeConfig.js";
@@ -58,6 +63,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  audit: typeof audit;
   auth: typeof auth;
   bootstrap: typeof bootstrap;
   categories: typeof categories;
@@ -81,7 +87,9 @@ declare const fullApi: ApiFromModules<{
   "lib/payments": typeof lib_payments;
   "lib/profileImage": typeof lib_profileImage;
   "lib/roles": typeof lib_roles;
+  "lib/sessions": typeof lib_sessions;
   "lib/types": typeof lib_types;
+  "lib/userSerialization": typeof lib_userSerialization;
   "lib/validation": typeof lib_validation;
   "lib/youtube": typeof lib_youtube;
   messages: typeof messages;
@@ -89,11 +97,13 @@ declare const fullApi: ApiFromModules<{
   modules: typeof modules;
   notifications: typeof notifications;
   password: typeof password;
+  passwordInternal: typeof passwordInternal;
   paymentProviders: typeof paymentProviders;
   payments: typeof payments;
   platform: typeof platform;
   progress: typeof progress;
   seed: typeof seed;
+  sessions: typeof sessions;
   settings: typeof settings;
   stripe: typeof stripe;
   stripeConfig: typeof stripeConfig;

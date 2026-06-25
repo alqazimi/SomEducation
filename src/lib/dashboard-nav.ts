@@ -5,6 +5,7 @@ import {
   BookOpen,
   CreditCard,
   GraduationCap,
+  History,
   LayoutDashboard,
   Menu,
   MessageSquare,
@@ -27,6 +28,7 @@ export type DashboardNavItem = {
 const adminNav: DashboardNavItem[] = [
   { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard },
   { label: "Users", href: "/dashboard/admin/users", icon: Users },
+  { label: "Activity", href: "/dashboard/admin/activity", icon: History },
   { label: "Payments", href: "/dashboard/admin/payments", icon: CreditCard },
   {
     label: "Payment Methods",

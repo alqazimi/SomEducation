@@ -100,6 +100,7 @@ export default defineSchema({
     .index("by_clerkId", ["clerkId"])
     .index("by_role", ["role", "status"])
     .index("by_status", ["status"])
+    .index("by_createdAt", ["createdAt"])
     .searchIndex("search_users", {
       searchField: "searchText",
       filterFields: ["role", "status"],

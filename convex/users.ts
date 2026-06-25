@@ -10,9 +10,14 @@ import {
 } from "./lib/auth";
 import { logAudit } from "./lib/audit";
 import { getOwnerEmails, requiresMfa } from "./lib/roles";
-import { sanitizeText, validatePhone } from "./lib/validation";
+import { sanitizeText, validatePhone, checkRateLimit } from "./lib/validation";
 import { validateImageStorageFile } from "./lib/files";
 import { resolveProfileImageUrl } from "./lib/profileImage";
+import { revokeAllUserSessions } from "./lib/sessions";
+import {
+  toAdminUserListItem,
+  toPublicUser,
+} from "./lib/userSerialization";
 import { userRole } from "./schema";
 import { UserRole } from "./lib/types";
 
@@ -45,7 +50,7 @@ export const getMe = query({
     if (!user) return null;
 
     const profileImageUrl = await resolveProfileImageUrl(ctx, user);
-    return { ...user, profileImageUrl };
+    return toPublicUser(user, { profileImageUrl });
   },
 });
 
@@ -83,10 +88,11 @@ export const listUsers = query({
     ),
     search: v.optional(v.string()),
     limit: v.optional(v.number()),
+    cursor: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const actor = await requireAdmin(ctx);
-    const limit = Math.min(args.limit ?? 100, 200);
+    const limit = Math.min(args.limit ?? 50, 100);
     const statusFilter = args.status ?? "all";
 
     if (args.search?.trim()) {
@@ -98,28 +104,47 @@ export const listUsers = query({
           if (statusFilter !== "all") sq = sq.eq("status", statusFilter);
           return sq;
         })
-        .take(limit);
+        .take(limit + 1);
 
-      return users.map((user) => ({
-        ...user,
-        canManage: canManageUser(actor, user),
-      }));
+      const hasMore = users.length > limit;
+      const page = hasMore ? users.slice(0, limit) : users;
+
+      return {
+        users: page.map((user) =>
+          toAdminUserListItem(user, canManageUser(actor, user))
+        ),
+        nextCursor: hasMore ? page[page.length - 1]?.createdAt : undefined,
+        hasMore,
+      };
     }
 
-    const users = await ctx.db.query("users").collect();
+    let query = ctx.db.query("users").withIndex("by_createdAt").order("desc");
 
-    return users
-      .filter((user) => user.status !== "deleted")
-      .filter((user) => (args.role ? user.role === args.role : true))
-      .filter((user) =>
-        statusFilter === "all" ? true : user.status === statusFilter
-      )
-      .sort((a, b) => b.createdAt - a.createdAt)
-      .slice(0, limit)
-      .map((user) => ({
-        ...user,
-        canManage: canManageUser(actor, user),
-      }));
+    if (statusFilter !== "all") {
+      query = query.filter((q) => q.eq(q.field("status"), statusFilter));
+    } else {
+      query = query.filter((q) => q.neq(q.field("status"), "deleted"));
+    }
+
+    if (args.role) {
+      query = query.filter((q) => q.eq(q.field("role"), args.role));
+    }
+
+    if (args.cursor !== undefined) {
+      query = query.filter((q) => q.lt(q.field("createdAt"), args.cursor!));
+    }
+
+    const users = await query.take(limit + 1);
+    const hasMore = users.length > limit;
+    const page = hasMore ? users.slice(0, limit) : users;
+
+    return {
+      users: page.map((user) =>
+        toAdminUserListItem(user, canManageUser(actor, user))
+      ),
+      nextCursor: hasMore ? page[page.length - 1]?.createdAt : undefined,
+      hasMore,
+    };
   },
 });
 
@@ -136,9 +161,12 @@ export const updateUserRole = mutation({
   args: {
     userId: v.id("users"),
     role: userRole,
+    reason: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const actor = await requireAdmin(ctx);
+    await checkRateLimit(ctx, `admin-user:${actor._id}`, 30);
+
     const target = await ctx.db.get(args.userId);
     if (!target || target.status === "deleted") {
       throw new Error("User not found");
@@ -186,7 +214,11 @@ export const updateUserRole = mutation({
       action: "user.role_changed",
       entityType: "users",
       entityId: args.userId,
-      details: JSON.stringify({ from: target.role, to: args.role }),
+      details: JSON.stringify({
+        from: target.role,
+        to: args.role,
+        reason: args.reason ? sanitizeText(args.reason, 300) : undefined,
+      }),
     });
   },
 });
@@ -198,6 +230,8 @@ export const suspendUser = mutation({
   },
   handler: async (ctx, args) => {
     const actor = await requireAdmin(ctx);
+    await checkRateLimit(ctx, `admin-user:${actor._id}`, 30);
+
     const target = await ctx.db.get(args.userId);
     if (!target || target.status === "deleted") {
       throw new Error("User not found");
@@ -218,6 +252,10 @@ export const suspendUser = mutation({
       updatedAt: Date.now(),
     });
 
+    if (args.suspend) {
+      await revokeAllUserSessions(ctx, args.userId);
+    }
+
     await logAudit(ctx, {
       actorId: actor._id,
       action: args.suspend ? "user.suspended" : "user.unsuspended",
@@ -231,6 +269,8 @@ export const deleteUser = mutation({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
     const actor = await requireAdmin(ctx);
+    await checkRateLimit(ctx, `admin-user:${actor._id}`, 30);
+
     const target = await ctx.db.get(args.userId);
     if (!target) throw new Error("User not found");
 
@@ -248,6 +288,8 @@ export const deleteUser = mutation({
       status: "deleted",
       updatedAt: Date.now(),
     });
+
+    await revokeAllUserSessions(ctx, args.userId);
 
     await logAudit(ctx, {
       actorId: actor._id,
@@ -269,6 +311,7 @@ export const updateProfile = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireCurrentUser(ctx);
+    await checkRateLimit(ctx, `profile:${user._id}`, 20);
 
     const nextFirstName =
       args.firstName !== undefined

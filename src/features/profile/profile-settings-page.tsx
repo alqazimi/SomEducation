@@ -26,6 +26,7 @@ export function ProfileSettingsPage() {
   const user = useQuery(api.users.getMe);
   const updateProfile = useMutation(api.users.updateProfile);
   const changePassword = useAction(api.password.changePassword);
+  const signOutOtherSessions = useMutation(api.sessions.signOutOtherSessions);
 
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -67,6 +68,15 @@ export function ProfileSettingsPage() {
       toast.success("Profile updated");
     } catch (error) {
       toast.error(getConvexErrorMessage(error, "Could not update profile"));
+    }
+  }
+
+  async function onSignOutOtherSessions() {
+    try {
+      await signOutOtherSessions({});
+      toast.success("Signed out on all other devices");
+    } catch (error) {
+      toast.error(getConvexErrorMessage(error, "Could not sign out other sessions"));
     }
   }
 
@@ -274,7 +284,25 @@ export function ProfileSettingsPage() {
                   ? "Updating..."
                   : "Change password"}
               </Button>
+              <p className="text-xs text-muted-foreground">
+                Changing your password signs you out on all other devices.
+              </p>
             </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Active sessions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              If you signed in on another phone or computer, sign out everywhere except
+              this browser.
+            </p>
+            <Button type="button" variant="outline" onClick={() => void onSignOutOtherSessions()}>
+              Sign out other devices
+            </Button>
           </CardContent>
         </Card>
       </div>

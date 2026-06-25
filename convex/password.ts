@@ -1,11 +1,13 @@
 import { v } from "convex/values";
 import {
   getAuthUserId,
+  getAuthSessionId,
   modifyAccountCredentials,
   retrieveAccount,
 } from "@convex-dev/auth/server";
 import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { checkRateLimit } from "./lib/validation";
 
 const PASSWORD_PROVIDER = "password";
 const MIN_PASSWORD_LENGTH = 12;
@@ -26,6 +28,10 @@ export const changePassword = action({
     if (!userId) {
       throw new Error("Authentication required");
     }
+
+    await ctx.runMutation(internal.passwordInternal.assertPasswordChangeRateLimit, {
+      userId,
+    });
 
     validatePassword(args.newPassword);
 
@@ -51,6 +57,12 @@ export const changePassword = action({
     await modifyAccountCredentials(ctx, {
       provider: PASSWORD_PROVIDER,
       account: { id: email, secret: args.newPassword },
+    });
+
+    const sessionId = await getAuthSessionId(ctx);
+    await ctx.runMutation(internal.sessions.revokeUserSessionsInternal, {
+      userId,
+      exceptSessionId: sessionId ?? undefined,
     });
   },
 });
