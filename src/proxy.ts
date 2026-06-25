@@ -3,8 +3,7 @@ import {
   createRouteMatcher,
 } from "@convex-dev/auth/nextjs/server";
 import { NextResponse } from "next/server";
-
-const SESSION_MAX_AGE_SECONDS = 3 * 60 * 60;
+import { convexAuthServerOptions } from "@/lib/convex-auth-server";
 
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -55,10 +54,7 @@ export default convexAuthNextjsMiddleware(
 
     return NextResponse.next();
   },
-  {
-    cookieConfig: { maxAge: SESSION_MAX_AGE_SECONDS },
-    verbose: process.env.NODE_ENV === "development",
-  }
+  convexAuthServerOptions
 );
 
 export const config = {

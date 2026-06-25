@@ -17,6 +17,12 @@ export function getConvexErrorMessage(
   if (lower.includes("invalid credentials")) {
     return "Invalid email or password.";
   }
+  if (lower.includes("could not find public function")) {
+    return "Auth service is not deployed yet. Redeploy the Convex backend and try again.";
+  }
+  if (lower.includes("missing environment variable")) {
+    return "Site configuration error. Contact support if this continues.";
+  }
 
   const withoutPrefix = raw.replace(CONVEX_ERROR_PREFIX, "").trim();
   if (
