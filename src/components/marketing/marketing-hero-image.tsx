@@ -9,7 +9,7 @@ export function MarketingHeroImage({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "relative mx-auto w-full max-w-[180px] sm:max-w-[240px] lg:max-w-[300px] xl:max-w-[340px]",
+        "relative mx-auto w-full max-w-[220px] sm:max-w-[260px] lg:max-w-[320px] xl:max-w-[380px]",
         className
       )}
     >
@@ -22,7 +22,7 @@ export function MarketingHeroImage({ className }: { className?: string }) {
           src={HERO_IMAGE}
           alt="Student learning on a laptop"
           fill
-          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 28vw, 340px"
+          sizes="(max-width: 640px) 55vw, (max-width: 1024px) 32vw, 380px"
           className="object-contain object-bottom"
           priority
         />

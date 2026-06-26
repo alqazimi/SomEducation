@@ -205,7 +205,8 @@ export function AdminUsers() {
         >
           {user.status === "active" ? "Suspend" : "Unsuspend"}
         </Button>
-        {isOwner && (user.role === "admin" || user.role === "teacher") && (
+        {(user.role === "student" ||
+          (isOwner && (user.role === "admin" || user.role === "teacher"))) && (
           <Button
             size="sm"
             variant="destructive"
@@ -400,7 +401,7 @@ export function AdminUsers() {
         title="Remove user?"
         description={
           removeTarget
-            ? `Remove ${removeTarget.email}? Their account will be marked deleted and all sessions will end immediately.`
+            ? `Remove ${removeTarget.email}? Their account will be marked deleted, signed out immediately, and hidden from the user list.`
             : ""
         }
         confirmLabel="Remove User"

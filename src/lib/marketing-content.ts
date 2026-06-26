@@ -12,18 +12,10 @@ export const MARKETING_HERO = {
 /** Kept for imports; identical copy so day/night always show the same hero text. */
 export const MARKETING_HERO_DAY = MARKETING_HERO;
 
-/** Hero trust strip — matches sheerxirfad.com hero (avatars + rating + active students). */
+/** Hero trust strip — rating + active students count. */
 export const MARKETING_HERO_TRUST = {
   ratings: "5.0",
   subscribers: "10,000+ active students",
-  avatars: [
-    { id: "1", image: "https://i.pravatar.cc/96?img=11" },
-    { id: "2", image: "https://i.pravatar.cc/96?img=12" },
-    { id: "3", image: "https://i.pravatar.cc/96?img=15" },
-    { id: "4", image: "https://i.pravatar.cc/96?img=20" },
-    { id: "5", image: "https://i.pravatar.cc/96?img=32" },
-    { id: "6", image: "https://i.pravatar.cc/96?img=47" },
-  ],
 } as const;
 
 /** Udemy-style “trusted by” strip on the homepage. */

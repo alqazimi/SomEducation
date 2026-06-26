@@ -220,6 +220,38 @@
   color: #ffffff;
 }
 
+/* Homepage “trusted by” strip — readable in day and night themes */
+[data-marketing-theme="day"] .marketing-trusted-by {
+  background-color: #ffffff;
+}
+
+[data-marketing-theme="day"] .marketing-trusted-headline {
+  color: #1e293b;
+  font-weight: 500;
+}
+
+[data-marketing-theme="night"] .marketing-trusted-headline {
+  color: #cbd5e1;
+}
+
+[data-marketing-theme="day"] .marketing-trusted-logo-img {
+  filter: brightness(0) saturate(100%);
+  opacity: 0.72;
+}
+
+[data-marketing-theme="day"] .marketing-trusted-logo:hover .marketing-trusted-logo-img {
+  opacity: 0.9;
+}
+
+[data-marketing-theme="night"] .marketing-trusted-logo-img {
+  filter: brightness(0) invert(1);
+  opacity: 0.55;
+}
+
+[data-marketing-theme="night"] .marketing-trusted-logo:hover .marketing-trusted-logo-img {
+  opacity: 0.75;
+}
+
 .marketing-courses-band,
 [data-surface="courses-light"] {
   background-color: var(--marketing-bg);

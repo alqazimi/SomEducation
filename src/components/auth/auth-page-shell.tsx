@@ -35,9 +35,36 @@ export function AuthPageShell({
   variant,
 }: {
   children: React.ReactNode;
-  variant: "sign-in" | "sign-up";
+  variant: "sign-in" | "sign-up" | "mfa" | "mfa-setup";
 }) {
   const { isNight } = useMarketingTheme();
+
+  const asideCopy =
+    variant === "sign-up"
+      ? {
+          eyebrow: "Join SomEducation",
+          title: "Start learning something new today",
+          description: `${PLATFORM_TAGLINE}. Create your account and explore courses from verified teachers.`,
+        }
+      : variant === "mfa-setup"
+        ? {
+            eyebrow: "Account security",
+            title: "Protect your staff account",
+            description:
+              "Scan the QR code with Google Authenticator, Authy, or another TOTP app. You will need a code each time you sign in.",
+          }
+        : variant === "mfa"
+          ? {
+              eyebrow: "Verification required",
+              title: "Confirm it's really you",
+              description:
+                "Enter the 6-digit code from your authenticator app to finish signing in.",
+            }
+          : {
+              eyebrow: "Welcome back",
+              title: "Continue your learning journey",
+              description: `${PLATFORM_TAGLINE}. Sign in to access your dashboard, courses, and certificates.`,
+            };
 
   return (
     <div className={cn(marketingPageClass, "relative min-h-screen overflow-hidden")}>
@@ -93,16 +120,13 @@ export function AuthPageShell({
           <div className="grid w-full max-w-6xl items-center gap-10 lg:grid-cols-[1fr_minmax(0,28rem)] lg:gap-16 xl:grid-cols-[1.1fr_minmax(0,26rem)]">
             <aside className="hidden lg:block">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-500">
-                {variant === "sign-in" ? "Welcome back" : "Join SomEducation"}
+                {asideCopy.eyebrow}
               </p>
               <h1 className="mt-3 text-3xl font-semibold tracking-tight text-marketing-fg xl:text-4xl">
-                {variant === "sign-in"
-                  ? "Continue your learning journey"
-                  : "Start learning something new today"}
+                {asideCopy.title}
               </h1>
               <p className="mt-3 max-w-md text-base leading-relaxed text-marketing-muted">
-                {PLATFORM_TAGLINE}. Sign in to access your dashboard, courses, and
-                certificates.
+                {asideCopy.description}
               </p>
 
               <ul className="mt-10 space-y-5">

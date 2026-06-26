@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internalQuery, mutation, query } from "./_generated/server";
+import { internalQuery, internalMutation, mutation, query } from "./_generated/server";
 import {
   buildSearchText,
   getCurrentUser,
@@ -60,6 +60,34 @@ export const getUserEmailInternal = internalQuery({
     const user = await ctx.db.get(args.userId);
     if (!user || user.status === "deleted") return null;
     return user.email?.trim().toLowerCase() ?? null;
+  },
+});
+
+export const applySelfAccountDeletion = internalMutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user || user.status === "deleted") {
+      throw new Error("Account not found");
+    }
+
+    if (user.role === "owner") {
+      await assertCanRemoveOwner(ctx);
+    }
+
+    await ctx.db.patch(args.userId, {
+      status: "deleted",
+      updatedAt: Date.now(),
+    });
+
+    await revokeAllUserSessions(ctx, args.userId);
+
+    await logAudit(ctx, {
+      actorId: args.userId,
+      action: "user.self_deleted",
+      entityType: "users",
+      entityId: args.userId,
+    });
   },
 });
 

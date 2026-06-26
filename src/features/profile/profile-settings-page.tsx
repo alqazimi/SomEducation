@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -16,17 +18,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { getConvexErrorMessage } from "@/lib/convex-error";
 import {
+  deleteAccountSchema,
   passwordChangeSchema,
   profileFormSchema,
+  type DeleteAccountValues,
   type PasswordChangeValues,
   type ProfileFormValues,
 } from "@/schemas";
 
 export function ProfileSettingsPage() {
+  const router = useRouter();
+  const { signOut } = useAuthActions();
   const user = useQuery(api.users.getMe);
   const updateProfile = useMutation(api.users.updateProfile);
   const changePassword = useAction(api.password.changePassword);
+  const deleteMyAccount = useAction(api.account.deleteMyAccount);
   const signOutOtherSessions = useMutation(api.sessions.signOutOtherSessions);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -44,6 +52,14 @@ export function ProfileSettingsPage() {
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
+    },
+  });
+
+  const deleteForm = useForm({
+    resolver: zodResolver(deleteAccountSchema),
+    defaultValues: {
+      currentPassword: "",
+      confirmation: "",
     },
   });
 
@@ -90,6 +106,21 @@ export function ProfileSettingsPage() {
       passwordForm.reset();
     } catch (error) {
       toast.error(getConvexErrorMessage(error, "Could not change password"));
+    }
+  }
+
+  async function onDeleteAccount(data: DeleteAccountValues) {
+    try {
+      await deleteMyAccount({
+        currentPassword: data.currentPassword,
+        confirmation: data.confirmation,
+      });
+      toast.success("Account deleted");
+      await signOut();
+      router.replace("/");
+      router.refresh();
+    } catch (error) {
+      toast.error(getConvexErrorMessage(error, "Could not delete account"));
     }
   }
 
@@ -303,6 +334,89 @@ export function ProfileSettingsPage() {
             <Button type="button" variant="outline" onClick={() => void onSignOutOtherSessions()}>
               Sign out other devices
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="border-red-200 dark:border-red-900/50">
+          <CardHeader>
+            <CardTitle className="text-red-700 dark:text-red-400">Delete account</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Permanently remove your account from the platform. You will be signed out
+              immediately and will need to sign up again to return.
+              {user.role === "owner"
+                ? " You cannot delete the last owner account."
+                : null}
+            </p>
+            {!deleteOpen ? (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setDeleteOpen(true)}
+              >
+                Delete my account
+              </Button>
+            ) : (
+              <form
+                className="space-y-4 rounded-lg border border-red-200 p-4 dark:border-red-900/50"
+                onSubmit={deleteForm.handleSubmit(onDeleteAccount)}
+              >
+                <div>
+                  <Label htmlFor="delete-password">Current password</Label>
+                  <Input
+                    id="delete-password"
+                    type="password"
+                    autoComplete="current-password"
+                    className="mt-1"
+                    {...deleteForm.register("currentPassword")}
+                  />
+                  {deleteForm.formState.errors.currentPassword && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {deleteForm.formState.errors.currentPassword.message}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="delete-confirmation">
+                    Type <span className="font-mono">DELETE</span> to confirm
+                  </Label>
+                  <Input
+                    id="delete-confirmation"
+                    className="mt-1 font-mono"
+                    autoComplete="off"
+                    {...deleteForm.register("confirmation")}
+                  />
+                  {deleteForm.formState.errors.confirmation && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {deleteForm.formState.errors.confirmation.message}
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="submit"
+                    variant="destructive"
+                    disabled={deleteForm.formState.isSubmitting}
+                  >
+                    {deleteForm.formState.isSubmitting
+                      ? "Deleting..."
+                      : "Permanently delete account"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={deleteForm.formState.isSubmitting}
+                    onClick={() => {
+                      setDeleteOpen(false);
+                      deleteForm.reset();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            )}
           </CardContent>
         </Card>
       </div>

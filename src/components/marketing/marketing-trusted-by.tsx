@@ -13,7 +13,7 @@ function TrustedLogo({
   return (
     <div
       className={cn(
-        "flex h-8 min-w-[5.5rem] items-center justify-center sm:h-9",
+        "marketing-trusted-logo flex h-8 min-w-[5.5rem] items-center justify-center sm:h-9",
         className
       )}
     >
@@ -25,7 +25,7 @@ function TrustedLogo({
         height={32}
         loading="lazy"
         decoding="async"
-        className="max-h-7 w-auto max-w-[7.5rem] object-contain opacity-80 transition-opacity hover:opacity-100 sm:max-h-8 sm:max-w-[8.5rem] dark:brightness-200 dark:opacity-70"
+        className="marketing-trusted-logo-img max-h-7 w-auto max-w-[7.5rem] object-contain transition-opacity sm:max-h-8 sm:max-w-[8.5rem]"
       />
     </div>
   );
@@ -38,12 +38,12 @@ export function MarketingTrustedBy({ className }: { className?: string }) {
     <section
       aria-label="Trusted by leading companies"
       className={cn(
-        "border-b border-marketing-border bg-marketing-bg py-8 sm:py-10",
+        "marketing-trusted-by border-b border-marketing-border bg-marketing-bg py-8 sm:py-10",
         className
       )}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <p className="mx-auto max-w-3xl text-center text-sm leading-relaxed text-marketing-muted sm:text-base">
+        <p className="marketing-trusted-headline mx-auto max-w-3xl text-center text-sm leading-relaxed sm:text-base">
           {headline}
         </p>
 
